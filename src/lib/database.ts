@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
-import { createStore, Store, createPersister } from 'tinybase';
+import { createStore, Store } from 'tinybase';
+import { FRUIT_PRESETS } from '~/data/fruits';
 
 export interface Fruit {
   id: number;
@@ -38,7 +39,7 @@ class DatabaseManager {
     this.db = SQLite.openDatabaseSync('fruitiq.db');
     this.store = createStore();
     this.initializeDatabase();
-    this.setupTinyBase();
+    this.loadDataToStore();
   }
 
   private initializeDatabase() {
@@ -94,23 +95,8 @@ class DatabaseManager {
     `);
   }
 
-  private setupTinyBase() {
-    // Create persister to sync TinyBase store with SQLite
-    const persister = createPersister(
-      this.store,
-      async () => {
-        // Load data from SQLite to TinyBase
-        await this.loadDataToStore();
-      },
-      async () => {
-        // Save data from TinyBase to SQLite (handled individually)
-      }
-    );
 
-    persister.startAutoSave();
-  }
-
-  private async loadDataToStore() {
+  private loadDataToStore() {
     try {
       // Load fruits
       const fruits = this.getAllFruits();
@@ -276,6 +262,21 @@ class DatabaseManager {
   getTodaysSummary(): DailySummary | null {
     const today = new Date().toISOString().split('T')[0];
     return this.getDailySummary(today);
+  }
+
+  // Load preset fruits if database is empty
+  loadPresetFruits(): void {
+    const existingFruits = this.getAllFruits();
+    if (existingFruits.length === 0) {
+      FRUIT_PRESETS.forEach(preset => {
+        this.addFruit({
+          name_thai: preset.name_thai,
+          name_english: preset.name_english,
+          price_per_kg: preset.price_per_kg,
+          is_active: true
+        });
+      });
+    }
   }
 }
 

@@ -19,14 +19,14 @@ export function SetupScreen({ navigation }: any) {
     loadPresets();
   }, []);
 
-  const handleAddFruit = async () => {
+  const handleAddFruit = () => {
     if (!formData.name_thai || !formData.price_per_kg) {
       Alert.alert('ข้อผิดพลาด', 'กรุณากรอกชื่อผลไม้และราคา');
       return;
     }
 
     try {
-      await addFruit(
+      addFruit(
         formData.name_thai,
         formData.name_english,
         parseFloat(formData.price_per_kg)
@@ -38,14 +38,14 @@ export function SetupScreen({ navigation }: any) {
     }
   };
 
-  const handleUpdateFruit = async () => {
+  const handleUpdateFruit = () => {
     if (!editingFruit || !formData.name_thai || !formData.price_per_kg) {
       Alert.alert('ข้อผิดพลาด', 'กรุณากรอกข้อมูลให้ครบ');
       return;
     }
 
     try {
-      await updateFruit(editingFruit.id, {
+      updateFruit(editingFruit.id, {
         name_thai: formData.name_thai,
         name_english: formData.name_english,
         price_per_kg: parseFloat(formData.price_per_kg),
@@ -66,9 +66,9 @@ export function SetupScreen({ navigation }: any) {
         {
           text: 'ลบ',
           style: 'destructive',
-          onPress: async () => {
+          onPress: () => {
             try {
-              await deleteFruit(fruit.id);
+              deleteFruit(fruit.id);
               Alert.alert('สำเร็จ', 'ลบผลไม้เรียบร้อย');
             } catch (error) {
               Alert.alert('ข้อผิดพลาด', 'ไม่สามารถลบผลไม้ได้');
