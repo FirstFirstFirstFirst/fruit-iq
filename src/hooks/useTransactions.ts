@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { db, type Transaction, type DailySummary } from '~/lib/database';
+import { useState, useEffect } from "react";
+import { db, type Transaction, type DailySummary } from "~/lib/database";
 
 export function useTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -10,11 +10,11 @@ export function useTransactions() {
     try {
       const todaysTransactions = db.getTodaysTransactions();
       const summary = db.getTodaysSummary();
-      
+
       setTransactions(todaysTransactions);
       setTodaysSummary(summary);
     } catch (error) {
-      console.error('Error loading today\'s data:', error);
+      console.error("Error loading today's data:", error);
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ export function useTransactions() {
       await loadTodaysData(); // Refresh data including summary
       return id;
     } catch (error) {
-      console.error('Error adding transaction:', error);
+      console.error("Error adding transaction:", error);
       throw error;
     }
   };
@@ -42,7 +42,7 @@ export function useTransactions() {
     try {
       return db.getTransactionsByDate(date);
     } catch (error) {
-      console.error('Error getting transactions by date:', error);
+      console.error("Error getting transactions by date:", error);
       return [];
     }
   };
@@ -51,7 +51,7 @@ export function useTransactions() {
     try {
       return db.getDailySummary(date);
     } catch (error) {
-      console.error('Error getting daily summary:', error);
+      console.error("Error getting daily summary:", error);
       return null;
     }
   };

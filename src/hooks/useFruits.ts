@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { db, type Fruit } from '~/lib/database';
-import { FRUIT_PRESETS } from '~/data/fruits';
+import { useState, useEffect } from "react";
+import { db, type Fruit } from "~/lib/database";
+import { FRUIT_PRESETS } from "~/data/fruits";
 
 export function useFruits() {
   const [fruits, setFruits] = useState<Fruit[]>([]);
@@ -11,13 +11,17 @@ export function useFruits() {
       const allFruits = db.getAllFruits();
       setFruits(allFruits);
     } catch (error) {
-      console.error('Error loading fruits:', error);
+      console.error("Error loading fruits:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const addFruit = (name_thai: string, name_english: string, price_per_kg: number) => {
+  const addFruit = (
+    name_thai: string,
+    name_english: string,
+    price_per_kg: number
+  ) => {
     try {
       const id = db.addFruit({
         name_thai,
@@ -28,12 +32,15 @@ export function useFruits() {
       loadFruits();
       return id;
     } catch (error) {
-      console.error('Error adding fruit:', error);
+      console.error("Error adding fruit:", error);
       throw error;
     }
   };
 
-  const updateFruit = (id: number, updates: Partial<Omit<Fruit, 'id' | 'created_at'>>) => {
+  const updateFruit = (
+    id: number,
+    updates: Partial<Omit<Fruit, "id" | "created_at">>
+  ) => {
     try {
       const success = db.updateFruit(id, updates);
       if (success) {
@@ -41,7 +48,7 @@ export function useFruits() {
       }
       return success;
     } catch (error) {
-      console.error('Error updating fruit:', error);
+      console.error("Error updating fruit:", error);
       throw error;
     }
   };
@@ -54,7 +61,7 @@ export function useFruits() {
       }
       return success;
     } catch (error) {
-      console.error('Error deleting fruit:', error);
+      console.error("Error deleting fruit:", error);
       throw error;
     }
   };
@@ -64,7 +71,7 @@ export function useFruits() {
       db.loadPresetFruits();
       loadFruits();
     } catch (error) {
-      console.error('Error loading presets:', error);
+      console.error("Error loading presets:", error);
     }
   };
 

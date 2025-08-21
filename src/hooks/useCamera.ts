@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { Alert } from 'react-native';
-import { performOCR, type OCRResult } from '~/lib/ocr';
-import { THAI_TEXT } from '~/lib/constants';
+import { useState } from "react";
+import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { Alert } from "react-native";
+import { performOCR, type OCRResult } from "~/lib/ocr";
+import { THAI_TEXT } from "~/lib/constants";
 
 export function useCamera() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -14,10 +14,10 @@ export function useCamera() {
       const result = await requestPermission();
       return result.granted;
     } catch (error) {
-      console.error('Error requesting camera permission:', error);
+      console.error("Error requesting camera permission:", error);
       Alert.alert(
-        'ต้องการสิทธิ์กล้อง',
-        'แอปต้องการใช้กล้องเพื่อถ่ายภาพตาชั่ง กรุณาอนุญาตในการตั้งค่า'
+        "ต้องการสิทธิ์กล้อง",
+        "แอปต้องการใช้กล้องเพื่อถ่ายภาพตาชั่ง กรุณาอนุญาตในการตั้งค่า"
       );
       return false;
     }
@@ -30,7 +30,7 @@ export function useCamera() {
   const takePhoto = async (cameraRef: any): Promise<string | null> => {
     try {
       if (!cameraRef?.current) {
-        Alert.alert('ข้อผิดพลาด', 'ไม่สามารถเข้าถึงกล้องได้');
+        Alert.alert("ข้อผิดพลาด", "ไม่สามารถเข้าถึงกล้องได้");
         return null;
       }
 
@@ -42,8 +42,8 @@ export function useCamera() {
       setLastPhoto(photo.uri);
       return photo.uri;
     } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('ข้อผิดพลาด', THAI_TEXT.errorCamera);
+      console.error("Error taking photo:", error);
+      Alert.alert("ข้อผิดพลาด", THAI_TEXT.errorCamera);
       return null;
     }
   };
@@ -54,15 +54,17 @@ export function useCamera() {
       const result = await performOCR(photoUri);
       return result;
     } catch (error) {
-      console.error('Error processing photo:', error);
-      Alert.alert('ข้อผิดพลาด', THAI_TEXT.errorOCR);
+      console.error("Error processing photo:", error);
+      Alert.alert("ข้อผิดพลาด", THAI_TEXT.errorOCR);
       return null;
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const takePhotoAndProcess = async (cameraRef: any): Promise<{
+  const takePhotoAndProcess = async (
+    cameraRef: any
+  ): Promise<{
     photoUri: string | null;
     ocrResult: OCRResult | null;
   }> => {
