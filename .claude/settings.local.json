@@ -10,7 +10,21 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx expo install:*)",
+      "Bash(rm:*)",
+      "Bash(rm:*)",
+      "Bash(npx expo r:*)",
+      "Bash(npx expo start:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx:*)",
+      "Bash(expo start:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

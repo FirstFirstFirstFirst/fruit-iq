@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, SafeAreaView, Alert, Image, ScrollView } from 'react-native';
-import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import { CameraView, CameraType } from 'expo-camera';
 import { Button, Card, CardContent, Input } from '~/components/ui';
 import { useCamera } from '~/hooks/useCamera';
 import { useFruits } from '~/hooks/useFruits';
@@ -10,9 +10,7 @@ import { formatCurrency, formatWeight } from '~/lib/utils';
 import { getImageProcessingTips, type OCRResult } from '~/lib/ocr';
 
 export function CameraScreen({ navigation }: any) {
-  const cameraRef = useRef<Camera>(null);
-  const devices = useCameraDevices();
-  const device = devices.back;
+  const cameraRef = useRef<CameraView>(null);
 
   const { 
     hasPermission, 
@@ -38,7 +36,7 @@ export function CameraScreen({ navigation }: any) {
   const handleTakePhoto = async () => {
     if (!cameraRef.current) return;
 
-    const { photoUri, ocrResult } = await takePhotoAndProcess(cameraRef.current);
+    const { photoUri, ocrResult } = await takePhotoAndProcess(cameraRef);
     
     if (photoUri) {
       setCapturedPhoto(photoUri);
@@ -149,23 +147,14 @@ export function CameraScreen({ navigation }: any) {
     );
   }
 
-  if (!device) {
-    return (
-      <SafeAreaView className="flex-1 bg-background justify-center items-center">
-        <Text className="text-lg text-foreground">ไม่พบกล้องหลัง</Text>
-      </SafeAreaView>
-    );
-  }
 
   if (step === 'camera') {
     return (
       <SafeAreaView className="flex-1 bg-black">
-        <Camera
+        <CameraView
           ref={cameraRef}
-          device={device}
-          isActive={true}
-          photo={true}
-          className="flex-1"
+          facing="back"
+          style={{ flex: 1 }}
         />
         
         <View className="absolute bottom-0 left-0 right-0 bg-black/50 p-4">
