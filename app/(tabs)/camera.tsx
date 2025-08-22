@@ -619,20 +619,8 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     textAlign: 'center',
   },
-  addFruitCard: {
-    borderWidth: 2,
-    borderColor: '#B46A07',
-    borderStyle: 'dashed',
-    backgroundColor: 'rgba(180, 106, 7, 0.05)',
-  },
-  addFruitText: {
-    fontSize: 12,
-    color: '#B46A07',
-    fontWeight: '600',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  addFruitModal: {
+  // Modern Modal Styles
+  modernModal: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -642,44 +630,63 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  addFruitContent: {
+  modernModalContent: {
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 24,
-    width: width - 48,
+    width: width - 40,
     maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 15,
   },
-  addFruitHeader: {
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  addFruitTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
     color: '#1f2937',
   },
-  addFruitInput: {
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 16,
-    backgroundColor: '#f8fafc',
+  inputGroup: {
+    marginBottom: 20,
   },
-  addFruitButton: {
-    backgroundColor: '#B46A07',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  addFruitButtonText: {
-    color: 'white',
+  inputLabel: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  modernInput: {
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    borderRadius: 16,
+    padding: 16,
+    fontSize: 16,
+    backgroundColor: '#ffffff',
+    color: '#1f2937',
+  },
+  modernAddButton: {
+    backgroundColor: '#B46A07',
+    borderRadius: 16,
+    padding: 18,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: '#B46A07',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  modernAddButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
   },
 
   // Confirmation Screen

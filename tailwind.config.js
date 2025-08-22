@@ -23,7 +23,14 @@ module.exports = {
         }
       },
       fontFamily: {
-        'thai-sans': ['Noto Sans Thai', 'system-ui', 'sans-serif'],
+        'sans': ['Kanit_400Regular', 'system-ui', 'sans-serif'],
+        'thai-sans': ['Kanit_400Regular', 'system-ui', 'sans-serif'],
+        'light': ['Kanit_300Light'],
+        'regular': ['Kanit_400Regular'],
+        'medium': ['Kanit_500Medium'],
+        'semibold': ['Kanit_600SemiBold'],
+        'bold': ['Kanit_700Bold'],
+        'extrabold': ['Kanit_800ExtraBold'],
       },
       fontSize: {
         'thai-sm': ['16px', '24px'],

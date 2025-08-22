@@ -10,7 +10,10 @@
       "Bash(npx expo start:*)",
       "WebSearch",
       "Bash(npx tsc:*)",
-      "Bash(npx expo install:*)"
+      "Bash(npx expo install:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx expo r:*)"
     ],
     "deny": [],
     "ask": []
