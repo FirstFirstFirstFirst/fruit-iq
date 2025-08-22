@@ -5,13 +5,13 @@ import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
-import { COLORS, THAI_TEXT } from '../../src/lib/constants';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: COLORS.primary[600],
+        tabBarActiveTintColor: '#B46A07',
+        tabBarInactiveTintColor: '#6b7280',
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
@@ -19,31 +19,35 @@ export default function TabLayout() {
           ios: {
             // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
           },
           default: {
             backgroundColor: 'white',
             borderTopColor: '#e5e7eb',
+            height: 60,
+            paddingBottom: 8,
+            paddingTop: 8,
           },
         }),
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: THAI_TEXT.setup,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
+          title: 'หน้าหลัก',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="camera"
         options={{
-          title: THAI_TEXT.camera,
+          title: 'กล้อง',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="camera.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: THAI_TEXT.history,
+          title: 'ประวัติ',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="clock.fill" color={color} />,
         }}
       />

@@ -1,18 +1,14 @@
 import React from 'react'
-import { View } from 'react-native'
-import { cn } from '../../lib/utils'
+import { View, StyleSheet } from 'react-native'
 
 interface CardProps {
   children: React.ReactNode
   className?: string
 }
 
-export function Card({ children, className }: CardProps) {
+export function Card({ children }: CardProps) {
   return (
-    <View className={cn(
-      "bg-white rounded-xl p-4 shadow-sm border border-gray-100",
-      className
-    )}>
+    <View style={styles.card}>
       {children}
     </View>
   )
@@ -23,9 +19,9 @@ interface CardHeaderProps {
   className?: string
 }
 
-export function CardHeader({ children, className }: CardHeaderProps) {
+export function CardHeader({ children }: CardHeaderProps) {
   return (
-    <View className={cn("mb-3", className)}>
+    <View style={styles.cardHeader}>
       {children}
     </View>
   )
@@ -36,10 +32,35 @@ interface CardContentProps {
   className?: string
 }
 
-export function CardContent({ children, className }: CardContentProps) {
+export function CardContent({ children }: CardContentProps) {
   return (
-    <View className={cn("", className)}>
+    <View style={styles.cardContent}>
       {children}
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#f3f4f6'
+  },
+  cardHeader: {
+    marginBottom: 12
+  },
+  cardContent: {
+    // Content has no specific styles
+  }
+})

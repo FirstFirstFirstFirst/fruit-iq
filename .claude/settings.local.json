@@ -8,7 +8,9 @@
       "Bash(rm:*)",
       "Bash(npm run lint)",
       "Bash(npx expo start:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npx tsc:*)",
+      "Bash(npx expo install:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,5 @@
 import React from 'react'
-import { TextInput, Text, View } from 'react-native'
-import { cn } from '../../lib/utils'
+import { TextInput, Text, View, StyleSheet } from 'react-native'
 
 interface InputProps {
   label?: string
@@ -24,13 +23,12 @@ export function Input({
   multiline = false,
   numberOfLines = 1,
   disabled = false,
-  error,
-  className
+  error
 }: InputProps) {
   return (
-    <View className={cn("mb-4", className)}>
+    <View style={styles.container}>
       {label && (
-        <Text className="text-thai-base font-medium text-gray-700 mb-2">
+        <Text style={styles.label}>
           {label}
         </Text>
       )}
@@ -42,19 +40,53 @@ export function Input({
         multiline={multiline}
         numberOfLines={numberOfLines}
         editable={!disabled}
-        className={cn(
-          "px-4 py-3 border border-gray-300 rounded-lg text-thai-base min-h-[56px]",
-          error && "border-red-500",
-          disabled && "bg-gray-100 text-gray-500",
-          "text-gray-900"
-        )}
+        style={[
+          styles.input,
+          error && styles.inputError,
+          disabled && styles.inputDisabled
+        ]}
         placeholderTextColor="#9CA3AF"
       />
       {error && (
-        <Text className="text-red-500 text-thai-sm mt-1">
+        <Text style={styles.error}>
           {error}
         </Text>
       )}
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  input: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    fontSize: 16,
+    minHeight: 48,
+    color: '#111827',
+    backgroundColor: 'white',
+  },
+  inputError: {
+    borderColor: '#ef4444',
+  },
+  inputDisabled: {
+    backgroundColor: '#f9fafb',
+    color: '#6b7280',
+  },
+  error: {
+    color: '#ef4444',
+    fontSize: 14,
+    marginTop: 4,
+  },
+})

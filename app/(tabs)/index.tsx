@@ -1,240 +1,191 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, SafeAreaView, ScrollView, FlatList, Alert } from 'react-native'
+import React from 'react'
+import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native'
 import { Button } from '../../src/components/ui/Button'
-import { Input } from '../../src/components/ui/Input'
-import { Card, CardContent, CardHeader } from '../../src/components/ui/Card'
-import { useFruits } from '../../src/hooks/useFruits'
-import { THAI_TEXT } from '../../src/lib/constants'
-import { formatThaiCurrency } from '../../src/lib/utils'
-import '../../src/lib/seeder' // Import seeder to trigger initialization
+import { MaterialIcons, Feather } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 
-export default function SetupScreen() {
-  const { fruits, addFruit, updateFruit, initializeWithPresets } = useFruits()
-  const [showAddFruit, setShowAddFruit] = useState(false)
-  const [newFruitName, setNewFruitName] = useState('')
-  const [newFruitPrice, setNewFruitPrice] = useState('')
-  const [editingFruit, setEditingFruit] = useState<any>(null)
-
-  useEffect(() => {
-    // Initialize with presets if no fruits exist
-    if (fruits.length === 0) {
-      initializeWithPresets()
-    }
-  }, [fruits.length, initializeWithPresets])
-
-  const handleAddFruit = async () => {
-    if (!newFruitName.trim() || !newFruitPrice.trim()) {
-      Alert.alert('Error', 'Please fill in all fields')
-      return
-    }
-
-    const price = parseFloat(newFruitPrice)
-    if (isNaN(price) || price <= 0) {
-      Alert.alert('Error', 'Please enter a valid price')
-      return
-    }
-
-    try {
-      await addFruit({
-        nameThai: newFruitName.trim(),
-        nameEnglish: '',
-        pricePerKg: price,
-        isActive: true
-      })
-
-      setNewFruitName('')
-      setNewFruitPrice('')
-      setShowAddFruit(false)
-      Alert.alert('Success', 'Fruit added successfully')
-    } catch (error) {
-      console.error('Add fruit error:', error)
-      Alert.alert('Error', 'Failed to add fruit')
-    }
-  }
-
-  const handleEditFruit = (fruit: any) => {
-    setEditingFruit(fruit)
-    setNewFruitName(fruit.nameThai)
-    setNewFruitPrice(fruit.pricePerKg.toString())
-    setShowAddFruit(true)
-  }
-
-  const handleUpdateFruit = async () => {
-    if (!editingFruit || !newFruitName.trim() || !newFruitPrice.trim()) {
-      Alert.alert('Error', 'Please fill in all fields')
-      return
-    }
-
-    const price = parseFloat(newFruitPrice)
-    if (isNaN(price) || price <= 0) {
-      Alert.alert('Error', 'Please enter a valid price')
-      return
-    }
-
-    try {
-      await updateFruit(editingFruit.id, {
-        nameThai: newFruitName.trim(),
-        pricePerKg: price
-      })
-
-      setNewFruitName('')
-      setNewFruitPrice('')
-      setEditingFruit(null)
-      setShowAddFruit(false)
-      Alert.alert('Success', 'Fruit updated successfully')
-    } catch (error) {
-      console.error('Update fruit error:', error)
-      Alert.alert('Error', 'Failed to update fruit')
-    }
-  }
-
-  const handleCancel = () => {
-    setNewFruitName('')
-    setNewFruitPrice('')
-    setEditingFruit(null)
-    setShowAddFruit(false)
-  }
-
-  const renderFruit = ({ item }: { item: any }) => (
-    <Card className="mb-3">
-      <CardContent>
-        <View className="flex-row justify-between items-center">
-          <View className="flex-1">
-            <Text className="text-thai-lg font-medium text-gray-800">
-              {item.nameThai}
+export default function HomeScreen() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={['#B46A07', '#D97706']}
+        style={styles.gradient}
+      >
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          {/* Hero Section */}
+          <View style={styles.hero}>
+            <View style={styles.iconContainer}>
+              <MaterialIcons name="analytics" size={60} color="white" />
+            </View>
+            <Text style={styles.heroTitle}>Fruit IQ</Text>
+            <Text style={styles.heroSubtitle}>
+              ระบบชั่งน้ำหนักและคำนวณราคา{'\n'}ผลไม้อัจฉริยะ
             </Text>
-            {item.nameEnglish && (
-              <Text className="text-thai-sm text-gray-600">
-                {item.nameEnglish}
-              </Text>
-            )}
           </View>
-          <View className="items-end">
-            <Text className="text-thai-lg font-bold text-primary-600">
-              {formatThaiCurrency(item.pricePerKg)}
-            </Text>
-            <Button
-              variant="outline"
-              size="sm"
-              onPress={() => handleEditFruit(item)}
-              className="mt-1"
-            >
-              {THAI_TEXT.edit}
+
+          {/* Features */}
+          <View style={styles.featuresContainer}>
+            <Text style={styles.featuresTitle}>เริ่มต้นใช้งาน</Text>
+            
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Feather name="camera" size={24} color="#B46A07" />
+              </View>
+              <View style={styles.featureContent}>
+                <Text style={styles.featureTitle}>1. ถ่ายรูปที่ชั่งดิจิทัล</Text>
+                <Text style={styles.featureDescription}>
+                  ตรวจจับน้ำหนักผลไม้
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <MaterialIcons name="shopping-cart" size={24} color="#B46A07" />
+              </View>
+              <View style={styles.featureContent}>
+                <Text style={styles.featureTitle}>2. เลือกผลไม้</Text>
+                <Text style={styles.featureDescription}>
+                  คำนวณราคาอัตโนมัติ
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <MaterialIcons name="receipt" size={24} color="#B46A07" />
+              </View>
+              <View style={styles.featureContent}>
+                <Text style={styles.featureTitle}>3. ดูยอดขาย</Text>
+                <Text style={styles.featureDescription}>
+                  สถิติการขายเรียลไทม์
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* CTA Button */}
+          <View style={styles.ctaContainer}>
+            <Button size="lg" onPress={() => {}}>
+              <View style={styles.ctaContent}>
+                <MaterialIcons name="play-arrow" size={24} color="white" />
+                <Text style={styles.ctaText}>เริ่มใช้งาน</Text>
+              </View>
             </Button>
           </View>
-        </View>
-      </CardContent>
-    </Card>
-  )
-
-  return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1 p-4">
-        {/* Header */}
-        <Card className="mb-6">
-          <CardHeader>
-            <Text className="text-thai-2xl font-bold text-gray-800">
-              FruitIQ Setup
-            </Text>
-          </CardHeader>
-          <CardContent>
-            <Text className="text-thai-base text-gray-600">
-              จัดการรายการผลไม้และราคา
-            </Text>
-          </CardContent>
-        </Card>
-
-        {/* Tutorial Card */}
-        <Card className="mb-6">
-          <CardHeader>
-            <Text className="text-thai-lg font-medium text-gray-800">
-              {THAI_TEXT.tutorial}
-            </Text>
-          </CardHeader>
-          <CardContent>
-            <Text className="text-thai-sm text-gray-600 mb-2">{THAI_TEXT.step1}</Text>
-            <Text className="text-thai-sm text-gray-600 mb-2">{THAI_TEXT.step2}</Text>
-            <Text className="text-thai-sm text-gray-600 mb-2">{THAI_TEXT.step3}</Text>
-            <Text className="text-thai-sm text-gray-600">{THAI_TEXT.step4}</Text>
-          </CardContent>
-        </Card>
-
-        {/* Add Fruit Form */}
-        {showAddFruit && (
-          <Card className="mb-6">
-            <CardHeader>
-              <Text className="text-thai-lg font-medium text-gray-800">
-                {editingFruit ? THAI_TEXT.editFruit : THAI_TEXT.addFruit}
-              </Text>
-            </CardHeader>
-            <CardContent>
-              <Input
-                label={THAI_TEXT.fruitName}
-                value={newFruitName}
-                onChangeText={setNewFruitName}
-                placeholder="เช่น มะม่วง"
-              />
-              <Input
-                label={`${THAI_TEXT.pricePerKg} (${THAI_TEXT.baht})`}
-                value={newFruitPrice}
-                onChangeText={setNewFruitPrice}
-                keyboardType="numeric"
-                placeholder="80"
-              />
-              <View className="flex-row gap-3">
-                <Button
-                  onPress={editingFruit ? handleUpdateFruit : handleAddFruit}
-                  className="flex-1"
-                >
-                  {editingFruit ? THAI_TEXT.save : THAI_TEXT.add}
-                </Button>
-                <Button
-                  variant="outline"
-                  onPress={handleCancel}
-                  className="flex-1"
-                >
-                  {THAI_TEXT.cancel}
-                </Button>
-              </View>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Add Button */}
-        {!showAddFruit && (
-          <Button
-            onPress={() => setShowAddFruit(true)}
-            className="mb-6"
-            size="lg"
-          >
-            {THAI_TEXT.addFruit}
-          </Button>
-        )}
-
-        {/* Fruits List */}
-        <View className="mb-4">
-          <Text className="text-thai-lg font-medium text-gray-800 mb-3">
-            รายการผลไม้ ({fruits.length})
-          </Text>
-          
-          {fruits.length === 0 ? (
-            <Card>
-              <CardContent className="items-center py-8">
-                <Text className="text-thai-base text-gray-500 text-center">
-                  {THAI_TEXT.noFruits}
-                </Text>
-              </CardContent>
-            </Card>
-          ) : (
-            <FlatList
-              data={fruits}
-              renderItem={renderFruit}
-              keyExtractor={item => item.id.toString()}
-              scrollEnabled={false}
-            />
-          )}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </LinearGradient>
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  gradient: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  hero: {
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
+  },
+  iconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: 12,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  featuresContainer: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 32,
+    paddingHorizontal: 24,
+    flex: 1,
+  },
+  featuresTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  featureCard: {
+    flexDirection: 'row',
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  featureIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  featureContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  featureDescription: {
+    fontSize: 14,
+    color: '#6b7280',
+    lineHeight: 20,
+  },
+  ctaContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    backgroundColor: 'white',
+  },
+  ctaContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+})
