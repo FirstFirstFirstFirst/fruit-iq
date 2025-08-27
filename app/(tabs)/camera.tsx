@@ -1,26 +1,41 @@
 import React, { useState } from 'react'
 import { View, Text, Alert, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, TextInput, ScrollView } from 'react-native'
-import { useFruits, useTransactions } from '../../src/hooks/useSimpleData'
+import { useFruits, useTransactions, useDatabase } from '../../src/hooks/useDatabase'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import QRPaymentScreen from '../../src/components/QRPaymentScreen'
 
 const { width } = Dimensions.get('window')
 
 export default function CameraScreen() {
-  const { fruits, addFruit } = useFruits()
+  const { isInitialized } = useDatabase()
+  const { fruits, addFruit, loading: fruitsLoading } = useFruits()
   const { addTransaction } = useTransactions()
   
-  const [step, setStep] = useState<'scan' | 'select' | 'weight' | 'confirm' | 'success' | 'add-fruit'>('scan')
+  const [step, setStep] = useState<'scan' | 'select' | 'weight' | 'confirm' | 'qr-payment' | 'success' | 'add-fruit'>('scan')
   const [selectedFruitId, setSelectedFruitId] = useState<number | null>(null)
   const [detectedWeight, setDetectedWeight] = useState<number | null>(null)
   const [totalAmount, setTotalAmount] = useState(0)
+  const [currentTransactionId, setCurrentTransactionId] = useState<number | null>(null)
   const [showAddFruit, setShowAddFruit] = useState(false)
   const [newFruitName, setNewFruitName] = useState('')
   const [newFruitPrice, setNewFruitPrice] = useState('')
   const [newFruitEmoji, setNewFruitEmoji] = useState('')
 
   const selectedFruit = fruits.find(f => f.id === selectedFruitId)
+
+  // Show loading while database initializes
+  if (!isInitialized || fruitsLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <MaterialIcons name="hourglass-empty" size={48} color="#B46A07" />
+          <Text style={styles.loadingText}>กำลังโหลด...</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   const handleScan = () => {
     // Mock weight detection
@@ -42,15 +57,20 @@ export default function CameraScreen() {
     setTotalAmount(total)
 
     try {
-      await addTransaction({
+      // Create transaction in database (not saved yet)
+      const transaction = await addTransaction({
         fruitId: selectedFruit.id,
         weightKg: detectedWeight,
         pricePerKg: selectedFruit.pricePerKg,
-        totalAmount: total
+        totalAmount: total,
+        isSaved: false // Not saved until QR payment is completed
       })
-      setStep('success')
-    } catch {
-      Alert.alert('Error', 'Failed to save transaction')
+      
+      setCurrentTransactionId(transaction.id)
+      setStep('qr-payment')
+    } catch (error) {
+      console.error('Failed to create transaction:', error)
+      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถสร้างรายการได้ กรุณาลองอีกครั้ง')
     }
   }
 
@@ -59,16 +79,26 @@ export default function CameraScreen() {
     setSelectedFruitId(null)
     setDetectedWeight(null)
     setTotalAmount(0)
+    setCurrentTransactionId(null)
     setShowAddFruit(false)
     setNewFruitName('')
     setNewFruitPrice('')
     setNewFruitEmoji('')
   }
 
-  const handleAddNewFruit = () => {
+  const handleQRPaymentSave = () => {
+    setStep('success')
+  }
+
+  const handleQRPaymentCancel = () => {
+    // Reset to scan step if user cancels QR payment
+    handleNewScan()
+  }
+
+  const handleAddNewFruit = async () => {
     if (!newFruitName || !newFruitPrice || !newFruitEmoji) return
     
-    const newFruit = addFruit({
+    const newFruit = await addFruit({
       nameThai: newFruitName,
       nameEnglish: newFruitName,
       emoji: newFruitEmoji,
@@ -94,6 +124,20 @@ export default function CameraScreen() {
     setStep('weight')
   }
 
+  // QR Payment screen
+  if (step === 'qr-payment' && selectedFruit && detectedWeight && currentTransactionId) {
+    return (
+      <QRPaymentScreen
+        fruit={selectedFruit}
+        weight={detectedWeight}
+        totalAmount={totalAmount}
+        transactionId={currentTransactionId}
+        onSave={handleQRPaymentSave}
+        onCancel={handleQRPaymentCancel}
+      />
+    )
+  }
+
   // Success screen
   if (step === 'success') {
     return (
@@ -103,10 +147,10 @@ export default function CameraScreen() {
             <View style={styles.successIcon}>
               <MaterialIcons name="check-circle" size={80} color="white" />
             </View>
-            <Text style={styles.successTitle}>สำเร็จ!</Text>
+            <Text style={styles.successTitle}>บันทึกสำเร็จ!</Text>
             <Text style={styles.successAmount}>{formatThaiCurrency(totalAmount)}</Text>
             <Text style={styles.successDetails}>
-              {selectedFruit?.nameThai} - {formatWeight(detectedWeight!)}
+              {selectedFruit?.nameThai} - {formatWeight(detectedWeight!)} - บันทึกแล้ว
             </Text>
             <TouchableOpacity style={styles.newScanButton} onPress={handleNewScan}>
               <Text style={styles.newScanText}>สแกนใหม่</Text>
@@ -196,9 +240,9 @@ export default function CameraScreen() {
                     {formatThaiCurrency(fruit.pricePerKg)}/กก.
                   </Text>
                 </View>
-                <TouchableOpacity style={styles.addButton}>
+                <View style={styles.addButton}>
                   <MaterialIcons name="add" size={20} color="white" />
-                </TouchableOpacity>
+                </View>
               </TouchableOpacity>
             ))}
             
@@ -333,6 +377,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+  },
+
+  // Loading Screen
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6b7280',
+    fontWeight: '500',
   },
 
   // Success Screen

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Pressable, Text, ActivityIndicator, View, StyleSheet } from 'react-native'
+import { Pressable, Text, ActivityIndicator, View, StyleSheet, ViewStyle, TextStyle } from 'react-native'
 
 interface ButtonProps {
   children: React.ReactNode
@@ -20,8 +20,8 @@ export function Button({
   loading = false
 }: ButtonProps) {
   
-  const getButtonStyle = (): any[] => {
-    const baseStyle = [styles.button]
+  const getButtonStyle = (): ViewStyle[] => {
+    const baseStyle: ViewStyle[] = [styles.button]
     
     if (size === 'sm') baseStyle.push(styles.smSize)
     if (size === 'md') baseStyle.push(styles.mdSize)
@@ -35,8 +35,8 @@ export function Button({
     return baseStyle
   }
   
-  const getTextStyle = (): any[] => {
-    const baseStyle = [styles.text]
+  const getTextStyle = (): TextStyle[] => {
+    const baseStyle: TextStyle[] = [styles.text]
     
     if (size === 'sm') baseStyle.push(styles.smText)
     if (size === 'md') baseStyle.push(styles.mdText)
@@ -71,7 +71,25 @@ export function Button({
   )
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{
+  button: ViewStyle;
+  content: ViewStyle;
+  text: TextStyle;
+  loader: ViewStyle;
+  primaryButton: ViewStyle;
+  secondaryButton: ViewStyle;
+  outlineButton: ViewStyle;
+  primaryText: TextStyle;
+  secondaryText: TextStyle;
+  outlineText: TextStyle;
+  smSize: ViewStyle;
+  mdSize: ViewStyle;
+  lgSize: ViewStyle;
+  smText: TextStyle;
+  mdText: TextStyle;
+  lgText: TextStyle;
+  disabled: ViewStyle;
+}>({
   button: {
     borderRadius: 8,
     alignItems: 'center',

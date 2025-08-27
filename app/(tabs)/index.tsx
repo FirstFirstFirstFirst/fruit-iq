@@ -1,23 +1,24 @@
 import React from 'react'
-import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native'
-import { Button } from '../../src/components/ui/Button'
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native'
 import { MaterialIcons, Feather } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useRouter } from 'expo-router'
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
         colors={['#B46A07', '#D97706']}
         style={styles.gradient}
       >
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {/* Hero Section */}
           <View style={styles.hero}>
-            <View style={styles.iconContainer}>
-              <MaterialIcons name="analytics" size={60} color="white" />
+            <View style={styles.logoContainer}>
+              <MaterialIcons name="scale" size={60} color="white" />
             </View>
-            <Text style={styles.heroTitle}>Fruit IQ</Text>
+            <Text style={styles.heroTitle}>WeighPay</Text>
             <Text style={styles.heroSubtitle}>
               ระบบชั่งน้ำหนักและคำนวณราคา{'\n'}ผลไม้อัจฉริยะ
             </Text>
@@ -25,40 +26,40 @@ export default function HomeScreen() {
 
           {/* Features */}
           <View style={styles.featuresContainer}>
-            <Text style={styles.featuresTitle}>เริ่มต้นใช้งาน</Text>
+            <Text style={styles.featuresTitle}>วิธีใช้งาน</Text>
             
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
-                <Feather name="camera" size={24} color="#B46A07" />
+                <Feather name="camera" size={26} color="#B46A07" />
               </View>
               <View style={styles.featureContent}>
-                <Text style={styles.featureTitle}>1. ถ่ายรูปที่ชั่งดิจิทัล</Text>
+                <Text style={styles.featureTitle}>1. สแกนน้ำหนักผลไม้</Text>
                 <Text style={styles.featureDescription}>
-                  ตรวจจับน้ำหนักผลไม้
+                  ตรวจจับน้ำหนักผลไม้อัตโนมัติ
                 </Text>
               </View>
             </View>
 
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
-                <MaterialIcons name="shopping-cart" size={24} color="#B46A07" />
+                <MaterialIcons name="shopping-cart" size={26} color="#B46A07" />
               </View>
               <View style={styles.featureContent}>
-                <Text style={styles.featureTitle}>2. เลือกผลไม้</Text>
+                <Text style={styles.featureTitle}>2. เลือกผลไม้และคำนวณราคา</Text>
                 <Text style={styles.featureDescription}>
-                  คำนวณราคาอัตโนมัติ
+                  เลือกผลไม้และคำนวณราคาอัตโนมัติ
                 </Text>
               </View>
             </View>
 
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
-                <MaterialIcons name="receipt" size={24} color="#B46A07" />
+                <MaterialIcons name="qr-code" size={26} color="#B46A07" />
               </View>
               <View style={styles.featureContent}>
-                <Text style={styles.featureTitle}>3. ดูยอดขาย</Text>
+                <Text style={styles.featureTitle}>3. รับชำระเงินผ่าน QR Code</Text>
                 <Text style={styles.featureDescription}>
-                  สถิติการขายเรียลไทม์
+                  สร้าง QR Code PromptPay และรับชำระเงิน
                 </Text>
               </View>
             </View>
@@ -66,14 +67,14 @@ export default function HomeScreen() {
 
           {/* CTA Button */}
           <View style={styles.ctaContainer}>
-            <Button size="lg" onPress={() => {}}>
-              <View style={styles.ctaContent}>
-                <MaterialIcons name="play-arrow" size={24} color="white" />
-                <Text style={styles.ctaText}>เริ่มใช้งาน</Text>
-              </View>
-            </Button>
+            <TouchableOpacity 
+              style={styles.ctaButton} 
+              onPress={() => router.push('/(tabs)/camera')}
+            >
+              <MaterialIcons name="play-arrow" size={20} color="white" />
+              <Text style={styles.ctaText}>เริ่มใช้งาน</Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
       </LinearGradient>
     </SafeAreaView>
   )
@@ -86,26 +87,25 @@ const styles = StyleSheet.create({
   gradient: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
   hero: {
     alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingTop: 40,
+    paddingBottom: 20,
     paddingHorizontal: 24,
   },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  logoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: 'white',
     marginBottom: 12,
@@ -120,15 +120,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingTop: 32,
+    paddingTop: 24,
     paddingHorizontal: 24,
     flex: 1,
   },
   featuresTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     color: '#1f2937',
-    marginBottom: 24,
+    marginBottom: 20,
     textAlign: 'center',
   },
   featureCard: {
@@ -141,9 +141,9 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
   },
   featureIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
@@ -162,10 +162,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   featureTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#1f2937',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   featureDescription: {
     fontSize: 14,
@@ -174,18 +174,29 @@ const styles = StyleSheet.create({
   },
   ctaContainer: {
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingVertical: 20,
     backgroundColor: 'white',
+    alignItems: 'center',
   },
-  ctaContent: {
+  ctaButton: {
+    backgroundColor: '#B46A07',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#B46A07',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    minWidth: 150,
   },
   ctaText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 6,
   },
 })

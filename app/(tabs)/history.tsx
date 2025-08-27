@@ -1,19 +1,24 @@
 import React from 'react'
-import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
-import { useTransactions } from '../../src/hooks/useSimpleData'
+import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { useTransactions, useDatabase, useDailySales } from '../../src/hooks/useDatabase'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export default function HistoryScreen() {
-  const { transactions } = useTransactions()
+  const { isInitialized } = useDatabase()
+  const { transactions, loading: transactionsLoading } = useTransactions()
+  const { summary, loading: summaryLoading } = useDailySales()
+  
+  // Filter only saved transactions for display
+  const savedTransactions = transactions.filter(t => t.isSaved)
 
-  // Calculate today's totals
-  const todaysTotals = transactions.reduce((acc, transaction) => ({
-    count: acc.count + 1,
-    weight: acc.weight + transaction.weightKg,
-    revenue: acc.revenue + transaction.totalAmount
-  }), { count: 0, weight: 0, revenue: 0 })
+  // Use database summary instead of calculating from transactions
+  const todaysTotals = {
+    count: summary.totalTransactions,
+    weight: savedTransactions.reduce((acc, transaction) => acc + transaction.weightKg, 0),
+    revenue: summary.totalRevenue
+  }
 
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('th-TH', {
@@ -34,6 +39,18 @@ export default function HistoryScreen() {
   ]
 
   const maxAmount = Math.max(...chartData.map(d => d.amount))
+
+  // Show loading while database initializes
+  if (!isInitialized || transactionsLoading || summaryLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#B46A07" />
+          <Text style={styles.loadingText}>กำลังโหลดข้อมูล...</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -118,14 +135,14 @@ export default function HistoryScreen() {
             </TouchableOpacity>
           </View>
           
-          {transactions.length === 0 ? (
+          {savedTransactions.length === 0 ? (
             <View style={styles.emptyState}>
               <MaterialIcons name="receipt-long" size={48} color="#d1d5db" />
-              <Text style={styles.emptyText}>ยังไม่มีรายการขาย</Text>
-              <Text style={styles.emptySubtext}>เริ่มต้นขายผลไม้เลย!</Text>
+              <Text style={styles.emptyText}>ยังไม่มีรายการขายที่บันทึก</Text>
+              <Text style={styles.emptySubtext}>เริ่มต้นขายและบันทึกผลไม้เลย!</Text>
             </View>
           ) : (
-            transactions.slice(0, 5).map((transaction) => (
+            savedTransactions.slice(0, 5).map((transaction) => (
               <View key={transaction.id} style={styles.transactionCard}>
                 <View style={styles.transactionIcon}>
                   <Text style={styles.transactionEmoji}>{transaction.fruit?.emoji}</Text>
@@ -155,6 +172,17 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6b7280',
+    fontWeight: '500',
   },
   header: {
     paddingTop: 60,

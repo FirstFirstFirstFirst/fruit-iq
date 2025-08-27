@@ -1,4 +1,4 @@
-# FruitIQ App Development Plan
+# WeighPay App Development Plan
 
 ## MVP-First Approach (3-4 weeks)
 
@@ -254,4 +254,4 @@ CREATE TABLE daily_summaries (
 
 ---
 
-**Ready to build FruitIQ! 🥭📱💰**
+**Ready to build WeighPay! 🥭📱💰**
