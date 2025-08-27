@@ -91,10 +91,12 @@ export default function QRPaymentScreen({
       // Mark transaction as saved in database
       await markTransactionAsSaved(transactionId);
       
+      console.log(`Transaction ${transactionId} marked as saved successfully`);
+      
       // Show success message
       Alert.alert(
         'บันทึกสำเร็จ!',
-        'รายการขายได้รับการบันทึกแล้ว',
+        'รายการขายได้รับการบันทึกแล้ว\nคุณสามารถดูรายการในหน้าประวัติได้',
         [
           {
             text: 'ตกลง',
@@ -106,7 +108,7 @@ export default function QRPaymentScreen({
       console.error('Error saving transaction:', error);
       Alert.alert(
         'ข้อผิดพลาด',
-        'ไม่สามารถบันทึกรายการได้ กรุณาลองอีกครั้ง',
+        `ไม่สามารถบันทึกรายการได้: ${error instanceof Error ? error.message : 'Unknown error'}\nกรุณาลองอีกครั้ง`,
         [{ text: 'ตกลง' }]
       );
     } finally {

@@ -5,12 +5,13 @@ import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import QRPaymentScreen from '../../src/components/QRPaymentScreen'
+import { Fruit } from '../../src/data/mockData'
 
 const { width } = Dimensions.get('window')
 
 export default function CameraScreen() {
   const { isInitialized } = useDatabase()
-  const { fruits, addFruit, loading: fruitsLoading } = useFruits()
+  const { fruits, addFruit, updateFruit, deleteFruit, loading: fruitsLoading } = useFruits()
   const { addTransaction } = useTransactions()
   
   const [step, setStep] = useState<'scan' | 'select' | 'weight' | 'confirm' | 'qr-payment' | 'success' | 'add-fruit'>('scan')
@@ -22,8 +23,10 @@ export default function CameraScreen() {
   const [newFruitName, setNewFruitName] = useState('')
   const [newFruitPrice, setNewFruitPrice] = useState('')
   const [newFruitEmoji, setNewFruitEmoji] = useState('')
+  const [editingFruit, setEditingFruit] = useState<Fruit | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null)
 
-  const selectedFruit = fruits.find(f => f.id === selectedFruitId)
+  const selectedFruit = fruits?.find(f => f.id === selectedFruitId)
 
   // Show loading while database initializes
   if (!isInitialized || fruitsLoading) {
@@ -74,6 +77,13 @@ export default function CameraScreen() {
     }
   }
 
+  const resetFruitForm = () => {
+    setNewFruitName('')
+    setNewFruitPrice('')
+    setNewFruitEmoji('')
+    setEditingFruit(null)
+  }
+
   const handleNewScan = () => {
     setStep('scan')
     setSelectedFruitId(null)
@@ -81,9 +91,8 @@ export default function CameraScreen() {
     setTotalAmount(0)
     setCurrentTransactionId(null)
     setShowAddFruit(false)
-    setNewFruitName('')
-    setNewFruitPrice('')
-    setNewFruitEmoji('')
+    setShowDeleteConfirm(null)
+    resetFruitForm()
   }
 
   const handleQRPaymentSave = () => {
@@ -95,33 +104,78 @@ export default function CameraScreen() {
     handleNewScan()
   }
 
+  const handleEditFruit = (fruit: Fruit) => {
+    setEditingFruit(fruit)
+    setNewFruitName(fruit.nameThai)
+    setNewFruitPrice(fruit.pricePerKg.toString())
+    setNewFruitEmoji(fruit.emoji)
+    setShowAddFruit(true)
+  }
+
+  const handleDeleteFruit = async (fruitId: number) => {
+    try {
+      await deleteFruit(fruitId)
+      setShowDeleteConfirm(null)
+      Alert.alert('ลบสำเร็จ', 'ผลไม้ได้รับการลบออกจากระบบแล้ว')
+    } catch (error) {
+      console.error('Error deleting fruit:', error)
+      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถลบผลไม้ได้ กรุณาลองอีกครั้ง')
+    }
+  }
+
   const handleAddNewFruit = async () => {
-    if (!newFruitName || !newFruitPrice || !newFruitEmoji) return
-    
-    const newFruit = await addFruit({
-      nameThai: newFruitName,
-      nameEnglish: newFruitName,
-      emoji: newFruitEmoji,
-      pricePerKg: parseFloat(newFruitPrice),
-      category: 'other',
-      description: `ผลไม้ ${newFruitName}`,
-      nutritionFacts: {
-        calories: 50,
-        carbs: 12,
-        fiber: 2,
-        sugar: 8,
-        protein: 1,
-        fat: 0.2,
-        vitamin_c: 20
+    if (!newFruitName?.trim() || !newFruitPrice?.trim() || !newFruitEmoji?.trim()) {
+      Alert.alert('ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลให้ครบทุกช่อง')
+      return
+    }
+
+    const price = parseFloat(newFruitPrice)
+    if (isNaN(price) || price <= 0) {
+      Alert.alert('ราคาไม่ถูกต้อง', 'กรุณากรอกราคาเป็นตัวเลขที่มากกว่า 0')
+      return
+    }
+
+    try {
+      if (editingFruit) {
+        // Update existing fruit
+        await updateFruit(editingFruit.id, {
+          nameThai: newFruitName.trim(),
+          nameEnglish: newFruitName.trim(),
+          emoji: newFruitEmoji.trim(),
+          pricePerKg: price,
+          description: `ผลไม้ ${newFruitName.trim()}`
+        })
+        Alert.alert('แก้ไขสำเร็จ', 'ข้อมูลผลไม้ได้รับการอัปเดตแล้ว')
+      } else {
+        // Add new fruit
+        const newFruit = await addFruit({
+          nameThai: newFruitName.trim(),
+          nameEnglish: newFruitName.trim(),
+          emoji: newFruitEmoji.trim(),
+          pricePerKg: price,
+          category: 'other',
+          description: `ผลไม้ ${newFruitName.trim()}`,
+          nutritionFacts: {
+            calories: 50,
+            carbs: 12,
+            fiber: 2,
+            sugar: 8,
+            protein: 1,
+            fat: 0.2,
+            vitamin_c: 20
+          }
+        })
+        
+        setSelectedFruitId(newFruit.id)
+        setStep('weight')
       }
-    })
-    
-    setSelectedFruitId(newFruit.id)
-    setShowAddFruit(false)
-    setNewFruitName('')
-    setNewFruitPrice('')
-    setNewFruitEmoji('')
-    setStep('weight')
+      
+      setShowAddFruit(false)
+      resetFruitForm()
+    } catch (error) {
+      console.error('Error saving fruit:', error)
+      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลผลไม้ได้ กรุณาลองอีกครั้ง')
+    }
   }
 
   // QR Payment screen
@@ -150,7 +204,7 @@ export default function CameraScreen() {
             <Text style={styles.successTitle}>บันทึกสำเร็จ!</Text>
             <Text style={styles.successAmount}>{formatThaiCurrency(totalAmount)}</Text>
             <Text style={styles.successDetails}>
-              {selectedFruit?.nameThai} - {formatWeight(detectedWeight!)} - บันทึกแล้ว
+              {selectedFruit?.nameThai || 'ไม่ทราบชื่อ'} - {formatWeight(detectedWeight || 0)} - บันทึกแล้ว
             </Text>
             <TouchableOpacity style={styles.newScanButton} onPress={handleNewScan}>
               <Text style={styles.newScanText}>สแกนใหม่</Text>
@@ -214,7 +268,7 @@ export default function CameraScreen() {
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>เลือกผลไม้</Text>
-            <Text style={styles.headerWeight}>น้ำหนัก {formatWeight(detectedWeight!)}</Text>
+            <Text style={styles.headerWeight}>น้ำหนัก {formatWeight(detectedWeight || 0)}</Text>
           </View>
         </View>
 
@@ -225,26 +279,48 @@ export default function CameraScreen() {
         >
           {/* Modern Fruit Grid */}
           <View style={styles.modernGrid}>
-            {fruits.map(fruit => (
-              <TouchableOpacity
-                key={fruit.id}
-                style={styles.modernFruitCard}
-                onPress={() => handleFruitSelect(fruit.id)}
-              >
-                <View style={styles.fruitImageContainer}>
-                  <Text style={styles.modernFruitEmoji}>{fruit.emoji}</Text>
+            {fruits?.length > 0 ? fruits.map(fruit => (
+              <View key={fruit.id} style={styles.modernFruitCard}>
+                <TouchableOpacity
+                  style={styles.fruitCardContent}
+                  onPress={() => handleFruitSelect(fruit.id)}
+                >
+                  <View style={styles.fruitImageContainer}>
+                    <Text style={styles.modernFruitEmoji}>{fruit.emoji}</Text>
+                  </View>
+                  <View style={styles.fruitInfo}>
+                    <Text style={styles.modernFruitName}>{fruit.nameThai}</Text>
+                    <Text style={styles.modernFruitPrice}>
+                      {formatThaiCurrency(fruit.pricePerKg)}/กก.
+                    </Text>
+                  </View>
+                  <View style={styles.addButton}>
+                    <MaterialIcons name="add" size={20} color="white" />
+                  </View>
+                </TouchableOpacity>
+                
+                {/* Action Buttons */}
+                <View style={styles.fruitActions}>
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() => handleEditFruit(fruit)}
+                  >
+                    <MaterialIcons name="edit" size={16} color="#3b82f6" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => setShowDeleteConfirm(fruit.id)}
+                  >
+                    <MaterialIcons name="delete" size={16} color="#ef4444" />
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.fruitInfo}>
-                  <Text style={styles.modernFruitName}>{fruit.nameThai}</Text>
-                  <Text style={styles.modernFruitPrice}>
-                    {formatThaiCurrency(fruit.pricePerKg)}/กก.
-                  </Text>
-                </View>
-                <View style={styles.addButton}>
-                  <MaterialIcons name="add" size={20} color="white" />
-                </View>
-              </TouchableOpacity>
-            ))}
+              </View>
+            )) : (
+              <View style={styles.emptyFruitsContainer}>
+                <MaterialIcons name="inbox" size={48} color="#d1d5db" />
+                <Text style={styles.emptyFruitsText}>ไม่มีข้อมูลผลไม้</Text>
+              </View>
+            )}
             
             {/* Add new fruit card - modern style */}
             <TouchableOpacity
@@ -267,8 +343,13 @@ export default function CameraScreen() {
           <View style={styles.modernModal}>
             <View style={styles.modernModalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>เพิ่มผลไม้ใหม่</Text>
-                <TouchableOpacity onPress={() => setShowAddFruit(false)}>
+                <Text style={styles.modalTitle}>
+                  {editingFruit ? 'แก้ไขผลไม้' : 'เพิ่มผลไม้ใหม่'}
+                </Text>
+                <TouchableOpacity onPress={() => {
+                  setShowAddFruit(false)
+                  resetFruitForm()
+                }}>
                   <MaterialIcons name="close" size={24} color="#6b7280" />
                 </TouchableOpacity>
               </View>
@@ -287,22 +368,36 @@ export default function CameraScreen() {
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>อีโมจิ</Text>
                 <TextInput
-                  style={styles.modernInput}
-                  placeholder="🥭"
+                  style={[styles.modernInput, styles.emojiInput]}
+                  placeholder="🥭 เลือกอีโมจิที่เหมาะสม"
                   value={newFruitEmoji}
-                  onChangeText={setNewFruitEmoji}
+                  onChangeText={(text) => {
+                    // Allow only emoji characters and limit to 2 characters
+                    const emojiOnly = text.replace(/[^\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Modifier_Base}\p{Emoji_Presentation}]/gu, '')
+                    setNewFruitEmoji(emojiOnly.slice(0, 2))
+                  }}
                   placeholderTextColor="#9ca3af"
+                  maxLength={2}
                 />
               </View>
               
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>ราคาต่อกิโลกรัม</Text>
+                <Text style={styles.inputLabel}>ราคาต่อกิโลกรัม (บาท)</Text>
                 <TextInput
                   style={styles.modernInput}
                   placeholder="120"
                   value={newFruitPrice}
-                  onChangeText={setNewFruitPrice}
-                  keyboardType="numeric"
+                  onChangeText={(text) => {
+                    // Allow only numbers and decimal point
+                    const numericText = text.replace(/[^0-9.]/g, '')
+                    // Prevent multiple decimal points
+                    const parts = numericText.split('.')
+                    if (parts.length > 2) {
+                      return
+                    }
+                    setNewFruitPrice(numericText)
+                  }}
+                  keyboardType="decimal-pad"
                   placeholderTextColor="#9ca3af"
                 />
               </View>
@@ -310,9 +405,51 @@ export default function CameraScreen() {
               <TouchableOpacity
                 style={styles.modernAddButton}
                 onPress={handleAddNewFruit}
+                disabled={!newFruitName?.trim() || !newFruitPrice?.trim() || !newFruitEmoji?.trim()}
               >
-                <Text style={styles.modernAddButtonText}>เพิ่มผลไม้</Text>
+                <Text style={styles.modernAddButtonText}>
+                  {editingFruit ? 'บันทึกการแก้ไข' : 'เพิ่มผลไม้'}
+                </Text>
               </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <View style={styles.modernModal}>
+            <View style={styles.modernModalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>ยืนยันการลบ</Text>
+                <TouchableOpacity onPress={() => setShowDeleteConfirm(null)}>
+                  <MaterialIcons name="close" size={24} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.deleteConfirmContent}>
+                <MaterialIcons name="warning" size={48} color="#ef4444" />
+                <Text style={styles.deleteConfirmText}>
+                  คุณต้องการลบผลไม้นี้ออกจากระบบหรือไม่?
+                </Text>
+                <Text style={styles.deleteConfirmSubtext}>
+                  การดำเนินการนี้ไม่สามารถยกเลิกได้
+                </Text>
+              </View>
+              
+              <View style={styles.deleteActions}>
+                <TouchableOpacity
+                  style={styles.cancelDeleteButton}
+                  onPress={() => setShowDeleteConfirm(null)}
+                >
+                  <Text style={styles.cancelDeleteText}>ยกเลิก</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.confirmDeleteButton}
+                  onPress={() => handleDeleteFruit(showDeleteConfirm)}
+                >
+                  <Text style={styles.confirmDeleteText}>ลบ</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         )}
@@ -339,23 +476,23 @@ export default function CameraScreen() {
               <Text style={styles.summaryEmoji}>{selectedFruit?.emoji}</Text>
               <View style={styles.summaryDetails}>
                 <Text style={styles.summaryFruitName}>{selectedFruit?.nameThai}</Text>
-                <Text style={styles.summaryWeight}>{formatWeight(detectedWeight!)}</Text>
+                <Text style={styles.summaryWeight}>{formatWeight(detectedWeight || 0)}</Text>
               </View>
             </View>
 
             <View style={styles.priceBreakdown}>
               <View style={styles.priceRow}>
                 <Text style={styles.priceLabel}>น้ำหนัก</Text>
-                <Text style={styles.priceValue}>{formatWeight(detectedWeight!)}</Text>
+                <Text style={styles.priceValue}>{formatWeight(detectedWeight || 0)}</Text>
               </View>
               <View style={styles.priceRow}>
                 <Text style={styles.priceLabel}>ราคาต่อกิโลกรัม</Text>
-                <Text style={styles.priceValue}>{formatThaiCurrency(selectedFruit!.pricePerKg)}</Text>
+                <Text style={styles.priceValue}>{formatThaiCurrency(selectedFruit?.pricePerKg || 0)}</Text>
               </View>
               <View style={[styles.priceRow, styles.totalRow]}>
                 <Text style={styles.totalLabel}>ราคารวม</Text>
                 <Text style={styles.totalPrice}>
-                  {formatThaiCurrency(detectedWeight! * selectedFruit!.pricePerKg)}
+                  {formatThaiCurrency((detectedWeight || 0) * (selectedFruit?.pricePerKg || 0))}
                 </Text>
               </View>
             </View>
@@ -593,7 +730,6 @@ const styles = StyleSheet.create({
     width: (width - 60) / 2,
     backgroundColor: '#ffffff',
     borderRadius: 20,
-    padding: 16,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -602,6 +738,40 @@ const styles = StyleSheet.create({
     elevation: 6,
     borderWidth: 1,
     borderColor: '#f1f5f9',
+  },
+  fruitCardContent: {
+    padding: 16,
+    paddingBottom: 8,
+  },
+  fruitActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  editButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginRight: 4,
+    borderRadius: 8,
+    backgroundColor: '#eff6ff',
+  },
+  deleteButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginLeft: 4,
+    borderRadius: 8,
+    backgroundColor: '#fef2f2',
   },
   fruitImageContainer: {
     alignItems: 'center',
@@ -677,6 +847,19 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     textAlign: 'center',
   },
+  emptyFruitsContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    width: '100%',
+  },
+  emptyFruitsText: {
+    fontSize: 16,
+    color: '#9ca3af',
+    marginTop: 12,
+    textAlign: 'center',
+  },
   // Modern Modal Styles
   modernModal: {
     position: 'absolute',
@@ -728,6 +911,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#ffffff',
     color: '#1f2937',
+  },
+  emojiInput: {
+    fontSize: 20,
+    textAlign: 'center',
   },
   modernAddButton: {
     backgroundColor: '#B46A07',
@@ -846,6 +1033,58 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   confirmButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  // Delete Confirmation Modal
+  deleteConfirmContent: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  deleteConfirmText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  deleteConfirmSubtext: {
+    fontSize: 14,
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  deleteActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  cancelDeleteButton: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  cancelDeleteText: {
+    color: '#6b7280',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  confirmDeleteButton: {
+    flex: 1,
+    backgroundColor: '#ef4444',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  confirmDeleteText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',

@@ -308,11 +308,30 @@ export const transactionsDB = {
    */
   async markTransactionAsSaved(id: number): Promise<void> {
     const database = getDatabase();
-    await database.runAsync(`
+    
+    console.log(`Database: Marking transaction ${id} as saved`);
+    
+    const result = await database.runAsync(`
       UPDATE transactions 
       SET is_saved = 1
       WHERE id = ?
     `, [id]);
+    
+    console.log(`Database: Update result for transaction ${id}:`, {
+      changes: result.changes,
+      lastInsertRowId: result.lastInsertRowId
+    });
+    
+    if (result.changes === 0) {
+      throw new Error(`Transaction ${id} not found or already saved`);
+    }
+    
+    // Verify the update
+    const verifyResult = await database.getFirstAsync(`
+      SELECT is_saved FROM transactions WHERE id = ?
+    `, [id]) as { is_saved: number } | null;
+    
+    console.log(`Database: Verification for transaction ${id}: is_saved = ${verifyResult?.is_saved}`);
   },
 
   /**

@@ -6,13 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatThaiCurrency(amount: number): string {
+  const safeAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 0
   return new Intl.NumberFormat('th-TH', {
     style: 'currency',
     currency: 'THB',
     minimumFractionDigits: 2,
-  }).format(amount)
+  }).format(safeAmount)
 }
 
 export function formatWeight(weight: number): string {
-  return `${weight.toFixed(2)} กก.`
+  const safeWeight = typeof weight === 'number' && !isNaN(weight) ? weight : 0
+  return `${safeWeight.toFixed(2)} กก.`
 }

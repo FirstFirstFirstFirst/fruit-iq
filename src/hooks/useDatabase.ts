@@ -7,6 +7,34 @@ import { useState, useEffect, useCallback } from 'react';
 import { fruitsDB, transactionsDB, settingsDB, initializeDatabase, seedInitialData } from '../lib/database';
 import { Fruit, Transaction } from '../data/mockData';
 
+// Global refresh trigger for cross-hook communication
+let globalRefreshCounter = 0;
+const refreshListeners: ((counter: number) => void)[] = [];
+
+export const triggerGlobalRefresh = () => {
+  globalRefreshCounter++;
+  console.log(`Global refresh triggered: ${globalRefreshCounter}`);
+  refreshListeners.forEach(listener => listener(globalRefreshCounter));
+};
+
+export const useGlobalRefresh = () => {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const listener = (counter: number) => setRefreshTrigger(counter);
+    refreshListeners.push(listener);
+    
+    return () => {
+      const index = refreshListeners.indexOf(listener);
+      if (index > -1) {
+        refreshListeners.splice(index, 1);
+      }
+    };
+  }, []);
+
+  return refreshTrigger;
+};
+
 // Database initialization hook
 export function useDatabase() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -136,11 +164,22 @@ export function useTransactions() {
 
   const markTransactionAsSaved = useCallback(async (id: number) => {
     try {
+      console.log(`Marking transaction ${id} as saved...`);
       await transactionsDB.markTransactionAsSaved(id);
-      setTransactions(prev => 
-        prev.map(t => t.id === id ? { ...t, isSaved: true } : t)
-      );
+      
+      // Update local state immediately
+      setTransactions(prev => {
+        const updated = prev.map(t => t.id === id ? { ...t, isSaved: true } : t);
+        console.log(`Transaction ${id} updated in local state. isSaved = ${updated.find(t => t.id === id)?.isSaved}`);
+        return updated;
+      });
+      
+      // Trigger global refresh to update other hooks (like useDailySales)
+      triggerGlobalRefresh();
+      
+      console.log(`Transaction ${id} successfully marked as saved and global refresh triggered`);
     } catch (err) {
+      console.error(`Error marking transaction ${id} as saved:`, err);
       setError(err instanceof Error ? err.message : 'Failed to mark transaction as saved');
       throw err;
     }
@@ -228,7 +267,7 @@ export function useSettings() {
 }
 
 // Daily sales dashboard hook
-export function useDailySales(date?: string) {
+export function useDailySales(date?: string, refreshTrigger?: number) {
   const [summary, setSummary] = useState<{
     totalTransactions: number;
     totalRevenue: number;
@@ -242,22 +281,38 @@ export function useDailySales(date?: string) {
 
   const targetDate = date || new Date().toISOString().split('T')[0];
 
-  const loadSummary = useCallback(async () => {
+  const loadSummary = useCallback(async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
+      console.log(`Loading daily summary for date: ${targetDate}`);
       const data = await transactionsDB.getDailySummary(targetDate);
       setSummary(data);
       setError(null);
+      console.log(`Daily summary loaded:`, data);
     } catch (err) {
+      console.error('Error loading daily summary:', err);
       setError(err instanceof Error ? err.message : 'Failed to load daily summary');
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   }, [targetDate]);
 
+  // Initial load and when date changes
   useEffect(() => {
     loadSummary();
   }, [loadSummary]);
+
+  // Refresh when trigger changes (for cross-hook communication)
+  useEffect(() => {
+    if (refreshTrigger !== undefined && refreshTrigger > 0) {
+      console.log(`Daily summary refresh triggered: ${refreshTrigger}`);
+      loadSummary(false); // Don't show loading for trigger-based refresh
+    }
+  }, [refreshTrigger, loadSummary]);
 
   return {
     summary,

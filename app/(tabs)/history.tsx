@@ -1,30 +1,94 @@
-import React from 'react'
-import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native'
 import { useTransactions, useDatabase, useDailySales } from '../../src/hooks/useDatabase'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useFocusEffect } from '@react-navigation/native'
 
 export default function HistoryScreen() {
+  const [refreshing, setRefreshing] = useState(false)
   const { isInitialized } = useDatabase()
-  const { transactions, loading: transactionsLoading } = useTransactions()
-  const { summary, loading: summaryLoading } = useDailySales()
+  const { transactions, loading: transactionsLoading, refreshTransactions } = useTransactions()
+  const { summary, loading: summaryLoading, refreshSummary } = useDailySales()
   
   // Filter only saved transactions for display
-  const savedTransactions = transactions.filter(t => t.isSaved)
+  const savedTransactions = transactions?.filter(t => t.isSaved) || []
 
-  // Use database summary instead of calculating from transactions
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('History screen focused, refreshing data...');
+      refreshTransactions();
+      refreshSummary();
+    }, [refreshTransactions, refreshSummary])
+  );
+
+  // Handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      console.log('Manual refresh triggered');
+      await Promise.all([
+        refreshTransactions(),
+        refreshSummary()
+      ]);
+    } catch (error) {
+      console.error('Error during refresh:', error);
+      // Still show data even if refresh fails
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Calculate fallback totals from transactions (optimistic UI) with null safety
+  const fallbackTotals = {
+    count: savedTransactions.length,
+    weight: savedTransactions.reduce((acc, transaction) => {
+      const weight = typeof transaction?.weightKg === 'number' ? transaction.weightKg : 0;
+      return acc + weight;
+    }, 0),
+    revenue: savedTransactions.reduce((acc, transaction) => {
+      const amount = typeof transaction?.totalAmount === 'number' ? transaction.totalAmount : 0;
+      return acc + amount;
+    }, 0)
+  };
+
+  // Use database summary when available, fallback to calculated values with null safety
   const todaysTotals = {
-    count: summary.totalTransactions,
-    weight: savedTransactions.reduce((acc, transaction) => acc + transaction.weightKg, 0),
-    revenue: summary.totalRevenue
-  }
+    count: (summary?.totalTransactions && typeof summary.totalTransactions === 'number' && summary.totalTransactions > 0) 
+      ? summary.totalTransactions 
+      : fallbackTotals.count,
+    weight: fallbackTotals.weight, // Always use calculated weight as it's more reliable
+    revenue: (summary?.totalRevenue && typeof summary.totalRevenue === 'number' && summary.totalRevenue > 0) 
+      ? summary.totalRevenue 
+      : fallbackTotals.revenue
+  };
+
+  console.log('History totals:', { 
+    summary: summary, 
+    fallback: fallbackTotals, 
+    final: todaysTotals,
+    savedTransactionsCount: savedTransactions.length 
+  });
 
   const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString('th-TH', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    try {
+      if (!timestamp || typeof timestamp !== 'string') {
+        return '--:--';
+      }
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return '--:--';
+      }
+      return date.toLocaleTimeString('th-TH', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return '--:--';
+    }
   }
 
   // Mock chart data for visual appeal
@@ -38,10 +102,22 @@ export default function HistoryScreen() {
     { day: 'อา', amount: todaysTotals.revenue || 2940 },
   ]
 
-  const maxAmount = Math.max(...chartData.map(d => d.amount))
+  const maxAmount = chartData.length > 0 ? Math.max(...chartData.map(d => d?.amount || 0)) : 1;
 
   // Show loading while database initializes
-  if (!isInitialized || transactionsLoading || summaryLoading) {
+  if (!isInitialized) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#B46A07" />
+          <Text style={styles.loadingText}>กำลังเริ่มต้นระบบ...</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
+
+  // Show loading only on first load with better null safety
+  if (transactionsLoading && (!transactions || transactions.length === 0)) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -54,7 +130,18 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#B46A07']}
+            tintColor="#B46A07"
+          />
+        }
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>ภาพรวมยอดขาย</Text>
@@ -70,10 +157,16 @@ export default function HistoryScreen() {
         >
           <View style={styles.balanceHeader}>
             <Text style={styles.balanceLabel}>ยอดขายวันนี้</Text>
-            <MaterialIcons name="visibility" size={20} color="rgba(255, 255, 255, 0.8)" />
+            {summaryLoading ? (
+              <ActivityIndicator size="small" color="rgba(255, 255, 255, 0.8)" />
+            ) : (
+              <MaterialIcons name="visibility" size={20} color="rgba(255, 255, 255, 0.8)" />
+            )}
           </View>
           <Text style={styles.balanceAmount}>{formatThaiCurrency(todaysTotals.revenue)}</Text>
-          <Text style={styles.balanceChange}>+12.5% จากเมื่อวาน</Text>
+          <Text style={styles.balanceChange}>
+            {summaryLoading ? 'กำลังอัปเดต...' : '+12.5% จากเมื่อวาน'}
+          </Text>
         </LinearGradient>
 
         {/* Stats Cards */}
@@ -99,7 +192,9 @@ export default function HistoryScreen() {
               <MaterialIcons name="trending-up" size={24} color="#B46A07" />
             </View>
             <Text style={styles.statValue}>
-              {todaysTotals.count > 0 ? formatThaiCurrency(todaysTotals.revenue / todaysTotals.count) : '฿0'}
+              {todaysTotals.count > 0 && todaysTotals.revenue > 0 
+                ? formatThaiCurrency(todaysTotals.revenue / todaysTotals.count) 
+                : '฿0'}
             </Text>
             <Text style={styles.statLabel}>เฉลี่ย/รายการ</Text>
           </View>
@@ -109,20 +204,26 @@ export default function HistoryScreen() {
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>ยอดขาย 7 วันล่าสุด</Text>
           <View style={styles.chart}>
-            {chartData.map((item, index) => (
-              <View key={index} style={styles.chartBar}>
-                <View 
-                  style={[
-                    styles.bar,
-                    { 
-                      height: (item.amount / maxAmount) * 80,
-                      backgroundColor: index === chartData.length - 1 ? '#B46A07' : '#e5e7eb'
-                    }
-                  ]} 
-                />
-                <Text style={styles.chartLabel}>{item.day}</Text>
-              </View>
-            ))}
+            {chartData.map((item, index) => {
+              const safeAmount = typeof item?.amount === 'number' ? item.amount : 0;
+              const safeHeight = maxAmount > 0 ? (safeAmount / maxAmount) * 80 : 0;
+              const safeDay = item?.day || '-';
+              
+              return (
+                <View key={index} style={styles.chartBar}>
+                  <View 
+                    style={[
+                      styles.bar,
+                      { 
+                        height: Math.max(safeHeight, 2), // Minimum height for visibility
+                        backgroundColor: index === chartData.length - 1 ? '#B46A07' : '#e5e7eb'
+                      }
+                    ]} 
+                  />
+                  <Text style={styles.chartLabel}>{safeDay}</Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -142,22 +243,31 @@ export default function HistoryScreen() {
               <Text style={styles.emptySubtext}>เริ่มต้นขายและบันทึกผลไม้เลย!</Text>
             </View>
           ) : (
-            savedTransactions.slice(0, 5).map((transaction) => (
-              <View key={transaction.id} style={styles.transactionCard}>
-                <View style={styles.transactionIcon}>
-                  <Text style={styles.transactionEmoji}>{transaction.fruit?.emoji}</Text>
-                </View>
-                <View style={styles.transactionDetails}>
-                  <Text style={styles.transactionName}>{transaction.fruit?.nameThai}</Text>
-                  <Text style={styles.transactionInfo}>
-                    {formatWeight(transaction.weightKg)} • {formatTime(transaction.timestamp)}
+            savedTransactions.slice(0, 5).map((transaction) => {
+              // Safe data extraction with fallbacks
+              const fruitEmoji = transaction?.fruit?.emoji || '🍎';
+              const fruitName = transaction?.fruit?.nameThai || 'ไม่ระบุชื่อผลไม้';
+              const weight = typeof transaction?.weightKg === 'number' ? transaction.weightKg : 0;
+              const amount = typeof transaction?.totalAmount === 'number' ? transaction.totalAmount : 0;
+              const timestamp = transaction?.timestamp || '';
+              
+              return (
+                <View key={transaction?.id || Math.random()} style={styles.transactionCard}>
+                  <View style={styles.transactionIcon}>
+                    <Text style={styles.transactionEmoji}>{fruitEmoji}</Text>
+                  </View>
+                  <View style={styles.transactionDetails}>
+                    <Text style={styles.transactionName}>{fruitName}</Text>
+                    <Text style={styles.transactionInfo}>
+                      {formatWeight(weight)} • {formatTime(timestamp)}
+                    </Text>
+                  </View>
+                  <Text style={styles.transactionAmount}>
+                    {formatThaiCurrency(amount)}
                   </Text>
                 </View>
-                <Text style={styles.transactionAmount}>
-                  {formatThaiCurrency(transaction.totalAmount)}
-                </Text>
-              </View>
-            ))
+              );
+            })
           )}
         </View>
       </ScrollView>
