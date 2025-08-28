@@ -35,7 +35,20 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-font"
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Kanit-Light.ttf",
+            "./assets/fonts/Kanit-Regular.ttf", 
+            "./assets/fonts/Kanit-Medium.ttf",
+            "./assets/fonts/Kanit-SemiBold.ttf",
+            "./assets/fonts/Kanit-Bold.ttf",
+            "./assets/fonts/Kanit-ExtraBold.ttf",
+            "./assets/fonts/SpaceMono-Regular.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

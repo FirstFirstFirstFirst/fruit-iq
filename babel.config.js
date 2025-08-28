@@ -7,6 +7,7 @@ module.exports = function (api) {
     ],
     plugins: [
       // Other plugins if needed
+      "expo-font/app.plugin",
       // Ensure 'react-native-reanimated/plugin' is the last plugin in the array
       "react-native-reanimated/plugin",
     ],

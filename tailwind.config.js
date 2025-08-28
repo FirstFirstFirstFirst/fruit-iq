@@ -23,14 +23,15 @@ module.exports = {
         }
       },
       fontFamily: {
-        'sans': ['Kanit_400Regular', 'system-ui', 'sans-serif'],
-        'thai-sans': ['Kanit_400Regular', 'system-ui', 'sans-serif'],
-        'light': ['Kanit_300Light'],
-        'regular': ['Kanit_400Regular'],
-        'medium': ['Kanit_500Medium'],
-        'semibold': ['Kanit_600SemiBold'],
-        'bold': ['Kanit_700Bold'],
-        'extrabold': ['Kanit_800ExtraBold'],
+        'sans': ['Kanit-Regular', 'system-ui', 'sans-serif'],
+        'thai-sans': ['Kanit-Regular', 'system-ui', 'sans-serif'],
+        'light': ['Kanit-Light'],
+        'regular': ['Kanit-Regular'],
+        'medium': ['Kanit-Medium'],
+        'semibold': ['Kanit-SemiBold'],
+        'bold': ['Kanit-Bold'],
+        'extrabold': ['Kanit-ExtraBold'],
+        'mono': ['SpaceMono-Regular'],
       },
       fontSize: {
         'thai-sm': ['16px', '24px'],

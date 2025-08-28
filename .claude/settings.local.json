@@ -15,7 +15,9 @@
       "Bash(npm run typecheck:*)",
       "Bash(npx expo r:*)",
       "Bash(npm run:*)",
-      "Bash(npx expo lint:*)"
+      "Bash(npx expo lint:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx expo prebuild:*)"
     ],
     "deny": [],
     "ask": []
