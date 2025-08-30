@@ -6,10 +6,12 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import QRPaymentScreen from '../../src/components/QRPaymentScreen'
 import { Fruit } from '../../src/data/mockData'
+import { useRouter } from 'expo-router'
 
 const { width } = Dimensions.get('window')
 
 export default function CameraScreen() {
+  const router = useRouter()
   const { isInitialized } = useDatabase()
   const { fruits, addFruit, updateFruit, deleteFruit, loading: fruitsLoading } = useFruits()
   const { addTransaction } = useTransactions()
@@ -25,6 +27,15 @@ export default function CameraScreen() {
   const [newFruitEmoji, setNewFruitEmoji] = useState('')
   const [editingFruit, setEditingFruit] = useState<Fruit | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null)
+  const [contextMenuFruit, setContextMenuFruit] = useState<number | null>(null)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  
+  // Preset fruit emojis for easy selection
+  const presetEmojis = [
+    '🍎', '🍊', '🍌', '🥭', '🍇', '🍓', '🥥', '🍍', 
+    '🫐', '🍈', '🍑', '🥝', '🍋', '🍐', '🥑', '🍅',
+    '🥒', '🌶️', '🫑', '🥕'
+  ]
 
   const selectedFruit = fruits?.find(f => f.id === selectedFruitId)
 
@@ -82,6 +93,7 @@ export default function CameraScreen() {
     setNewFruitPrice('')
     setNewFruitEmoji('')
     setEditingFruit(null)
+    setShowEmojiPicker(false)
   }
 
   const handleNewScan = () => {
@@ -206,9 +218,16 @@ export default function CameraScreen() {
             <Text style={styles.successDetails}>
               {selectedFruit?.nameThai || 'ไม่ทราบชื่อ'} - {formatWeight(detectedWeight || 0)} - บันทึกแล้ว
             </Text>
-            <TouchableOpacity style={styles.newScanButton} onPress={handleNewScan}>
-              <Text style={styles.newScanText}>สแกนใหม่</Text>
-            </TouchableOpacity>
+            <View style={styles.successButtonContainer}>
+              <TouchableOpacity style={styles.newScanButton} onPress={handleNewScan}>
+                <MaterialIcons name="camera-alt" size={20} color="white" />
+                <Text style={styles.newScanText}>สแกนใหม่</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.historyButton} onPress={() => router.push('/history')}>
+                <MaterialIcons name="history" size={20} color="#B46A07" />
+                <Text style={styles.historyText}>ดูประวัติ</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </LinearGradient>
       </SafeAreaView>
@@ -277,44 +296,31 @@ export default function CameraScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Modern Fruit Grid */}
+          {/* Improved Fruit Grid */}
           <View style={styles.modernGrid}>
             {fruits?.length > 0 ? fruits.map(fruit => (
-              <View key={fruit.id} style={styles.modernFruitCard}>
-                <TouchableOpacity
-                  style={styles.fruitCardContent}
-                  onPress={() => handleFruitSelect(fruit.id)}
-                >
-                  <View style={styles.fruitImageContainer}>
-                    <Text style={styles.modernFruitEmoji}>{fruit.emoji}</Text>
-                  </View>
-                  <View style={styles.fruitInfo}>
-                    <Text style={styles.modernFruitName}>{fruit.nameThai}</Text>
-                    <Text style={styles.modernFruitPrice}>
-                      {formatThaiCurrency(fruit.pricePerKg)}/กก.
-                    </Text>
-                  </View>
-                  <View style={styles.addButton}>
-                    <MaterialIcons name="add" size={20} color="white" />
-                  </View>
-                </TouchableOpacity>
-                
-                {/* Action Buttons */}
-                <View style={styles.fruitActions}>
-                  <TouchableOpacity
-                    style={styles.editButton}
-                    onPress={() => handleEditFruit(fruit)}
-                  >
-                    <MaterialIcons name="edit" size={16} color="#3b82f6" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => setShowDeleteConfirm(fruit.id)}
-                  >
-                    <MaterialIcons name="delete" size={16} color="#ef4444" />
-                  </TouchableOpacity>
+              <TouchableOpacity
+                key={fruit.id}
+                style={styles.improvedFruitCard}
+                onPress={() => handleFruitSelect(fruit.id)}
+                onLongPress={() => {
+                  setContextMenuFruit(fruit.id);
+                }}
+                activeOpacity={0.8}
+              >
+                <View style={styles.fruitImageContainer}>
+                  <Text style={styles.improvedFruitEmoji}>{fruit.emoji}</Text>
                 </View>
-              </View>
+                <View style={styles.improvedFruitInfo}>
+                  <Text style={styles.improvedFruitName}>{fruit.nameThai}</Text>
+                  <Text style={styles.improvedFruitPrice}>
+                    {formatThaiCurrency(fruit.pricePerKg)}/กก.
+                  </Text>
+                </View>
+                <View style={styles.selectIndicator}>
+                  <MaterialIcons name="touch-app" size={16} color="#B46A07" />
+                </View>
+              </TouchableOpacity>
             )) : (
               <View style={styles.emptyFruitsContainer}>
                 <MaterialIcons name="inbox" size={48} color="#d1d5db" />
@@ -330,7 +336,7 @@ export default function CameraScreen() {
               <View style={styles.addIconContainer}>
                 <MaterialIcons name="add" size={32} color="#B46A07" />
               </View>
-              <View style={styles.fruitInfo}>
+              <View style={styles.addFruitInfo}>
                 <Text style={styles.addFruitLabel}>เพิ่มผลไม้ใหม่</Text>
                 <Text style={styles.addFruitSubtext}>สร้างรายการใหม่</Text>
               </View>
@@ -367,12 +373,43 @@ export default function CameraScreen() {
               
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>อีโมจิ</Text>
+                
+                {/* Emoji Display and Picker Button */}
+                <TouchableOpacity
+                  style={styles.emojiPickerButton}
+                  onPress={() => setShowEmojiPicker(true)}
+                >
+                  <Text style={styles.emojiDisplay}>
+                    {newFruitEmoji || '🍎'}
+                  </Text>
+                  <Text style={styles.emojiPickerText}>แตะเพื่อเลือกอีโมจิ</Text>
+                  <MaterialIcons name="keyboard-arrow-down" size={20} color="#6b7280" />
+                </TouchableOpacity>
+
+                {/* Photo Selection Option */}
+                <View style={styles.photoOptionContainer}>
+                  <TouchableOpacity
+                    style={styles.photoOptionButton}
+                    onPress={() => {
+                      // TODO: Implement image picker (requires expo-image-picker)
+                      Alert.alert(
+                        'รูปภาพ',
+                        'ฟีเจอร์การเลือกรูปภาพยังไม่พร้อมใช้งาน\nกรุณาใช้อีโมจิแทน',
+                        [{ text: 'ตกลง' }]
+                      )
+                    }}
+                  >
+                    <MaterialIcons name="photo-camera" size={20} color="#6b7280" />
+                    <Text style={styles.photoOptionText}>หรือเลือกรูปภาพ</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Custom Emoji Input (Optional) */}
                 <TextInput
-                  style={[styles.modernInput, styles.emojiInput]}
-                  placeholder="🥭 เลือกอีโมจิที่เหมาะสม"
+                  style={[styles.modernInput, styles.customEmojiInput]}
+                  placeholder="หรือใส่อีโมจิเอง"
                   value={newFruitEmoji}
                   onChangeText={(text) => {
-                    // Allow only emoji characters and limit to 2 characters
                     const emojiOnly = text.replace(/[^\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Modifier_Base}\p{Emoji_Presentation}]/gu, '')
                     setNewFruitEmoji(emojiOnly.slice(0, 2))
                   }}
@@ -411,6 +448,76 @@ export default function CameraScreen() {
                   {editingFruit ? 'บันทึกการแก้ไข' : 'เพิ่มผลไม้'}
                 </Text>
               </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Context Menu Modal */}
+        {contextMenuFruit && (
+          <TouchableOpacity 
+            style={styles.contextMenuOverlay}
+            activeOpacity={1}
+            onPress={() => setContextMenuFruit(null)}
+          >
+            <View style={styles.contextMenuContainer}>
+              <TouchableOpacity
+                style={styles.contextMenuItem}
+                onPress={() => {
+                  const fruit = fruits.find(f => f.id === contextMenuFruit);
+                  if (fruit) handleEditFruit(fruit);
+                  setContextMenuFruit(null);
+                }}
+              >
+                <MaterialIcons name="edit" size={20} color="#3b82f6" />
+                <Text style={styles.contextMenuText}>แก้ไข</Text>
+              </TouchableOpacity>
+              
+              <View style={styles.contextMenuDivider} />
+              
+              <TouchableOpacity
+                style={styles.contextMenuItem}
+                onPress={() => {
+                  setShowDeleteConfirm(contextMenuFruit);
+                  setContextMenuFruit(null);
+                }}
+              >
+                <MaterialIcons name="delete" size={20} color="#ef4444" />
+                <Text style={[styles.contextMenuText, { color: '#ef4444' }]}>ลบ</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {/* Emoji Picker Modal */}
+        {showEmojiPicker && (
+          <View style={styles.modernModal}>
+            <View style={[styles.modernModalContent, styles.emojiPickerModal]}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>เลือกอีโมจิ</Text>
+                <TouchableOpacity onPress={() => setShowEmojiPicker(false)}>
+                  <MaterialIcons name="close" size={24} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+              
+              <ScrollView style={styles.emojiGrid} showsVerticalScrollIndicator={false}>
+                <View style={styles.emojiGridContainer}>
+                  {presetEmojis.map((emoji, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.emojiGridItem,
+                        newFruitEmoji === emoji && styles.selectedEmojiItem
+                      ]}
+                      onPress={() => {
+                        setNewFruitEmoji(emoji)
+                        setShowEmojiPicker(false)
+                      }}
+                    >
+                      <Text style={styles.emojiGridEmoji}>{emoji}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
             </View>
           </View>
         )}
@@ -561,16 +668,38 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 40,
   },
+  successButtonContainer: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'center',
+  },
   newScanButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     paddingVertical: 16,
     borderRadius: 25,
     borderWidth: 2,
     borderColor: 'white',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   newScanText: {
     color: 'white',
+    fontSize: 16,
+    fontFamily: 'Kanit-SemiBold',
+  },
+  historyButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  historyText: {
+    color: '#B46A07',
     fontSize: 16,
     fontFamily: 'Kanit-SemiBold',
   },
@@ -729,76 +858,59 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  modernFruitCard: {
-    width: (width - 60) / 2,
+  // Improved fruit cards - larger and cleaner
+  improvedFruitCard: {
+    width: (width - 50) / 2,
     backgroundColor: '#ffffff',
-    borderRadius: 20,
-    marginBottom: 16,
+    borderRadius: 24,
+    marginBottom: 20,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
     borderWidth: 1,
     borderColor: '#f1f5f9',
-  },
-  fruitCardContent: {
-    padding: 16,
-    paddingBottom: 8,
-  },
-  fruitActions: {
-    flexDirection: 'row',
+    minHeight: 180,
+    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-  },
-  editButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginRight: 4,
-    borderRadius: 8,
-    backgroundColor: '#eff6ff',
-  },
-  deleteButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginLeft: 4,
-    borderRadius: 8,
-    backgroundColor: '#fef2f2',
   },
   fruitImageContainer: {
     alignItems: 'center',
     marginBottom: 12,
   },
-  modernFruitEmoji: {
-    fontSize: 50,
+  // Improved fruit card content styles
+  improvedFruitEmoji: {
+    fontSize: 64,
+    marginBottom: 12,
   },
-  fruitInfo: {
-    flex: 1,
+  improvedFruitInfo: {
     alignItems: 'center',
+    flex: 1,
   },
-  modernFruitName: {
-    fontSize: 16,
+  improvedFruitName: {
+    fontSize: 18,
     fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
-    marginBottom: 6,
+    marginBottom: 8,
     textAlign: 'center',
+    lineHeight: 24,
   },
-  modernFruitPrice: {
-    fontSize: 14,
+  improvedFruitPrice: {
+    fontSize: 16,
     color: '#B46A07',
     fontFamily: 'Kanit-Bold',
     textAlign: 'center',
+    marginBottom: 12,
+  },
+  selectIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(180, 106, 7, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   addButton: {
     position: 'absolute',
@@ -844,6 +956,9 @@ const styles = StyleSheet.create({
     color: '#B46A07',
     textAlign: 'center',
     marginBottom: 4,
+  },
+  addFruitInfo: {
+    alignItems: 'center',
   },
   addFruitSubtext: {
     fontSize: 12,
@@ -900,44 +1015,126 @@ const styles = StyleSheet.create({
     color: '#1f2937',
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   inputLabel: {
     fontSize: 16,
     fontFamily: 'Kanit-SemiBold',
     color: '#374151',
-    marginBottom: 8,
+    marginBottom: 12,
+    letterSpacing: 0.5,
   },
   modernInput: {
     borderWidth: 2,
     borderColor: '#e5e7eb',
     borderRadius: 16,
-    padding: 16,
+    padding: 18,
     fontSize: 16,
     fontFamily: 'Kanit-Regular',
     backgroundColor: '#ffffff',
     color: '#1f2937',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  emojiInput: {
+  // Emoji Picker Styles
+  emojiPickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: '#ffffff',
+    marginBottom: 12,
+  },
+  emojiDisplay: {
+    fontSize: 28,
+    marginRight: 12,
+  },
+  emojiPickerText: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+    color: '#6b7280',
+  },
+  customEmojiInput: {
     fontSize: 20,
     textAlign: 'center',
+    marginTop: -12,
+  },
+  emojiPickerModal: {
+    maxHeight: '70%',
+  },
+  emojiGrid: {
+    maxHeight: 300,
+  },
+  emojiGridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  emojiGridItem: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedEmojiItem: {
+    borderColor: '#B46A07',
+    backgroundColor: 'rgba(180, 106, 7, 0.1)',
+  },
+  emojiGridEmoji: {
+    fontSize: 32,
+  },
+  
+  // Photo Option Styles
+  photoOptionContainer: {
+    marginVertical: 8,
+  },
+  photoOptionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: 16,
+    backgroundColor: '#f9fafb',
+  },
+  photoOptionText: {
+    fontSize: 14,
+    fontFamily: 'Kanit-Regular',
+    color: '#6b7280',
+    marginLeft: 8,
   },
   modernAddButton: {
     backgroundColor: '#B46A07',
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 18,
+    padding: 20,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 16,
     shadowColor: '#B46A07',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+    transform: [{ scale: 1 }],
   },
   modernAddButtonText: {
     color: 'white',
     fontSize: 18,
     fontFamily: 'Kanit-Bold',
+    letterSpacing: 0.5,
   },
 
   // Confirmation Screen
@@ -1097,5 +1294,47 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontFamily: 'Kanit-SemiBold',
+  },
+  
+  // Context Menu Styles
+  contextMenuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contextMenuContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
+    minWidth: 140,
+  },
+  contextMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  contextMenuText: {
+    fontSize: 16,
+    fontFamily: 'Kanit-Medium',
+    color: '#374151',
+    marginLeft: 12,
+  },
+  contextMenuDivider: {
+    height: 1,
+    backgroundColor: '#e5e7eb',
+    marginVertical: 4,
+    marginHorizontal: 8,
   },
 })

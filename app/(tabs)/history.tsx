@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native'
 import { useTransactions, useDatabase, useDailySales } from '../../src/hooks/useDatabase'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
@@ -8,9 +8,20 @@ import { useFocusEffect } from '@react-navigation/native'
 
 export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false)
-  const { isInitialized } = useDatabase()
-  const { transactions, loading: transactionsLoading, refreshTransactions } = useTransactions()
-  const { summary, loading: summaryLoading, refreshSummary } = useDailySales()
+  const [hasDbError, setHasDbError] = useState(false)
+  const { isInitialized, error: dbError } = useDatabase()
+  const { transactions, loading: transactionsLoading, refreshTransactions, error: transactionsError } = useTransactions()
+  const { summary, loading: summaryLoading, refreshSummary, error: summaryError } = useDailySales()
+
+  // Monitor for database errors
+  useEffect(() => {
+    if (dbError || transactionsError || summaryError) {
+      console.log('Database errors detected:', { dbError, transactionsError, summaryError });
+      setHasDbError(true);
+    } else {
+      setHasDbError(false);
+    }
+  }, [dbError, transactionsError, summaryError]);
   
   // Filter only saved transactions for display
   const savedTransactions = transactions?.filter(t => t.isSaved) || []
@@ -18,10 +29,17 @@ export default function HistoryScreen() {
   // Refresh data when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      console.log('History screen focused, refreshing data...');
-      refreshTransactions();
-      refreshSummary();
-    }, [refreshTransactions, refreshSummary])
+      if (isInitialized && !hasDbError) {
+        console.log('History screen focused, refreshing data...');
+        try {
+          refreshTransactions();
+          refreshSummary();
+        } catch (error) {
+          console.error('Error refreshing data on focus:', error);
+          setHasDbError(true);
+        }
+      }
+    }, [isInitialized, hasDbError, refreshTransactions, refreshSummary])
   );
 
   // Handle pull-to-refresh
@@ -29,38 +47,40 @@ export default function HistoryScreen() {
     setRefreshing(true);
     try {
       console.log('Manual refresh triggered');
-      await Promise.all([
-        refreshTransactions(),
-        refreshSummary()
-      ]);
+      if (isInitialized && !hasDbError) {
+        await Promise.all([
+          refreshTransactions(),
+          refreshSummary()
+        ]);
+      }
     } catch (error) {
       console.error('Error during refresh:', error);
-      // Still show data even if refresh fails
+      setHasDbError(true);
     } finally {
       setRefreshing(false);
     }
   };
 
-  // Calculate fallback totals from transactions (optimistic UI) with null safety
+  // Calculate fallback totals from transactions (optimistic UI) with comprehensive null safety
   const fallbackTotals = {
-    count: savedTransactions.length,
-    weight: savedTransactions.reduce((acc, transaction) => {
-      const weight = typeof transaction?.weightKg === 'number' ? transaction.weightKg : 0;
+    count: Array.isArray(savedTransactions) ? savedTransactions.length : 0,
+    weight: Array.isArray(savedTransactions) ? savedTransactions.reduce((acc, transaction) => {
+      const weight = (transaction && typeof transaction?.weightKg === 'number' && !isNaN(transaction.weightKg)) ? transaction.weightKg : 0;
       return acc + weight;
-    }, 0),
-    revenue: savedTransactions.reduce((acc, transaction) => {
-      const amount = typeof transaction?.totalAmount === 'number' ? transaction.totalAmount : 0;
+    }, 0) : 0,
+    revenue: Array.isArray(savedTransactions) ? savedTransactions.reduce((acc, transaction) => {
+      const amount = (transaction && typeof transaction?.totalAmount === 'number' && !isNaN(transaction.totalAmount)) ? transaction.totalAmount : 0;
       return acc + amount;
-    }, 0)
+    }, 0) : 0
   };
 
-  // Use database summary when available, fallback to calculated values with null safety
+  // Use database summary when available and not in error state, fallback to calculated values with comprehensive null safety
   const todaysTotals = {
-    count: (summary?.totalTransactions && typeof summary.totalTransactions === 'number' && summary.totalTransactions > 0) 
+    count: (!hasDbError && summary?.totalTransactions && typeof summary.totalTransactions === 'number' && !isNaN(summary.totalTransactions) && summary.totalTransactions >= 0) 
       ? summary.totalTransactions 
       : fallbackTotals.count,
     weight: fallbackTotals.weight, // Always use calculated weight as it's more reliable
-    revenue: (summary?.totalRevenue && typeof summary.totalRevenue === 'number' && summary.totalRevenue > 0) 
+    revenue: (!hasDbError && summary?.totalRevenue && typeof summary.totalRevenue === 'number' && !isNaN(summary.totalRevenue) && summary.totalRevenue >= 0) 
       ? summary.totalRevenue 
       : fallbackTotals.revenue
   };
@@ -69,7 +89,9 @@ export default function HistoryScreen() {
     summary: summary, 
     fallback: fallbackTotals, 
     final: todaysTotals,
-    savedTransactionsCount: savedTransactions.length 
+    savedTransactionsCount: Array.isArray(savedTransactions) ? savedTransactions.length : 0,
+    hasDbError,
+    isInitialized
   });
 
   const formatTime = (timestamp: string) => {
@@ -91,21 +113,21 @@ export default function HistoryScreen() {
     }
   }
 
-  // Mock chart data for visual appeal
+  // Mock chart data for visual appeal - always show some data even in error state
   const chartData = [
-    { day: 'จ', amount: 2400 },
-    { day: 'อ', amount: 1800 },
-    { day: 'พ', amount: 3200 },
-    { day: 'พฤ', amount: 2800 },
-    { day: 'ศ', amount: 3600 },
-    { day: 'ส', amount: 4200 },
-    { day: 'อา', amount: todaysTotals.revenue || 2940 },
+    { day: 'จ', amount: hasDbError ? 0 : 2400 },
+    { day: 'อ', amount: hasDbError ? 0 : 1800 },
+    { day: 'พ', amount: hasDbError ? 0 : 3200 },
+    { day: 'พฤ', amount: hasDbError ? 0 : 2800 },
+    { day: 'ศ', amount: hasDbError ? 0 : 3600 },
+    { day: 'ส', amount: hasDbError ? 0 : 4200 },
+    { day: 'อา', amount: todaysTotals.revenue || (hasDbError ? 0 : 2940) },
   ]
 
-  const maxAmount = chartData.length > 0 ? Math.max(...chartData.map(d => d?.amount || 0)) : 1;
+  const maxAmount = chartData.length > 0 ? Math.max(...chartData.map(d => (d?.amount && typeof d.amount === 'number' && !isNaN(d.amount)) ? d.amount : 0)) : 1;
 
-  // Show loading while database initializes
-  if (!isInitialized) {
+  // Show loading while database initializes (unless there's a permanent error)
+  if (!isInitialized && !hasDbError) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -116,8 +138,8 @@ export default function HistoryScreen() {
     )
   }
 
-  // Show loading only on first load with better null safety
-  if (transactionsLoading && (!transactions || transactions.length === 0)) {
+  // Show loading only on first load with better null safety (unless there's a permanent error)
+  if (!hasDbError && transactionsLoading && (!Array.isArray(transactions) || transactions.length === 0)) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -142,6 +164,16 @@ export default function HistoryScreen() {
           />
         }
       >
+        {/* Database Error Banner */}
+        {hasDbError && (
+          <View style={styles.errorBanner}>
+            <MaterialIcons name="warning" size={20} color="#f59e0b" />
+            <Text style={styles.errorBannerText}>
+              ระบบฐานข้อมูลมีปัญหา - แสดงข้อมูลเบื้องต้น
+            </Text>
+          </View>
+        )}
+
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>ภาพรวมยอดขาย</Text>
@@ -157,15 +189,18 @@ export default function HistoryScreen() {
         >
           <View style={styles.balanceHeader}>
             <Text style={styles.balanceLabel}>ยอดขายวันนี้</Text>
-            {summaryLoading ? (
+            {(!hasDbError && summaryLoading) ? (
               <ActivityIndicator size="small" color="rgba(255, 255, 255, 0.8)" />
             ) : (
-              <MaterialIcons name="visibility" size={20} color="rgba(255, 255, 255, 0.8)" />
+              <MaterialIcons name={hasDbError ? "error-outline" : "visibility"} size={20} color="rgba(255, 255, 255, 0.8)" />
             )}
           </View>
           <Text style={styles.balanceAmount}>{formatThaiCurrency(todaysTotals.revenue)}</Text>
           <Text style={styles.balanceChange}>
-            {summaryLoading ? 'กำลังอัปเดต...' : '+12.5% จากเมื่อวาน'}
+            {hasDbError 
+              ? 'ข้อมูลจากหน่วยความจำ' 
+              : (summaryLoading ? 'กำลังอัปเดต...' : '+12.5% จากเมื่อวาน')
+            }
           </Text>
         </LinearGradient>
 
@@ -236,23 +271,27 @@ export default function HistoryScreen() {
             </TouchableOpacity>
           </View>
           
-          {savedTransactions.length === 0 ? (
+          {!Array.isArray(savedTransactions) || savedTransactions.length === 0 ? (
             <View style={styles.emptyState}>
               <MaterialIcons name="receipt-long" size={48} color="#d1d5db" />
-              <Text style={styles.emptyText}>ยังไม่มีรายการขายที่บันทึก</Text>
-              <Text style={styles.emptySubtext}>เริ่มต้นขายและบันทึกผลไม้เลย!</Text>
+              <Text style={styles.emptyText}>
+                {hasDbError ? 'ไม่สามารถโหลดรายการได้' : 'ยังไม่มีรายการขายที่บันทึก'}
+              </Text>
+              <Text style={styles.emptySubtext}>
+                {hasDbError ? 'กรุณาตรวจสอบระบบฐานข้อมูล' : 'เริ่มต้นขายและบันทึกผลไม้เลย!'}
+              </Text>
             </View>
           ) : (
-            savedTransactions.slice(0, 5).map((transaction) => {
-              // Safe data extraction with fallbacks
-              const fruitEmoji = transaction?.fruit?.emoji || '🍎';
-              const fruitName = transaction?.fruit?.nameThai || 'ไม่ระบุชื่อผลไม้';
-              const weight = typeof transaction?.weightKg === 'number' ? transaction.weightKg : 0;
-              const amount = typeof transaction?.totalAmount === 'number' ? transaction.totalAmount : 0;
-              const timestamp = transaction?.timestamp || '';
+            savedTransactions.slice(0, 5).map((transaction, index) => {
+              // Enhanced safe data extraction with fallbacks
+              const fruitEmoji = (transaction?.fruit?.emoji && typeof transaction.fruit.emoji === 'string') ? transaction.fruit.emoji : '🍎';
+              const fruitName = (transaction?.fruit?.nameThai && typeof transaction.fruit.nameThai === 'string') ? transaction.fruit.nameThai : 'ไม่ระบุชื่อผลไม้';
+              const weight = (transaction && typeof transaction?.weightKg === 'number' && !isNaN(transaction.weightKg)) ? transaction.weightKg : 0;
+              const amount = (transaction && typeof transaction?.totalAmount === 'number' && !isNaN(transaction.totalAmount)) ? transaction.totalAmount : 0;
+              const timestamp = (transaction?.timestamp && typeof transaction.timestamp === 'string') ? transaction.timestamp : '';
               
               return (
-                <View key={transaction?.id || Math.random()} style={styles.transactionCard}>
+                <View key={transaction?.id || `transaction-${index}`} style={styles.transactionCard}>
                   <View style={styles.transactionIcon}>
                     <Text style={styles.transactionEmoji}>{fruitEmoji}</Text>
                   </View>
@@ -281,6 +320,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
   },
   scrollView: {
+    flex: 1,
+  },
+  errorBanner: {
+    backgroundColor: '#fef3c7',
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 10,
+    borderRadius: 8,
+  },
+  errorBannerText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontFamily: 'Kanit-Medium',
+    color: '#92400e',
     flex: 1,
   },
   loadingContainer: {
