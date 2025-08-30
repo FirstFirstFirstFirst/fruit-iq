@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
     color: '#374151',
     marginBottom: 8,
   },
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     borderColor: '#d1d5db',
     borderRadius: 8,
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
     minHeight: 48,
     color: '#111827',
     backgroundColor: 'white',
@@ -87,6 +88,7 @@ const styles = StyleSheet.create({
   error: {
     color: '#ef4444',
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     marginTop: 4,
   },
 })

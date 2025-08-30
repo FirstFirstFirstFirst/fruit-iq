@@ -8,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { Platform } from "react-native";
 import "react-native-reanimated";
 import "../global.css"; // Import NativeWind styles
+import { useFonts } from "expo-font";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
@@ -15,37 +16,61 @@ import DatabaseProvider from "../src/components/DatabaseProvider";
 
 export default function RootLayout() {
   console.log(
-    "🔍 RootLayout: Component initializing with config plugin fonts..."
+    "🔍 RootLayout: Component initializing with local fonts..."
   );
 
   const colorScheme = useColorScheme();
   console.log("🎨 RootLayout: Color scheme detected:", colorScheme);
+  
+  const [loaded] = useFonts({
+    "Kanit-Black": require("../assets/fonts/Kanit-Black.ttf"),
+    "Kanit-BlackItalic": require("../assets/fonts/Kanit-BlackItalic.ttf"),
+    "Kanit-Bold": require("../assets/fonts/Kanit-Bold.ttf"),
+    "Kanit-BoldItalic": require("../assets/fonts/Kanit-BoldItalic.ttf"),
+    "Kanit-ExtraBold": require("../assets/fonts/Kanit-ExtraBold.ttf"),
+    "Kanit-ExtraBoldItalic": require("../assets/fonts/Kanit-ExtraBoldItalic.ttf"),
+    "Kanit-ExtraLight": require("../assets/fonts/Kanit-ExtraLight.ttf"),
+    "Kanit-ExtraLightItalic": require("../assets/fonts/Kanit-ExtraLightItalic.ttf"),
+    "Kanit-Italic": require("../assets/fonts/Kanit-Italic.ttf"),
+    "Kanit-Light": require("../assets/fonts/Kanit-Light.ttf"),
+    "Kanit-LightItalic": require("../assets/fonts/Kanit-LightItalic.ttf"),
+    "Kanit-Medium": require("../assets/fonts/Kanit-Medium.ttf"),
+    "Kanit-MediumItalic": require("../assets/fonts/Kanit-MediumItalic.ttf"),
+    "Kanit-Regular": require("../assets/fonts/Kanit-Regular.ttf"),
+    "Kanit-SemiBold": require("../assets/fonts/Kanit-SemiBold.ttf"),
+    "Kanit-SemiBoldItalic": require("../assets/fonts/Kanit-SemiBoldItalic.ttf"),
+    "Kanit-Thin": require("../assets/fonts/Kanit-Thin.ttf"),
+    "Kanit-ThinItalic": require("../assets/fonts/Kanit-ThinItalic.ttf"),
+  });
+
+  console.log("📦 RootLayout: Fonts loaded status:", loaded);
 
   useEffect(() => {
-    // With config plugin, fonts are embedded in native code and available immediately
-    const embeddedFonts = [
-      "Kanit-Light",
-      "Kanit-Regular",
-      "Kanit-Medium",
-      "Kanit-SemiBold",
-      "Kanit-Bold",
-      "Kanit-ExtraBold",
-      "SpaceMono-Regular",
-    ];
-
-    console.log("✅ RootLayout: Using config plugin embedded fonts");
-    console.log("📝 RootLayout: Available embedded fonts:", embeddedFonts);
-
-    // Additional Android-specific debugging
-    if (Platform.OS === "android") {
-      console.log(
-        "🤖 RootLayout: Android config plugin fonts should work in production builds"
-      );
-      console.log(
-        "📝 RootLayout: This method requires development build, not Expo Go"
-      );
+    if (loaded) {
+      console.log("✅ RootLayout: All local fonts have been loaded successfully");
+      const availableFonts = [
+        "Kanit-Black", "Kanit-BlackItalic", "Kanit-Bold", "Kanit-BoldItalic",
+        "Kanit-ExtraBold", "Kanit-ExtraBoldItalic", "Kanit-ExtraLight", "Kanit-ExtraLightItalic",
+        "Kanit-Italic", "Kanit-Light", "Kanit-LightItalic", "Kanit-Medium",
+        "Kanit-MediumItalic", "Kanit-Regular", "Kanit-SemiBold", "Kanit-SemiBoldItalic",
+        "Kanit-Thin", "Kanit-ThinItalic"
+      ];
+      console.log("📝 RootLayout: Available font families:", availableFonts);
+    } else {
+      console.log("⏳ RootLayout: Fonts are still loading...");
     }
-  }, []);
+
+    // Additional Platform-specific debugging
+    if (Platform.OS === "android") {
+      console.log("🤖 RootLayout: Android using local font files");
+    } else if (Platform.OS === "ios") {
+      console.log("🍎 RootLayout: iOS using local font files");
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null; // or a loading screen component
+  }
 
   return (
     <DatabaseProvider>

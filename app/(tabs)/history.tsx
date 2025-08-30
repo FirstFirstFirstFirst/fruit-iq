@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#6b7280',
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
   header: {
     paddingTop: 60,
@@ -301,12 +301,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#1e293b',
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#64748b',
   },
   balanceCard: {
@@ -328,18 +329,18 @@ const styles = StyleSheet.create({
   balanceLabel: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
   balanceAmount: {
     fontSize: 32,
-    fontWeight: '800',
+    fontFamily: 'Kanit-ExtraBold',
     color: 'white',
     marginBottom: 8,
   },
   balanceChange: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -369,12 +370,13 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#1e293b',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'Kanit-Regular',
     color: '#64748b',
     textAlign: 'center',
   },
@@ -391,7 +393,7 @@ const styles = StyleSheet.create({
   },
   chartTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1e293b',
     marginBottom: 20,
   },
@@ -414,7 +416,7 @@ const styles = StyleSheet.create({
   chartLabel: {
     fontSize: 12,
     color: '#64748b',
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
   transactionsContainer: {
     backgroundColor: 'white',
@@ -436,13 +438,13 @@ const styles = StyleSheet.create({
   },
   transactionsTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1e293b',
   },
   viewAllText: {
     fontSize: 14,
     color: '#B46A07',
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
   emptyState: {
     alignItems: 'center',
@@ -450,13 +452,14 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
     color: '#64748b',
     marginTop: 12,
     marginBottom: 4,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#94a3b8',
   },
   transactionCard: {
@@ -483,17 +486,18 @@ const styles = StyleSheet.create({
   },
   transactionName: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1e293b',
     marginBottom: 4,
   },
   transactionInfo: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#64748b',
   },
   transactionAmount: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#B46A07',
   },
 })

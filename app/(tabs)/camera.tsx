@@ -526,8 +526,8 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+    fontFamily: 'Kanit-Medium',
     color: '#6b7280',
-    fontWeight: '500',
   },
 
   // Success Screen
@@ -545,18 +545,19 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'Kanit-Bold',
     color: 'white',
     marginBottom: 16,
   },
   successAmount: {
     fontSize: 32,
-    fontWeight: '800',
+    fontFamily: 'Kanit-ExtraBold',
     color: 'white',
     marginBottom: 8,
   },
   successDetails: {
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
     color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 40,
   },
@@ -571,7 +572,7 @@ const styles = StyleSheet.create({
   newScanText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
   },
 
   // Scanner Screen
@@ -587,12 +588,13 @@ const styles = StyleSheet.create({
   },
   scannerTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: 'white',
     marginBottom: 8,
   },
   scannerSubtitle: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
   },
@@ -655,6 +657,7 @@ const styles = StyleSheet.create({
   scannerCenterText: {
     color: 'white',
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     marginTop: 12,
   },
   scanButtonContainer: {
@@ -704,14 +707,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#1f2937',
     marginBottom: 4,
   },
   headerWeight: {
     fontSize: 14,
+    fontFamily: 'Kanit-Medium',
     color: '#6b7280',
-    fontWeight: '500',
   },
   modernScrollView: {
     flex: 1,
@@ -786,7 +789,7 @@ const styles = StyleSheet.create({
   },
   modernFruitName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
     marginBottom: 6,
     textAlign: 'center',
@@ -794,7 +797,7 @@ const styles = StyleSheet.create({
   modernFruitPrice: {
     fontSize: 14,
     color: '#B46A07',
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     textAlign: 'center',
   },
   addButton: {
@@ -837,13 +840,14 @@ const styles = StyleSheet.create({
   },
   addFruitLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#B46A07',
     textAlign: 'center',
     marginBottom: 4,
   },
   addFruitSubtext: {
     fontSize: 12,
+    fontFamily: 'Kanit-Regular',
     color: '#9ca3af',
     textAlign: 'center',
   },
@@ -856,6 +860,7 @@ const styles = StyleSheet.create({
   },
   emptyFruitsText: {
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
     color: '#9ca3af',
     marginTop: 12,
     textAlign: 'center',
@@ -891,7 +896,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#1f2937',
   },
   inputGroup: {
@@ -899,7 +904,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#374151',
     marginBottom: 8,
   },
@@ -909,6 +914,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
     backgroundColor: '#ffffff',
     color: '#1f2937',
   },
@@ -931,7 +937,7 @@ const styles = StyleSheet.create({
   modernAddButtonText: {
     color: 'white',
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
   },
 
   // Confirmation Screen
@@ -950,7 +956,7 @@ const styles = StyleSheet.create({
   },
   confirmTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
     marginLeft: 16,
   },
@@ -975,12 +981,13 @@ const styles = StyleSheet.create({
   },
   summaryFruitName: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
     marginBottom: 4,
   },
   summaryWeight: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
   },
   priceBreakdown: {
@@ -996,11 +1003,12 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
   },
   priceValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
     color: '#1f2937',
   },
   totalRow: {
@@ -1012,12 +1020,12 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
   },
   totalPrice: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#B46A07',
   },
   confirmButton: {
@@ -1035,7 +1043,7 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
   },
 
   // Delete Confirmation Modal
@@ -1045,7 +1053,7 @@ const styles = StyleSheet.create({
   },
   deleteConfirmText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
     textAlign: 'center',
     marginTop: 16,
@@ -1053,6 +1061,7 @@ const styles = StyleSheet.create({
   },
   deleteConfirmSubtext: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
     textAlign: 'center',
   },
@@ -1074,7 +1083,7 @@ const styles = StyleSheet.create({
   cancelDeleteText: {
     color: '#6b7280',
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
   confirmDeleteButton: {
     flex: 1,
@@ -1087,6 +1096,6 @@ const styles = StyleSheet.create({
   confirmDeleteText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
   },
 })

@@ -101,7 +101,7 @@ const styles = StyleSheet.create<{
     alignItems: 'center',
   },
   text: {
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
   loader: {
     marginRight: 8,

@@ -305,6 +305,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
   },
 
@@ -332,12 +333,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#1f2937',
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
   },
 
@@ -369,12 +371,13 @@ const styles = StyleSheet.create({
   },
   fruitName: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
     marginBottom: 4,
   },
   fruitWeight: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
   },
   priceDetails: {
@@ -390,11 +393,12 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
   },
   priceValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
     color: '#1f2937',
   },
   totalRow: {
@@ -406,12 +410,12 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
   },
   totalPrice: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: 'Kanit-Bold',
     color: '#B46A07',
   },
 
@@ -435,12 +439,13 @@ const styles = StyleSheet.create({
   },
   qrTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
     marginBottom: 4,
   },
   qrSubtitle: {
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
     marginBottom: 24,
   },
@@ -463,6 +468,7 @@ const styles = StyleSheet.create({
   qrPlaceholderText: {
     marginTop: 8,
     fontSize: 12,
+    fontFamily: 'Kanit-Regular',
     color: '#9ca3af',
     textAlign: 'center',
   },
@@ -477,6 +483,7 @@ const styles = StyleSheet.create({
   qrInfoText: {
     marginLeft: 8,
     fontSize: 12,
+    fontFamily: 'Kanit-Regular',
     color: '#6b7280',
     textAlign: 'center',
   },
@@ -498,7 +505,7 @@ const styles = StyleSheet.create({
   },
   instructionsTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: '#1f2937',
     marginBottom: 16,
   },
@@ -520,12 +527,13 @@ const styles = StyleSheet.create({
   },
   stepNumberText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     color: 'white',
   },
   stepText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: 'Kanit-Regular',
     color: '#374151',
     lineHeight: 20,
   },
@@ -564,7 +572,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Kanit-SemiBold',
     marginLeft: 8,
   },
   cancelActionButton: {
@@ -580,6 +588,6 @@ const styles = StyleSheet.create({
   cancelActionButtonText: {
     color: '#6b7280',
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Kanit-Medium',
   },
 });
