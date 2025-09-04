@@ -1,3 +1,5 @@
+QRCODE thing -> OCD
+
 # WeighPay App Development Plan
 
 ## MVP-First Approach (3-4 weeks)

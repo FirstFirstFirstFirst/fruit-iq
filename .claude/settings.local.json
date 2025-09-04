@@ -17,7 +17,10 @@
       "Bash(npm run:*)",
       "Bash(npx expo lint:*)",
       "Bash(npm uninstall:*)",
-      "Bash(npx expo prebuild:*)"
+      "Bash(npx expo prebuild:*)",
+      "Read(/E:\\fruit-iq\\src\\lib/**)",
+      "Read(/E:\\fruit-iq\\src\\components/**)",
+      "Read(/E:\\fruit-iq\\app\\(tabs)/**)"
     ],
     "deny": [],
     "ask": []

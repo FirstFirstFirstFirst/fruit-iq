@@ -5,6 +5,7 @@ import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import QRPaymentScreen from '../../src/components/QRPaymentScreen'
+import WeighScaleCamera from '../../src/components/WeighScaleCamera'
 import { Fruit } from '../../src/data/mockData'
 import { useRouter } from 'expo-router'
 
@@ -16,7 +17,7 @@ export default function CameraScreen() {
   const { fruits, addFruit, updateFruit, deleteFruit, loading: fruitsLoading } = useFruits()
   const { addTransaction } = useTransactions()
   
-  const [step, setStep] = useState<'scan' | 'select' | 'weight' | 'confirm' | 'qr-payment' | 'success' | 'add-fruit'>('scan')
+  const [step, setStep] = useState<'scan' | 'camera' | 'select' | 'weight' | 'confirm' | 'qr-payment' | 'success' | 'add-fruit'>('scan')
   const [selectedFruitId, setSelectedFruitId] = useState<number | null>(null)
   const [detectedWeight, setDetectedWeight] = useState<number | null>(null)
   const [totalAmount, setTotalAmount] = useState(0)
@@ -29,6 +30,8 @@ export default function CameraScreen() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null)
   const [contextMenuFruit, setContextMenuFruit] = useState<number | null>(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [, setCapturedPhotoPath] = useState<string | null>(null)
+  const [isProcessingPhoto, setIsProcessingPhoto] = useState(false)
   
   // Preset fruit emojis for easy selection
   const presetEmojis = [
@@ -52,11 +55,44 @@ export default function CameraScreen() {
   }
 
   const handleScan = () => {
-    // Mock weight detection
-    const mockWeights = [1.25, 2.45, 0.75, 3.67, 1.89]
-    const randomWeight = mockWeights[Math.floor(Math.random() * mockWeights.length)]
-    setDetectedWeight(randomWeight)
-    setStep('select')
+    setStep('camera')
+  }
+
+  // Handle real camera photo taken
+  const handlePhotoTaken = async (photoPath: string) => {
+    setCapturedPhotoPath(photoPath)
+    setStep('scan') // Go back to scan step to show processing
+    setIsProcessingPhoto(true)
+    
+    try {
+      // For now, simulate OCR processing with a delay
+      // TODO: Implement actual OCR processing here
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Mock weight detection (will be replaced with actual OCR)
+      const mockWeights = [1.25, 2.45, 0.75, 3.67, 1.89]
+      const randomWeight = mockWeights[Math.floor(Math.random() * mockWeights.length)]
+      
+      setDetectedWeight(randomWeight)
+      setIsProcessingPhoto(false)
+      setStep('select')
+      
+      console.log('Photo processed successfully:', photoPath, 'Weight detected:', randomWeight)
+    } catch (error) {
+      console.error('Error processing photo:', error)
+      setIsProcessingPhoto(false)
+      Alert.alert(
+        'ข้อผิดพลาด',
+        'ไม่สามารถประมวลผลรูปภาพได้ กรุณาลองถ่ายรูปใหม่',
+        [{ text: 'ตกลง' }]
+      )
+    }
+  }
+
+  // Handle camera cancelled
+  const handleCameraCancel = () => {
+    setStep('scan')
+    setCapturedPhotoPath(null)
   }
 
   const handleFruitSelect = (fruitId: number) => {
@@ -104,6 +140,8 @@ export default function CameraScreen() {
     setCurrentTransactionId(null)
     setShowAddFruit(false)
     setShowDeleteConfirm(null)
+    setCapturedPhotoPath(null)
+    setIsProcessingPhoto(false)
     resetFruitForm()
   }
 
@@ -234,6 +272,17 @@ export default function CameraScreen() {
     )
   }
 
+  // Real camera step for photo capture
+  if (step === 'camera') {
+    return (
+      <WeighScaleCamera
+        onPhotoTaken={handlePhotoTaken}
+        onCancel={handleCameraCancel}
+        isVisible={true}
+      />
+    )
+  }
+
   // QR Scanner style camera view
   if (step === 'scan') {
     return (
@@ -255,8 +304,17 @@ export default function CameraScreen() {
                 <View style={[styles.scannerCorner, styles.bottomRight]} />
                 
                 <View style={styles.scannerCenter}>
-                  <MaterialIcons name="scale" size={60} color="white" />
-                  <Text style={styles.scannerCenterText}>สแกนตาชั่ง</Text>
+                  {isProcessingPhoto ? (
+                    <>
+                      <MaterialIcons name="hourglass-empty" size={60} color="#B46A07" />
+                      <Text style={styles.scannerCenterText}>กำลังประมวลผล...</Text>
+                    </>
+                  ) : (
+                    <>
+                      <MaterialIcons name="scale" size={60} color="white" />
+                      <Text style={styles.scannerCenterText}>สแกนตาชั่ง</Text>
+                    </>
+                  )}
                 </View>
               </View>
             </View>
@@ -264,8 +322,16 @@ export default function CameraScreen() {
 
           {/* Scan Button */}
           <View style={styles.scanButtonContainer}>
-            <TouchableOpacity style={styles.scanButton} onPress={handleScan}>
-              <MaterialIcons name="camera-alt" size={32} color="white" />
+            <TouchableOpacity 
+              style={[styles.scanButton, isProcessingPhoto && styles.scanButtonDisabled]} 
+              onPress={handleScan}
+              disabled={isProcessingPhoto}
+            >
+              {isProcessingPhoto ? (
+                <MaterialIcons name="hourglass-empty" size={32} color="rgba(255, 255, 255, 0.6)" />
+              ) : (
+                <MaterialIcons name="camera-alt" size={32} color="white" />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -805,6 +871,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 8,
+  },
+  scanButtonDisabled: {
+    backgroundColor: '#9ca3af',
+    shadowColor: '#9ca3af',
+    shadowOpacity: 0.2,
   },
 
   // Modern Food Delivery Style
