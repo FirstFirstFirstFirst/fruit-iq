@@ -18,7 +18,9 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.weighpay",
-      "permissions": ["CAMERA"]
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -41,7 +43,7 @@
         {
           "fonts": [
             "./assets/fonts/Kanit-Light.ttf",
-            "./assets/fonts/Kanit-Regular.ttf", 
+            "./assets/fonts/Kanit-Regular.ttf",
             "./assets/fonts/Kanit-Medium.ttf",
             "./assets/fonts/Kanit-SemiBold.ttf",
             "./assets/fonts/Kanit-Bold.ttf",
@@ -49,7 +51,8 @@
             "./assets/fonts/SpaceMono-Regular.ttf"
           ]
         }
-      ]
+      ],
+      "react-native-vision-camera"
     ],
     "experiments": {
       "typedRoutes": true

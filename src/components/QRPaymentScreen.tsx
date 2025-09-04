@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { MaterialIcons } from '@expo/vector-icons';
-import { generateSimplePromptPayQR, isValidThaiPhoneNumber } from '../lib/promptpay';
+import generatePayload from 'promptpay-qr';
 import { useSettings, useTransactions } from '../hooks/useDatabase';
 import { formatThaiCurrency, formatWeight } from '../lib/utils';
 import { Fruit } from '../data/mockData';
@@ -53,26 +53,30 @@ export default function QRPaymentScreen({
     try {
       setLoading(true);
       
-      // Get PromptPay phone number from settings
-      let phone = promptpayPhone;
-      if (!phone) {
-        phone = await getPromptpayPhone();
+      // Get PromptPay phone/ID from settings
+      let promptpayId = promptpayPhone;
+      if (!promptpayId) {
+        promptpayId = await getPromptpayPhone();
       }
 
       // Use default phone number if none configured (for demo)
-      if (!phone || !isValidThaiPhoneNumber(phone)) {
-        phone = '0812345678'; // Demo phone number
+      if (!promptpayId) {
+        promptpayId = '0812345678'; // Demo phone number
       }
 
-      // Generate PromptPay QR code
-      const qrData = generateSimplePromptPayQR(phone, totalAmount);
+      console.log('Generating PromptPay QR with ID:', promptpayId, 'Amount:', totalAmount);
+
+      // Generate PromptPay QR code using the official library
+      const qrData = generatePayload(promptpayId, { amount: totalAmount });
+      console.log('Generated QR payload:', qrData.substring(0, 100) + '...');
+      
       setQrCodeData(qrData);
       setQrGenerated(true);
     } catch (error) {
       console.error('Error generating QR code:', error);
       Alert.alert(
         'ข้อผิดพลาด',
-        'ไม่สามารถสร้าง QR Code ได้ กรุณาลองอีกครั้ง',
+        'ไม่สามารถสร้าง QR Code ได้ กรุณาลองอีกครั้ง\n' + (error instanceof Error ? error.message : ''),
         [{ text: 'ตกลง' }]
       );
     } finally {
