@@ -4,7 +4,7 @@
  */
 
 import { OCR_CONFIG, OCR_ERROR_MESSAGES, OcrSpaceApiResponse, WeightDetectionResult } from './ocrConfig';
-import { preprocessImageForOCR, validateImageUri } from './imageProcessor';
+import { preprocessImageForOCRWithCrop, validateImageUri } from './imageProcessor';
 import { extractWeightFromText, preprocessTextForParsing } from './weightParser';
 
 // API Key should be stored in environment variables or secure storage
@@ -27,11 +27,15 @@ const getApiKey = (): string | null => {
 
 /**
  * Main function to process photo with OCR and extract weight
- * Orchestrates the complete OCR workflow
+ * Orchestrates the complete OCR workflow with optional crop selection
  */
-export async function processPhotoWithOCR(photoUri: string): Promise<WeightDetectionResult> {
+export async function processPhotoWithOCR(
+  photoUri: string,
+  cropSelection?: { x: number; y: number; width: number; height: number } | null
+): Promise<WeightDetectionResult> {
   try {
     console.log('Starting OCR processing for photo:', photoUri);
+    console.log('Crop selection provided:', !!cropSelection);
 
     // Validate inputs
     if (!validateImageUri(photoUri)) {
@@ -43,9 +47,9 @@ export async function processPhotoWithOCR(photoUri: string): Promise<WeightDetec
       throw new Error(OCR_ERROR_MESSAGES.API_KEY_MISSING);
     }
 
-    // Step 1: Preprocess image for optimal OCR
+    // Step 1: Preprocess image for optimal OCR (with optional crop)
     console.log('Preprocessing image...');
-    const processedImage = await preprocessImageForOCR(photoUri);
+    const processedImage = await preprocessImageForOCRWithCrop(photoUri, cropSelection);
 
     // Step 2: Call OCR.space API
     console.log('Calling OCR.space API...');

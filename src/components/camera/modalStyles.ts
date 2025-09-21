@@ -1,0 +1,258 @@
+import { StyleSheet, Dimensions } from 'react-native'
+
+const { width } = Dimensions.get('window')
+
+export const modalStyles = StyleSheet.create({
+  // Modern Modal Styles
+  modernModal: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modernModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 24,
+    padding: 24,
+    width: width - 40,
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: 'Kanit-Bold',
+    color: '#1f2937',
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontFamily: 'Kanit-SemiBold',
+    color: '#374151',
+    marginBottom: 12,
+    letterSpacing: 0.5,
+  },
+  modernInput: {
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    borderRadius: 16,
+    padding: 18,
+    fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+    backgroundColor: '#ffffff',
+    color: '#1f2937',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  // Emoji Picker Styles
+  emojiPickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: '#ffffff',
+    marginBottom: 12,
+  },
+  emojiDisplay: {
+    fontSize: 28,
+    marginRight: 12,
+  },
+  emojiPickerText: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+    color: '#6b7280',
+  },
+  customEmojiInput: {
+    fontSize: 20,
+    textAlign: 'center',
+    marginTop: -12,
+  },
+  emojiPickerModal: {
+    maxHeight: '70%',
+  },
+  emojiGrid: {
+    maxHeight: 300,
+  },
+  emojiGridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  emojiGridItem: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedEmojiItem: {
+    borderColor: '#B46A07',
+    backgroundColor: 'rgba(180, 106, 7, 0.1)',
+  },
+  emojiGridEmoji: {
+    fontSize: 32,
+  },
+
+  // Photo Option Styles
+  photoOptionContainer: {
+    marginVertical: 8,
+  },
+  photoOptionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: 16,
+    backgroundColor: '#f9fafb',
+  },
+  photoOptionText: {
+    fontSize: 14,
+    fontFamily: 'Kanit-Regular',
+    color: '#6b7280',
+    marginLeft: 8,
+  },
+  modernAddButton: {
+    backgroundColor: '#B46A07',
+    borderRadius: 18,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: 16,
+    shadowColor: '#B46A07',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+    transform: [{ scale: 1 }],
+  },
+  modernAddButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontFamily: 'Kanit-Bold',
+    letterSpacing: 0.5,
+  },
+
+  // Delete Confirmation Modal
+  deleteConfirmContent: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  deleteConfirmText: {
+    fontSize: 16,
+    fontFamily: 'Kanit-SemiBold',
+    color: '#1f2937',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  deleteConfirmSubtext: {
+    fontSize: 14,
+    fontFamily: 'Kanit-Regular',
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  deleteActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  cancelDeleteButton: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  cancelDeleteText: {
+    color: '#6b7280',
+    fontSize: 16,
+    fontFamily: 'Kanit-Medium',
+  },
+  confirmDeleteButton: {
+    flex: 1,
+    backgroundColor: '#ef4444',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  confirmDeleteText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'Kanit-SemiBold',
+  },
+
+  // Context Menu Styles
+  contextMenuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contextMenuContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
+    minWidth: 140,
+  },
+  contextMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  contextMenuText: {
+    fontSize: 16,
+    fontFamily: 'Kanit-Medium',
+    color: '#374151',
+    marginLeft: 12,
+  },
+  contextMenuDivider: {
+    height: 1,
+    backgroundColor: '#e5e7eb',
+    marginVertical: 4,
+    marginHorizontal: 8,
+  },
+})

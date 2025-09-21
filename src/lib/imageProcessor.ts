@@ -169,3 +169,85 @@ export async function cropCenterRegion(
     throw new Error('Failed to crop image: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
+
+/**
+ * Crops image to user-selected region for OCR processing
+ * Takes crop selection coordinates and returns cropped image URI
+ */
+export async function cropImageToSelection(
+  imageUri: string,
+  cropSelection: { x: number; y: number; width: number; height: number }
+): Promise<string> {
+  try {
+    console.log('Cropping image to user selection:', cropSelection);
+
+    // Get original image dimensions
+    const imageInfo = await ImageManipulator.manipulateAsync(
+      imageUri,
+      [],
+      { format: ImageManipulator.SaveFormat.JPEG }
+    );
+
+    console.log('Original image dimensions:', imageInfo.width, 'x', imageInfo.height);
+
+    // Validate crop selection bounds
+    const validatedCrop = {
+      originX: Math.max(0, Math.min(cropSelection.x, imageInfo.width - 1)),
+      originY: Math.max(0, Math.min(cropSelection.y, imageInfo.height - 1)),
+      width: Math.max(1, Math.min(cropSelection.width, imageInfo.width - cropSelection.x)),
+      height: Math.max(1, Math.min(cropSelection.height, imageInfo.height - cropSelection.y)),
+    };
+
+    console.log('Validated crop parameters:', validatedCrop);
+
+    // Perform the crop
+    const croppedImage = await ImageManipulator.manipulateAsync(
+      imageUri,
+      [
+        {
+          crop: validatedCrop,
+        },
+      ],
+      {
+        compress: OCR_CONFIG.IMAGE_QUALITY,
+        format: ImageManipulator.SaveFormat.JPEG,
+        base64: false, // We'll convert to base64 later if needed
+      }
+    );
+
+    console.log('Image cropped successfully to:', croppedImage.width, 'x', croppedImage.height);
+    return croppedImage.uri;
+
+  } catch (error) {
+    console.error('User crop selection failed:', error);
+    throw new Error('Failed to crop selected area: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
+}
+
+/**
+ * Preprocesses image with optional crop selection for OCR
+ * If cropSelection is provided, crops first then processes
+ */
+export async function preprocessImageForOCRWithCrop(
+  imageUri: string,
+  cropSelection?: { x: number; y: number; width: number; height: number } | null
+): Promise<ProcessedImage> {
+  try {
+    console.log('Starting image preprocessing with optional crop:', !!cropSelection);
+
+    let processUri = imageUri;
+
+    // Apply crop selection if provided
+    if (cropSelection) {
+      console.log('Applying user crop selection...');
+      processUri = await cropImageToSelection(imageUri, cropSelection);
+    }
+
+    // Continue with normal preprocessing
+    return await preprocessImageForOCR(processUri);
+
+  } catch (error) {
+    console.error('Image preprocessing with crop failed:', error);
+    throw new Error('Image preprocessing failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
+}
