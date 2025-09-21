@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,8 @@
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.weighpay",
       "permissions": [
-        "CAMERA"
+        "CAMERA",
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -56,6 +60,13 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "siriphong",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2df8b999-1b70-4a3d-8af7-b81d394ae4d9"
+      }
     }
   }
 }

@@ -20,7 +20,11 @@
       "Bash(npx expo prebuild:*)",
       "Read(/E:\\fruit-iq\\src\\lib/**)",
       "Read(/E:\\fruit-iq\\src\\components/**)",
-      "Read(/E:\\fruit-iq\\app\\(tabs)/**)"
+      "Read(/E:\\fruit-iq\\app\\(tabs)/**)",
+      "Read(/E:\\fruit-iq/**)",
+      "Bash(npx eas:*)",
+      "Bash(eas:*)",
+      "Read(/E:\\fruit-iq/**)"
     ],
     "deny": [],
     "ask": []
