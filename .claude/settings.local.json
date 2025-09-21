@@ -24,7 +24,8 @@
       "Read(/E:\\fruit-iq/**)",
       "Bash(npx eas:*)",
       "Bash(eas:*)",
-      "Read(/E:\\fruit-iq/**)"
+      "Read(/E:\\fruit-iq/**)",
+      "WebFetch(domain:ocr.space)"
     ],
     "deny": [],
     "ask": []

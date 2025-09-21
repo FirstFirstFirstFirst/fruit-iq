@@ -1,11 +1,11 @@
 /**
  * OCR Configuration
- * Google Cloud Vision API configuration and constants
+ * OCR.space API configuration and constants
  */
 
 export const OCR_CONFIG = {
-  // Google Cloud Vision API endpoint
-  API_ENDPOINT: 'https://vision.googleapis.com/v1/images:annotate',
+  // OCR.space API endpoint
+  API_ENDPOINT: 'https://api.ocr.space/parse/image',
 
   // Image processing settings
   MAX_IMAGE_WIDTH: 1024,
@@ -35,32 +35,42 @@ export const WEIGHT_PATTERNS = [
 ] as const;
 
 export const OCR_ERROR_MESSAGES = {
-  API_KEY_MISSING: 'API key ไม่ได้ถูกตั้งค่า',
-  NETWORK_ERROR: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้',
+  API_KEY_MISSING: 'OCR.space API key ไม่ได้ถูกตั้งค่า',
+  NETWORK_ERROR: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ OCR.space ได้',
   IMAGE_PROCESSING_ERROR: 'ไม่สามารถประมวลผลรูปภาพได้',
   NO_TEXT_DETECTED: 'ไม่พบข้อความในรูปภาพ',
   NO_WEIGHT_FOUND: 'ไม่พบน้ำหนักในรูปภาพ',
   INVALID_WEIGHT: 'น้ำหนักที่ตรวจพบไม่ถูกต้อง',
-  API_QUOTA_EXCEEDED: 'ใช้งาน API เกินโควต้า',
+  API_QUOTA_EXCEEDED: 'ใช้งาน OCR.space API เกินโควต้า (500 requests/day)',
   UNKNOWN_ERROR: 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ',
 } as const;
 
-export interface OcrApiResponse {
-  responses: {
-    textAnnotations?: {
-      description: string;
-      boundingPoly?: {
-        vertices: { x: number; y: number }[];
-      };
-    }[];
-    fullTextAnnotation?: {
-      text: string;
+export interface OcrSpaceApiResponse {
+  ParsedResults: {
+    TextOverlay?: {
+      Lines: {
+        LineText: string;
+        Words: {
+          WordText: string;
+          Left: number;
+          Top: number;
+          Height: number;
+          Width: number;
+        }[];
+      }[];
     };
-    error?: {
-      code: number;
-      message: string;
-    };
+    TextOrientation: string;
+    FileParseExitCode: number;
+    ParsedText: string;
+    ErrorMessage?: string;
+    ErrorDetails?: string;
   }[];
+  OCRExitCode: number;
+  IsErroredOnProcessing: boolean;
+  ProcessingTimeInMilliseconds: string;
+  SearchablePDFURL?: string;
+  ErrorMessage?: string[];
+  ErrorDetails?: string;
 }
 
 export interface WeightDetectionResult {

@@ -9,7 +9,7 @@ import QRPaymentScreen from '../../src/components/QRPaymentScreen'
 import WeighScaleCamera from '../../src/components/WeighScaleCamera'
 import { Fruit } from '../../src/data/mockData'
 import { useRouter } from 'expo-router'
-import { processPhotoWithFallback } from '../../src/lib/cloudOcr'
+import { processPhotoWithOCR } from '../../src/lib/ocrSpaceApi'
 
 const { width } = Dimensions.get('window')
 
@@ -69,8 +69,8 @@ export default function CameraScreen() {
     try {
       console.log('Starting OCR processing for photo:', photoPath)
 
-      // Process photo with Google Cloud Vision OCR (with fallback to mock)
-      const result = await processPhotoWithFallback(photoPath)
+      // Process photo with OCR.space OCR
+      const result = await processPhotoWithOCR(photoPath)
 
       console.log('OCR processing result:', result)
 
@@ -100,24 +100,48 @@ export default function CameraScreen() {
       console.error('Error processing photo:', error)
       setIsProcessingPhoto(false)
 
-      // Show error with retry and manual input options
-      Alert.alert(
-        'ข้อผิดพลาด',
-        error instanceof Error ? error.message : THAI_TEXT.ocrFailed,
-        [
-          {
-            text: THAI_TEXT.retryOcr,
-            onPress: () => setStep('camera') // Go back to camera
-          },
-          {
-            text: THAI_TEXT.enterManually,
-            onPress: () => {
-              setDetectedWeight(1.0) // Default weight for manual input
-              setStep('weight') // Skip to weight input step
-            }
+      let errorMessage: string = THAI_TEXT.ocrFailed
+      let showRetry = true
+
+      // Provide specific error messages based on error type
+      if (error instanceof Error) {
+        if (error.message.includes('API key')) {
+          errorMessage = THAI_TEXT.ocrConfigError + '\n\nกรุณาตั้งค่า OCR.space API Key ให้ถูกต้อง'
+          showRetry = false
+        } else if (error.message.includes('401')) {
+          errorMessage = THAI_TEXT.ocrConfigError + '\n\nOCR.space API Key ไม่ถูกต้องหรือหมดอายุ\nกรุณาตรวจสอบ API Key ของคุณ'
+          showRetry = false
+        } else if (error.message.includes('429')) {
+          errorMessage = THAI_TEXT.ocrConfigError + '\n\nใช้งาน OCR.space API เกินโควต้า (500 requests/day)\nกรุณาลองอีกครั้งพรุ่งนี้'
+          showRetry = false
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = THAI_TEXT.ocrNetworkError
+        } else if (error.message.includes('weight')) {
+          errorMessage = THAI_TEXT.ocrNoWeight
+        } else {
+          errorMessage = error.message
+        }
+      }
+
+      // Show error with appropriate options
+      const alertButtons: {text: string, onPress: () => void}[] = [
+        {
+          text: THAI_TEXT.enterManually,
+          onPress: () => {
+            setDetectedWeight(1.0) // Default weight for manual input
+            setStep('weight') // Skip to weight input step
           }
-        ]
-      )
+        }
+      ]
+
+      if (showRetry) {
+        alertButtons.unshift({
+          text: THAI_TEXT.retryOcr,
+          onPress: () => setStep('camera') // Go back to camera
+        })
+      }
+
+      Alert.alert('ข้อผิดพลาด', errorMessage, alertButtons)
     }
   }
 
