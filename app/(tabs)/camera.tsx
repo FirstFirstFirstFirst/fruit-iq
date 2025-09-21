@@ -2,12 +2,14 @@ import React, { useState } from 'react'
 import { View, Text, Alert, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, TextInput, ScrollView } from 'react-native'
 import { useFruits, useTransactions, useDatabase } from '../../src/hooks/useDatabase'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
+import { THAI_TEXT } from '../../src/lib/constants'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import QRPaymentScreen from '../../src/components/QRPaymentScreen'
 import WeighScaleCamera from '../../src/components/WeighScaleCamera'
 import { Fruit } from '../../src/data/mockData'
 import { useRouter } from 'expo-router'
+import { processPhotoWithFallback } from '../../src/lib/cloudOcr'
 
 const { width } = Dimensions.get('window')
 
@@ -63,28 +65,58 @@ export default function CameraScreen() {
     setCapturedPhotoPath(photoPath)
     setStep('scan') // Go back to scan step to show processing
     setIsProcessingPhoto(true)
-    
+
     try {
-      // For now, simulate OCR processing with a delay
-      // TODO: Implement actual OCR processing here
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Mock weight detection (will be replaced with actual OCR)
-      const mockWeights = [1.25, 2.45, 0.75, 3.67, 1.89]
-      const randomWeight = mockWeights[Math.floor(Math.random() * mockWeights.length)]
-      
-      setDetectedWeight(randomWeight)
+      console.log('Starting OCR processing for photo:', photoPath)
+
+      // Process photo with Google Cloud Vision OCR (with fallback to mock)
+      const result = await processPhotoWithFallback(photoPath)
+
+      console.log('OCR processing result:', result)
+
+      setDetectedWeight(result.weight)
       setIsProcessingPhoto(false)
       setStep('select')
-      
-      console.log('Photo processed successfully:', photoPath, 'Weight detected:', randomWeight)
+
+      // Show success message with confidence indicator
+      if (result.confidence === 'high') {
+        console.log('High confidence weight detection:', result.weight, 'kg')
+      } else if (result.confidence === 'medium') {
+        Alert.alert(
+          THAI_TEXT.ocrSuccess,
+          `ตรวจพบน้ำหนัก ${formatWeight(result.weight)}\n(ความมั่นใจ: ปานกลาง)\n\nกรุณาตรวจสอบน้ำหนักให้ถูกต้อง`,
+          [{ text: 'ตกลง' }]
+        )
+      } else {
+        Alert.alert(
+          THAI_TEXT.ocrSuccess,
+          `ตรวจพบน้ำหนัก ${formatWeight(result.weight)}\n(ความมั่นใจ: ต่ำ)\n\nกรุณาตรวจสอบและแก้ไขน้ำหนักในขั้นตอนถัดไป`,
+          [{ text: 'ตกลง' }]
+        )
+      }
+
+      console.log('Photo processed successfully:', photoPath, 'Weight detected:', result.weight, 'Confidence:', result.confidence)
     } catch (error) {
       console.error('Error processing photo:', error)
       setIsProcessingPhoto(false)
+
+      // Show error with retry and manual input options
       Alert.alert(
         'ข้อผิดพลาด',
-        'ไม่สามารถประมวลผลรูปภาพได้ กรุณาลองถ่ายรูปใหม่',
-        [{ text: 'ตกลง' }]
+        error instanceof Error ? error.message : THAI_TEXT.ocrFailed,
+        [
+          {
+            text: THAI_TEXT.retryOcr,
+            onPress: () => setStep('camera') // Go back to camera
+          },
+          {
+            text: THAI_TEXT.enterManually,
+            onPress: () => {
+              setDetectedWeight(1.0) // Default weight for manual input
+              setStep('weight') // Skip to weight input step
+            }
+          }
+        ]
       )
     }
   }
@@ -307,7 +339,7 @@ export default function CameraScreen() {
                   {isProcessingPhoto ? (
                     <>
                       <MaterialIcons name="hourglass-empty" size={60} color="#B46A07" />
-                      <Text style={styles.scannerCenterText}>กำลังประมวลผล...</Text>
+                      <Text style={styles.scannerCenterText}>{THAI_TEXT.ocrProcessing}</Text>
                     </>
                   ) : (
                     <>
