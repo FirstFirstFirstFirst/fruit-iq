@@ -176,6 +176,7 @@ export default function CameraScreen() {
           cameraState.setCropSelection(null)
           cameraActions.handleConfirmAndProcess()
         }}
+        onCropChange={cameraState.setCropSelection}
       />
     )
   }
