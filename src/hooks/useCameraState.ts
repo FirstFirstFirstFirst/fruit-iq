@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CameraStep, CropSelection } from '../components/camera/constants'
+import { CameraStep } from '../components/camera/constants'
 
 export function useCameraState() {
   const [step, setStep] = useState<CameraStep>('scan')
@@ -9,7 +9,6 @@ export function useCameraState() {
   const [currentTransactionId, setCurrentTransactionId] = useState<number | null>(null)
   const [capturedPhotoPath, setCapturedPhotoPath] = useState<string | null>(null)
   const [isProcessingPhoto, setIsProcessingPhoto] = useState(false)
-  const [cropSelection, setCropSelection] = useState<CropSelection | null>(null)
 
   const resetCameraState = () => {
     setStep('scan')
@@ -19,7 +18,6 @@ export function useCameraState() {
     setCurrentTransactionId(null)
     setCapturedPhotoPath(null)
     setIsProcessingPhoto(false)
-    setCropSelection(null)
   }
 
   return {
@@ -31,7 +29,6 @@ export function useCameraState() {
     currentTransactionId,
     capturedPhotoPath,
     isProcessingPhoto,
-    cropSelection,
 
     // Setters
     setStep,
@@ -41,7 +38,6 @@ export function useCameraState() {
     setCurrentTransactionId,
     setCapturedPhotoPath,
     setIsProcessingPhoto,
-    setCropSelection,
 
     // Actions
     resetCameraState,

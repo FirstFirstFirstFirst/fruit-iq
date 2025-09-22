@@ -10,7 +10,6 @@ import LoadingScreen from '../../src/components/camera/LoadingScreen'
 import SuccessScreen from '../../src/components/camera/SuccessScreen'
 import CleanScannerScreen from '../../src/components/camera/CleanScannerScreen'
 import FruitSelectionScreen from '../../src/components/camera/screens/FruitSelectionScreen'
-import PhotoConfirmationScreen from '../../src/components/camera/screens/PhotoConfirmationScreen'
 import WeightConfirmationScreen from '../../src/components/camera/screens/WeightConfirmationScreen'
 import AddFruitModal from '../../src/components/camera/modals/AddFruitModal'
 import EmojiPickerModal from '../../src/components/camera/modals/EmojiPickerModal'
@@ -32,14 +31,12 @@ export default function CameraScreen() {
     setStep: cameraState.setStep,
     setDetectedWeight: cameraState.setDetectedWeight,
     setIsProcessingPhoto: cameraState.setIsProcessingPhoto,
-    setCropSelection: cameraState.setCropSelection,
     setSelectedFruitId: cameraState.setSelectedFruitId,
     setTotalAmount: cameraState.setTotalAmount,
     setCurrentTransactionId: cameraState.setCurrentTransactionId,
     selectedFruit,
     detectedWeight: cameraState.detectedWeight,
     capturedPhotoPath: cameraState.capturedPhotoPath,
-    cropSelection: cameraState.cropSelection,
   })
 
   // Show loading while database initializes
@@ -157,29 +154,11 @@ export default function CameraScreen() {
         onPhotoTaken={cameraActions.handlePhotoTaken}
         onCancel={cameraActions.handleCameraCancel}
         isVisible={true}
+        isProcessing={cameraState.isProcessingPhoto}
       />
     )
   }
 
-  // Photo confirmation with crop selection
-  if (cameraState.step === 'confirm-photo' && cameraState.capturedPhotoPath) {
-    return (
-      <PhotoConfirmationScreen
-        capturedPhotoPath={cameraState.capturedPhotoPath}
-        isProcessingPhoto={cameraState.isProcessingPhoto}
-        onBack={() => {
-          cameraState.setStep('camera')
-          cameraState.setCropSelection(null)
-        }}
-        onConfirmAndProcess={cameraActions.handleConfirmAndProcess}
-        onSkipCrop={() => {
-          cameraState.setCropSelection(null)
-          cameraActions.handleConfirmAndProcess()
-        }}
-        onCropChange={cameraState.setCropSelection}
-      />
-    )
-  }
 
   // Clean camera scanner view - no overlay text
   if (cameraState.step === 'scan') {

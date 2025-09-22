@@ -19,9 +19,10 @@ interface WeighScaleCameraProps {
   onPhotoTaken: (photoPath: string) => void;
   onCancel: () => void;
   isVisible: boolean;
+  isProcessing?: boolean;
 }
 
-export default function WeighScaleCamera({ onPhotoTaken, onCancel, isVisible }: WeighScaleCameraProps) {
+export default function WeighScaleCamera({ onPhotoTaken, onCancel, isVisible, isProcessing = false }: WeighScaleCameraProps) {
   const cameraRef = useRef<CameraView>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [facing] = useState<CameraType>('back');
@@ -127,6 +128,14 @@ export default function WeighScaleCamera({ onPhotoTaken, onCancel, isVisible }: 
 
   const renderMinimalOverlay = () => (
     <View style={styles.minimalOverlay}>
+      {/* Processing overlay during Gemini analysis */}
+      {isProcessing && (
+        <View style={styles.processingOverlay}>
+          <ActivityIndicator size="large" color="#B46A07" />
+          <Text style={styles.processingText}>กำลังวิเคราะห์น้ำหนัก...</Text>
+        </View>
+      )}
+
       {/* Top-left close button */}
       <TouchableOpacity onPress={onCancel} style={styles.minimalCloseButton}>
         <MaterialIcons name="close" size={24} color="white" />
@@ -135,9 +144,9 @@ export default function WeighScaleCamera({ onPhotoTaken, onCancel, isVisible }: 
       {/* Bottom capture button */}
       <View style={styles.minimalCaptureArea}>
         <TouchableOpacity
-          style={[styles.minimalCaptureButton, isCapturing && styles.captureButtonDisabled]}
+          style={[styles.minimalCaptureButton, (isCapturing || isProcessing) && styles.captureButtonDisabled]}
           onPress={capturePhoto}
-          disabled={isCapturing}
+          disabled={isCapturing || isProcessing}
         >
           {isCapturing ? (
             <ActivityIndicator color="white" size="large" />
@@ -214,6 +223,26 @@ const styles = StyleSheet.create({
   },
   captureButtonDisabled: {
     opacity: 0.6,
+  },
+
+  // Processing overlay
+  processingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  processingText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'Kanit-Medium',
+    marginTop: 16,
+    textAlign: 'center',
   },
 
   // Loading states

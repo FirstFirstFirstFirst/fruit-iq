@@ -1,7 +1,6 @@
 import { Alert } from "react-native";
-import { CropSelection } from "../components/camera/constants";
 import { THAI_TEXT } from "../lib/constants";
-import { processPhotoWithOCR } from "../lib/ocrSpaceApi";
+import { processPhotoWithGemini } from "../lib/geminiApi";
 import { formatWeight } from "../lib/utils";
 import { useTransactions } from "./useDatabase";
 
@@ -10,14 +9,12 @@ interface UseCameraActionsProps {
   setStep: (step: any) => void;
   setDetectedWeight: (weight: number | null) => void;
   setIsProcessingPhoto: (processing: boolean) => void;
-  setCropSelection: (selection: CropSelection | null) => void;
   setSelectedFruitId: (id: number | null) => void;
   setTotalAmount: (amount: number) => void;
   setCurrentTransactionId: (id: number | null) => void;
   selectedFruit: any;
   detectedWeight: number | null;
   capturedPhotoPath: string | null;
-  cropSelection: CropSelection | null;
 }
 
 export function useCameraActions({
@@ -25,14 +22,12 @@ export function useCameraActions({
   setStep,
   setDetectedWeight,
   setIsProcessingPhoto,
-  setCropSelection,
   setSelectedFruitId,
   setTotalAmount,
   setCurrentTransactionId,
   selectedFruit,
   detectedWeight,
   capturedPhotoPath,
-  cropSelection,
 }: UseCameraActionsProps) {
   const { addTransaction } = useTransactions();
 
@@ -40,29 +35,15 @@ export function useCameraActions({
     setStep("camera");
   };
 
-  const handlePhotoTaken = (photoPath: string) => {
+  const handlePhotoTaken = async (photoPath: string) => {
     setCapturedPhotoPath(photoPath);
-    setStep("confirm-photo");
-  };
-
-  const handleCameraCancel = () => {
-    setStep("scan");
-    setCapturedPhotoPath(null);
-  };
-
-  const handleConfirmAndProcess = async () => {
-    if (!capturedPhotoPath) return;
-
     setIsProcessingPhoto(true);
 
     try {
-      console.log("Starting OCR processing for photo:", capturedPhotoPath);
+      console.log("Starting Gemini processing for photo:", photoPath);
 
-      const result = await processPhotoWithOCR(
-        capturedPhotoPath,
-        cropSelection
-      );
-      console.log("OCR processing result:", result);
+      const result = await processPhotoWithGemini(photoPath);
+      console.log("Gemini processing result:", result);
 
       setDetectedWeight(result.weight);
       setIsProcessingPhoto(false);
@@ -72,7 +53,7 @@ export function useCameraActions({
         console.log("High confidence weight detection:", result.weight, "kg");
       } else if (result.confidence === "medium") {
         Alert.alert(
-          THAI_TEXT.ocrSuccess,
+          "ตรวจพบน้ำหนัก",
           `ตรวจพบน้ำหนัก ${formatWeight(
             result.weight
           )}\n(ความมั่นใจ: ปานกลาง)\n\nกรุณาตรวจสอบน้ำหนักให้ถูกต้อง`,
@@ -80,7 +61,7 @@ export function useCameraActions({
         );
       } else {
         Alert.alert(
-          THAI_TEXT.ocrSuccess,
+          "ตรวจพบน้ำหนัก",
           `ตรวจพบน้ำหนัก ${formatWeight(
             result.weight
           )}\n(ความมั่นใจ: ต่ำ)\n\nกรุณาตรวจสอบและแก้ไขน้ำหนักในขั้นตอนถัดไป`,
@@ -90,7 +71,7 @@ export function useCameraActions({
 
       console.log(
         "Photo processed successfully:",
-        capturedPhotoPath,
+        photoPath,
         "Weight detected:",
         result.weight,
         "Confidence:",
@@ -100,32 +81,17 @@ export function useCameraActions({
       console.error("Error processing photo:", error);
       setIsProcessingPhoto(false);
 
-      let errorMessage: string = THAI_TEXT.ocrFailed;
+      let errorMessage: string = "ไม่สามารถตรวจสอบน้ำหนักได้ กรุณาลองอีกครั้ง";
       let showRetry = true;
 
       if (error instanceof Error) {
-        if (error.message.includes("API key")) {
-          errorMessage =
-            THAI_TEXT.ocrConfigError +
-            "\n\nกรุณาตั้งค่า OCR.space API Key ให้ถูกต้อง";
+        if (error.message.includes("API key") || error.message.includes("Gemini")) {
+          errorMessage = "การตั้งค่า Gemini API ไม่ถูกต้อง\n\nกรุณาตั้งค่า Gemini API Key ให้ถูกต้อง";
           showRetry = false;
-        } else if (error.message.includes("401")) {
-          errorMessage =
-            THAI_TEXT.ocrConfigError +
-            "\n\nOCR.space API Key ไม่ถูกต้องหรือหมดอายุ\nกรุณาตรวจสอบ API Key ของคุณ";
-          showRetry = false;
-        } else if (error.message.includes("429")) {
-          errorMessage =
-            THAI_TEXT.ocrConfigError +
-            "\n\nใช้งาน OCR.space API เกินโควต้า (500 requests/day)\nกรุณาลองอีกครั้งพรุ่งนี้";
-          showRetry = false;
-        } else if (
-          error.message.includes("network") ||
-          error.message.includes("fetch")
-        ) {
-          errorMessage = THAI_TEXT.ocrNetworkError;
+        } else if (error.message.includes("network") || error.message.includes("fetch")) {
+          errorMessage = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
         } else if (error.message.includes("weight")) {
-          errorMessage = THAI_TEXT.ocrNoWeight;
+          errorMessage = "ไม่พบน้ำหนักในรูปภาพ กรุณาถ่ายใหม่";
         } else {
           errorMessage = error.message;
         }
@@ -143,7 +109,7 @@ export function useCameraActions({
 
       if (showRetry) {
         alertButtons.unshift({
-          text: THAI_TEXT.retryOcr,
+          text: "ลองอีกครั้ง",
           onPress: () => setStep("camera"),
         });
       }
@@ -151,6 +117,12 @@ export function useCameraActions({
       Alert.alert("ข้อผิดพลาด", errorMessage, alertButtons);
     }
   };
+
+  const handleCameraCancel = () => {
+    setStep("scan");
+    setCapturedPhotoPath(null);
+  };
+
 
   const handleFruitSelect = (fruitId: number) => {
     setSelectedFruitId(fruitId);
@@ -188,7 +160,6 @@ export function useCameraActions({
     handleScan,
     handlePhotoTaken,
     handleCameraCancel,
-    handleConfirmAndProcess,
     handleFruitSelect,
     handleConfirm,
     handleQRPaymentSave,

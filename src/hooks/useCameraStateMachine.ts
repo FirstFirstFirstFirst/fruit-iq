@@ -17,14 +17,8 @@ const STEP_CONFIG: Record<CameraStep, CameraStepConfig> = {
   camera: {
     canGoBack: true,
     previousStep: 'scan',
-    nextStep: 'confirm-photo',
-    allowedTransitions: ['scan', 'confirm-photo'],
-  },
-  'confirm-photo': {
-    canGoBack: true,
-    previousStep: 'camera',
     nextStep: 'select',
-    allowedTransitions: ['camera', 'select', 'weight'],
+    allowedTransitions: ['scan', 'select'],
   },
   select: {
     canGoBack: true,
@@ -86,7 +80,6 @@ export function useCameraStateMachine(currentStep: CameraStep) {
     const stepOrder: CameraStep[] = [
       'scan',
       'camera',
-      'confirm-photo',
       'select',
       'weight',
       'confirm',
