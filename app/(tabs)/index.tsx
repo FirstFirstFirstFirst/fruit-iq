@@ -16,6 +16,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSettings, useDatabase } from "../../src/hooks/useDatabase";
+import { useAuth } from "../../src/contexts/AuthContext";
+import AuthGuard from "../../src/components/AuthGuard";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -27,6 +29,7 @@ export default function HomeScreen() {
   // PromptPay setup state
   const { isInitialized } = useDatabase();
   const { promptpayPhone, setPromptpayPhone, loading: settingsLoading } = useSettings();
+  const { isAuthenticated, selectedFarm } = useAuth();
   const [showSetupModal, setShowSetupModal] = useState(false);
   const [setupInput, setSetupInput] = useState('');
   const [setupInputType, setSetupInputType] = useState<'phone' | 'id'>('phone');
@@ -102,8 +105,9 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <LinearGradient colors={["#B46A07", "#D97706"]} style={styles.gradient}>
+    <AuthGuard>
+      <SafeAreaView style={styles.container}>
+        <LinearGradient colors={["#B46A07", "#D97706"]} style={styles.gradient}>
         <ScrollView 
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
@@ -133,6 +137,16 @@ export default function HomeScreen() {
             <Text style={[styles.heroSubtitle, isSmallScreen && styles.heroSubtitleSmall]}>
               ระบบชั่งน้ำหนักและคำนวณราคา{"\n"}ผลไม้อัจฉริยะ
             </Text>
+
+            {/* Farm Status */}
+            {isAuthenticated && selectedFarm && (
+              <View style={styles.farmStatus}>
+                <MaterialIcons name="agriculture" size={16} color="rgba(255, 255, 255, 0.9)" />
+                <Text style={styles.farmStatusText}>
+                  ฟาร์ม: {selectedFarm.farmName}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Features */}
@@ -356,6 +370,7 @@ export default function HomeScreen() {
         </Modal>
       </LinearGradient>
     </SafeAreaView>
+    </AuthGuard>
   );
 }
 
@@ -419,6 +434,23 @@ const styles = StyleSheet.create({
   heroSubtitleSmall: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  farmStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  farmStatusText: {
+    fontSize: 14,
+    fontFamily: 'Kanit-Medium',
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginLeft: 6,
   },
   featuresContainer: {
     backgroundColor: "white",

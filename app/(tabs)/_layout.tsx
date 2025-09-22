@@ -5,10 +5,12 @@ import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
+import AuthGuard from '../../src/components/AuthGuard';
 
 export default function TabLayout() {
   return (
-    <Tabs
+    <AuthGuard>
+      <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#B46A07',
         tabBarInactiveTintColor: '#6b7280',
@@ -56,5 +58,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </AuthGuard>
   );
 }

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native'
+import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native'
 import { useTransactions, useDatabase, useDailySales } from '../../src/hooks/useDatabase'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useFocusEffect } from '@react-navigation/native'
+import { useAuth } from '../../src/contexts/AuthContext'
+import { useRouter } from 'expo-router'
 
 export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false)
@@ -12,6 +14,8 @@ export default function HistoryScreen() {
   const { isInitialized, error: dbError } = useDatabase()
   const { transactions, loading: transactionsLoading, refreshTransactions, error: transactionsError } = useTransactions()
   const { summary, loading: summaryLoading, refreshSummary, error: summaryError } = useDailySales()
+  const { isAuthenticated, selectedFarm, logout } = useAuth()
+  const router = useRouter()
 
   // Monitor for database errors
   useEffect(() => {
@@ -126,6 +130,27 @@ export default function HistoryScreen() {
 
   const maxAmount = chartData.length > 0 ? Math.max(...chartData.map(d => (d?.amount && typeof d.amount === 'number' && !isNaN(d.amount)) ? d.amount : 0)) : 1;
 
+  const handleLogout = () => {
+    Alert.alert(
+      'ออกจากระบบ',
+      'คุณต้องการออกจากระบบหรือไม่?',
+      [
+        {
+          text: 'ยกเลิก',
+          style: 'cancel'
+        },
+        {
+          text: 'ออกจากระบบ',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            router.replace('/auth/login');
+          }
+        }
+      ]
+    );
+  };
+
   // Show loading while database initializes (unless there's a permanent error)
   if (!isInitialized && !hasDbError) {
     return (
@@ -176,8 +201,18 @@ export default function HistoryScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>ภาพรวมยอดขาย</Text>
-          <Text style={styles.headerSubtitle}>วันนี้ • {new Date().toLocaleDateString('th-TH')}</Text>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle}>ภาพรวมยอดขาย</Text>
+            <Text style={styles.headerSubtitle}>วันนี้ • {new Date().toLocaleDateString('th-TH')}</Text>
+            {isAuthenticated && selectedFarm && (
+              <Text style={styles.headerFarm}>ฟาร์ม: {selectedFarm.farmName}</Text>
+            )}
+          </View>
+          {isAuthenticated && (
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <MaterialIcons name="logout" size={20} color="#6b7280" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Balance Card */}
@@ -353,9 +388,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Kanit-Medium',
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingTop: 60,
     paddingHorizontal: 24,
     paddingBottom: 20,
+  },
+  headerLeft: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 24,
@@ -367,6 +408,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Kanit-Regular',
     color: '#64748b',
+    marginBottom: 4,
+  },
+  headerFarm: {
+    fontSize: 12,
+    fontFamily: 'Kanit-Medium',
+    color: '#B46A07',
+  },
+  logoutButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f8fafc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 16,
   },
   balanceCard: {
     margin: 24,

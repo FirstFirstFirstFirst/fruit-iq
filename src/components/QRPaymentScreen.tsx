@@ -21,6 +21,8 @@ import generatePayload from 'promptpay-qr';
 import { useSettings, useTransactions } from '../hooks/useDatabase';
 import { formatThaiCurrency, formatWeight } from '../lib/utils';
 import { Fruit } from '../data/mockData';
+import { useAuth } from '../contexts/AuthContext';
+import { createFruitSaleActivity } from '../lib/api';
 
 const { width } = Dimensions.get('window');
 
@@ -48,6 +50,7 @@ export default function QRPaymentScreen({
 
   const { promptpayPhone, getPromptpayPhone } = useSettings();
   const { markTransactionAsSaved } = useTransactions();
+  const { isAuthenticated, selectedFarm } = useAuth();
 
   const generateQRCode = useCallback(async () => {
     try {
@@ -91,16 +94,37 @@ export default function QRPaymentScreen({
   const handleSaveTransaction = async () => {
     try {
       setSaving(true);
-      
+
       // Mark transaction as saved in database
       await markTransactionAsSaved(transactionId);
-      
+
       console.log(`Transaction ${transactionId} marked as saved successfully`);
-      
+
+      // Add activity to API if user is authenticated and has a farm
+      if (isAuthenticated && selectedFarm) {
+        try {
+          console.log('Adding activity to farm:', selectedFarm.farmId);
+          await createFruitSaleActivity(
+            selectedFarm.farmId,
+            fruit.nameThai,
+            weight,
+            totalAmount,
+            `ขาย${fruit.nameThai} น้ำหนัก ${formatWeight(weight)} ราคา ${formatThaiCurrency(totalAmount)}`
+          );
+          console.log('Activity added to farm successfully');
+        } catch (apiError) {
+          console.error('Error adding activity to API:', apiError);
+          // Don't fail the whole transaction if API call fails
+          // User will still see local data
+        }
+      }
+
       // Show success message
       Alert.alert(
         'บันทึกสำเร็จ!',
-        'รายการขายได้รับการบันทึกแล้ว\nคุณสามารถดูรายการในหน้าประวัติได้',
+        isAuthenticated && selectedFarm
+          ? 'รายการขายได้รับการบันทึกแล้ว\nและเพิ่มกิจกรรมไปยังฟาร์มของคุณ\nคุณสามารถดูรายการในหน้าประวัติได้'
+          : 'รายการขายได้รับการบันทึกแล้ว\nคุณสามารถดูรายการในหน้าประวัติได้',
         [
           {
             text: 'ตกลง',
