@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -51,107 +50,78 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient colors={["#B46A07", "#D97706"]} style={styles.gradient}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.avatarContainer}>
-              <MaterialIcons name="person" size={60} color="white" />
-            </View>
-            <Text style={styles.userName}>{user?.name || "ผู้ใช้งาน"}</Text>
-            <Text style={styles.userEmail}>{user?.email || ""}</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.avatarContainer}>
+            <MaterialIcons name="person" size={60} color="white" />
           </View>
+          <Text style={styles.userName}>{user?.name || "ผู้ใช้งาน"}</Text>
+          <Text style={styles.userEmail}>{user?.email || ""}</Text>
+        </View>
 
-          {/* Content Card */}
-          <View style={styles.contentCard}>
-            {/* Farm Info Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>ฟาร์มของฉัน</Text>
-              {selectedFarm ? (
-                <View style={styles.farmCard}>
-                  <View style={styles.farmIconContainer}>
-                    <MaterialIcons name="agriculture" size={24} color="#B46A07" />
-                  </View>
-                  <View style={styles.farmInfo}>
-                    <Text style={styles.farmName}>{selectedFarm.farmName}</Text>
-                    <Text style={styles.farmDetail}>
-                      {selectedFarm.farmLocation || "ไม่มีที่อยู่"}
-                    </Text>
-                  </View>
+        {/* Content Card */}
+        <View style={styles.contentCard}>
+          {/* Farm Info Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>ฟาร์มของฉัน</Text>
+            {selectedFarm ? (
+              <View style={styles.farmCard}>
+                <View style={styles.farmIconContainer}>
+                  <MaterialIcons name="agriculture" size={24} color="#B46A07" />
                 </View>
-              ) : (
-                <Text style={styles.noFarmText}>ยังไม่มีฟาร์ม</Text>
-              )}
-              {farms.length > 1 && (
-                <Text style={styles.farmCount}>
-                  ฟาร์มทั้งหมด: {farms.length} ฟาร์ม
-                </Text>
-              )}
-            </View>
-
-            {/* Menu Items */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>การตั้งค่า</Text>
-
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={() => router.push('/auth/login')}
-              >
-                <MaterialIcons name="swap-horiz" size={24} color="#374151" />
-                <Text style={styles.menuItemText}>สลับบัญชี</Text>
-                <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuItem}>
-                <MaterialIcons name="person-outline" size={24} color="#374151" />
-                <Text style={styles.menuItemText}>ข้อมูลส่วนตัว</Text>
-                <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuItem}>
-                <MaterialIcons name="notifications-none" size={24} color="#374151" />
-                <Text style={styles.menuItemText}>การแจ้งเตือน</Text>
-                <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuItem}>
-                <MaterialIcons name="help-outline" size={24} color="#374151" />
-                <Text style={styles.menuItemText}>ความช่วยเหลือ</Text>
-                <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuItem}>
-                <MaterialIcons name="info-outline" size={24} color="#374151" />
-                <Text style={styles.menuItemText}>เกี่ยวกับแอป</Text>
-                <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Logout Button */}
-            <TouchableOpacity
-              style={[
-                styles.logoutButton,
-                (isLoggingOut || isLoading) && styles.logoutButtonDisabled,
-              ]}
-              onPress={handleLogout}
-              disabled={isLoggingOut || isLoading}
-            >
-              {isLoggingOut || isLoading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <>
-                  <MaterialIcons name="logout" size={20} color="white" />
-                  <Text style={styles.logoutButtonText}>ออกจากระบบ</Text>
-                </>
-              )}
-            </TouchableOpacity>
-
-            {/* Version Info */}
-            <Text style={styles.versionText}>Version 1.0.0</Text>
+                <View style={styles.farmInfo}>
+                  <Text style={styles.farmName}>{selectedFarm.farmName}</Text>
+                  <Text style={styles.farmDetail}>
+                    {selectedFarm.farmLocation || "ไม่มีที่อยู่"}
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              <Text style={styles.noFarmText}>ยังไม่มีฟาร์ม</Text>
+            )}
+            {farms.length > 1 && (
+              <Text style={styles.farmCount}>
+                ฟาร์มทั้งหมด: {farms.length} ฟาร์ม
+              </Text>
+            )}
           </View>
-        </ScrollView>
+
+          {/* Menu Items */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>การตั้งค่า</Text>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push('/auth/login')}
+            >
+              <MaterialIcons name="swap-horiz" size={24} color="#374151" />
+              <Text style={styles.menuItemText}>สลับบัญชี</Text>
+              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Logout Button */}
+          <TouchableOpacity
+            style={[
+              styles.logoutButton,
+              (isLoggingOut || isLoading) && styles.logoutButtonDisabled,
+            ]}
+            onPress={handleLogout}
+            disabled={isLoggingOut || isLoading}
+          >
+            {isLoggingOut || isLoading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <>
+                <MaterialIcons name="logout" size={20} color="white" />
+                <Text style={styles.logoutButtonText}>ออกจากระบบ</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          {/* Version Info */}
+          <Text style={styles.versionText}>Version 1.0.0</Text>
+        </View>
       </LinearGradient>
     </SafeAreaView>
   );
@@ -163,10 +133,6 @@ const styles = StyleSheet.create({
   },
   gradient: {
     flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 100,
   },
   header: {
     alignItems: "center",

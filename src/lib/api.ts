@@ -284,8 +284,8 @@ export const FarmAPI = {
     return apiClient.postFormData<{ message: string; createdFarm: Farm }>('/farms', formData);
   },
 
-  async getFarms(): Promise<Farm[]> {
-    return apiClient.get<Farm[]>('/farms');
+  async getFarmsByUserId(userId: number): Promise<Farm[]> {
+    return apiClient.get<Farm[]>(`/farms/user/${userId}`);
   },
 
   async getFarm(farmId: number): Promise<Farm> {

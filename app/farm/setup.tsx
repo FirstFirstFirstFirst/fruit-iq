@@ -101,7 +101,6 @@ export default function FarmSetupScreen() {
   const { createFarm, isLoading } = useAuth();
 
   const [farmName, setFarmName] = useState("");
-  const [farmLocation, setFarmLocation] = useState("");
   const [farmProvince, setFarmProvince] = useState("");
   const [farmDurianSpecies, setFarmDurianSpecies] = useState("");
   const [farmSpace, setFarmSpace] = useState("");
@@ -165,7 +164,6 @@ export default function FarmSetupScreen() {
 
       const farmData = {
         farmName: farmName.trim(),
-        farmLocation: farmLocation.trim() || undefined,
         farmProvince: farmProvince.trim(),
         farmDurianSpecies: farmDurianSpecies.trim() || undefined,
         farmSpace: parseFloat(farmSpace),
@@ -272,27 +270,6 @@ export default function FarmSetupScreen() {
                       placeholderTextColor="#9ca3af"
                       value={farmName}
                       onChangeText={setFarmName}
-                      editable={!isSubmitting}
-                    />
-                  </View>
-                </View>
-
-                {/* Farm Location */}
-                <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>ที่ตั้งฟาร์ม</Text>
-                  <View style={styles.inputWrapper}>
-                    <MaterialIcons
-                      name="location-on"
-                      size={20}
-                      color="#6b7280"
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="เช่น ตำบลป่าซาง อำเภอแม่ริม"
-                      placeholderTextColor="#9ca3af"
-                      value={farmLocation}
-                      onChangeText={setFarmLocation}
                       editable={!isSubmitting}
                     />
                   </View>

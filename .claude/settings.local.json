@@ -27,7 +27,9 @@
       "Read(/E:\\fruit-iq/**)",
       "WebFetch(domain:ocr.space)",
       "Bash(cat:*)",
-      "Bash(npx expo export:*)"
+      "Bash(npx expo export:*)",
+      "Read(//e/DurianFarm/durico-web-backend/durico-nest-backend/src/**)",
+      "Read(//e/DurianFarm/durico-web-backend/durico-nest-backend/**)"
     ],
     "deny": [],
     "ask": []

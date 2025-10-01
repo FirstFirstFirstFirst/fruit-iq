@@ -45,10 +45,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const [farmsLoading, setFarmsLoading] = useState<boolean>(false);
 
-  const loadFarms = useCallback(async () => {
+  const loadFarms = useCallback(async (userId: number) => {
     try {
       setFarmsLoading(true);
-      const userFarms = await FarmAPI.getFarms();
+      const userFarms = await FarmAPI.getFarmsByUserId(userId);
       setFarms(userFarms);
 
       // Auto-select first farm if no farm is selected
@@ -112,10 +112,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Load farms when user is authenticated
   useEffect(() => {
-    if (isAuthenticated && user) {
-      loadFarms();
+    if (isAuthenticated && user?.userId) {
+      loadFarms(user.userId);
     }
-  }, [isAuthenticated, user, loadFarms]);
+  }, [isAuthenticated, user?.userId, loadFarms]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -172,7 +172,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshFarms = async (): Promise<void> => {
-    await loadFarms();
+    if (user?.userId) {
+      await loadFarms(user.userId);
+    }
   };
 
   const selectFarm = (farm: Farm): void => {
