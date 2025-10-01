@@ -75,7 +75,7 @@ export async function processPhotoWithGemini(
 async function convertImageToBase64(photoUri: string): Promise<string> {
   try {
     const base64 = await FileSystem.readAsStringAsync(photoUri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: "base64",
     });
     return base64;
   } catch (error) {
