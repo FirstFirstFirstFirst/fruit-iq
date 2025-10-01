@@ -12,7 +12,6 @@ import { useFonts } from "expo-font";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
-import DatabaseProvider from "../src/components/DatabaseProvider";
 import { AuthProvider } from "../src/contexts/AuthContext";
 
 export default function RootLayout() {
@@ -74,19 +73,17 @@ export default function RootLayout() {
   }
 
   return (
-    <DatabaseProvider>
-      <AuthProvider>
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-            <Stack.Screen name="auth/signup" options={{ headerShown: false }} />
-            <Stack.Screen name="farm/setup" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </AuthProvider>
-    </DatabaseProvider>
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+          <Stack.Screen name="auth/signup" options={{ headerShown: false }} />
+          <Stack.Screen name="farm/setup" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

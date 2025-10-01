@@ -2,7 +2,8 @@ import { Alert } from "react-native";
 import { THAI_TEXT } from "../lib/constants";
 import { processPhotoWithGemini } from "../lib/geminiApi";
 import { formatWeight } from "../lib/utils";
-import { useTransactions } from "./useDatabase";
+import { useTransactions } from "./useApi";
+import { useAuth } from "../contexts/AuthContext";
 
 interface UseCameraActionsProps {
   setCapturedPhotoPath: (path: string | null) => void;
@@ -30,6 +31,7 @@ export function useCameraActions({
   capturedPhotoPath,
 }: UseCameraActionsProps) {
   const { addTransaction } = useTransactions();
+  const { selectedFarm } = useAuth();
 
   const handleScan = () => {
     setStep("camera");
@@ -137,14 +139,14 @@ export function useCameraActions({
 
     try {
       const transaction = await addTransaction({
-        fruitId: selectedFruit.id,
+        fruitId: selectedFruit.fruitId,
         weightKg: detectedWeight,
         pricePerKg: selectedFruit.pricePerKg,
         totalAmount: total,
-        isSaved: false,
+        farmId: selectedFarm?.farmId,
       });
 
-      setCurrentTransactionId(transaction.id);
+      setCurrentTransactionId(transaction.transactionId);
       setStep("qr-payment");
     } catch (error) {
       console.error("Failed to create transaction:", error);

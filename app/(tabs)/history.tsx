@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useTransactions, useDatabase, useDailySales } from '../../src/hooks/useDatabase'
+import { useTransactions, useDailySales } from '../../src/hooks/useApi'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -11,22 +11,21 @@ import { useRouter } from 'expo-router'
 
 export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false)
-  const [hasDbError, setHasDbError] = useState(false)
-  const { isInitialized, error: dbError } = useDatabase()
-  const { transactions, loading: transactionsLoading, refreshTransactions, error: transactionsError } = useTransactions()
-  const { summary, loading: summaryLoading, refreshSummary, error: summaryError } = useDailySales()
+  const [hasApiError, setHasApiError] = useState(false)
+  const { transactions, loading: transactionsLoading, refresh: refreshTransactions, error: transactionsError } = useTransactions()
+  const { summary, loading: summaryLoading, refresh: refreshSummary, error: summaryError } = useDailySales()
   const { isAuthenticated, selectedFarm, logout } = useAuth()
   const router = useRouter()
 
-  // Monitor for database errors
+  // Monitor for API errors
   useEffect(() => {
-    if (dbError || transactionsError || summaryError) {
-      console.log('Database errors detected:', { dbError, transactionsError, summaryError });
-      setHasDbError(true);
+    if (transactionsError || summaryError) {
+      console.log('API errors detected:', { transactionsError, summaryError });
+      setHasApiError(true);
     } else {
-      setHasDbError(false);
+      setHasApiError(false);
     }
-  }, [dbError, transactionsError, summaryError]);
+  }, [transactionsError, summaryError]);
   
   // Filter only saved transactions for display
   const savedTransactions = transactions?.filter(t => t.isSaved) || []
@@ -34,17 +33,15 @@ export default function HistoryScreen() {
   // Refresh data when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      if (isInitialized && !hasDbError) {
-        console.log('History screen focused, refreshing data...');
-        try {
-          refreshTransactions();
-          refreshSummary();
-        } catch (error) {
-          console.error('Error refreshing data on focus:', error);
-          setHasDbError(true);
-        }
+      console.log('History screen focused, refreshing data...');
+      try {
+        refreshTransactions({ isSaved: true });
+        refreshSummary();
+      } catch (error) {
+        console.error('Error refreshing data on focus:', error);
+        setHasApiError(true);
       }
-    }, [isInitialized, hasDbError, refreshTransactions, refreshSummary])
+    }, [refreshTransactions, refreshSummary])
   );
 
   // Handle pull-to-refresh
@@ -52,15 +49,11 @@ export default function HistoryScreen() {
     setRefreshing(true);
     try {
       console.log('Manual refresh triggered');
-      if (isInitialized && !hasDbError) {
-        await Promise.all([
-          refreshTransactions(),
-          refreshSummary()
-        ]);
-      }
+      refreshTransactions({ isSaved: true });
+      refreshSummary();
     } catch (error) {
       console.error('Error during refresh:', error);
-      setHasDbError(true);
+      setHasApiError(true);
     } finally {
       setRefreshing(false);
     }
@@ -81,22 +74,21 @@ export default function HistoryScreen() {
 
   // Use database summary when available and not in error state, fallback to calculated values with comprehensive null safety
   const todaysTotals = {
-    count: (!hasDbError && summary?.totalTransactions && typeof summary.totalTransactions === 'number' && !isNaN(summary.totalTransactions) && summary.totalTransactions >= 0) 
-      ? summary.totalTransactions 
+    count: (!hasApiError && summary?.totalTransactions && typeof summary.totalTransactions === 'number' && !isNaN(summary.totalTransactions) && summary.totalTransactions >= 0)
+      ? summary.totalTransactions
       : fallbackTotals.count,
-    weight: fallbackTotals.weight, // Always use calculated weight as it's more reliable
-    revenue: (!hasDbError && summary?.totalRevenue && typeof summary.totalRevenue === 'number' && !isNaN(summary.totalRevenue) && summary.totalRevenue >= 0) 
-      ? summary.totalRevenue 
+    weight: summary?.totalWeight || fallbackTotals.weight,
+    revenue: (!hasApiError && summary?.totalRevenue && typeof summary.totalRevenue === 'number' && !isNaN(summary.totalRevenue) && summary.totalRevenue >= 0)
+      ? summary.totalRevenue
       : fallbackTotals.revenue
   };
 
-  console.log('History totals:', { 
-    summary: summary, 
-    fallback: fallbackTotals, 
+  console.log('History totals:', {
+    summary: summary,
+    fallback: fallbackTotals,
     final: todaysTotals,
     savedTransactionsCount: Array.isArray(savedTransactions) ? savedTransactions.length : 0,
-    hasDbError,
-    isInitialized
+    hasApiError
   });
 
   const formatTime = (timestamp: string) => {
@@ -120,13 +112,13 @@ export default function HistoryScreen() {
 
   // Mock chart data for visual appeal - always show some data even in error state
   const chartData = [
-    { day: 'จ', amount: hasDbError ? 0 : 2400 },
-    { day: 'อ', amount: hasDbError ? 0 : 1800 },
-    { day: 'พ', amount: hasDbError ? 0 : 3200 },
-    { day: 'พฤ', amount: hasDbError ? 0 : 2800 },
-    { day: 'ศ', amount: hasDbError ? 0 : 3600 },
-    { day: 'ส', amount: hasDbError ? 0 : 4200 },
-    { day: 'อา', amount: todaysTotals.revenue || (hasDbError ? 0 : 2940) },
+    { day: 'จ', amount: hasApiError ? 0 : 2400 },
+    { day: 'อ', amount: hasApiError ? 0 : 1800 },
+    { day: 'พ', amount: hasApiError ? 0 : 3200 },
+    { day: 'พฤ', amount: hasApiError ? 0 : 2800 },
+    { day: 'ศ', amount: hasApiError ? 0 : 3600 },
+    { day: 'ส', amount: hasApiError ? 0 : 4200 },
+    { day: 'อา', amount: todaysTotals.revenue || (hasApiError ? 0 : 2940) },
   ]
 
   const maxAmount = chartData.length > 0 ? Math.max(...chartData.map(d => (d?.amount && typeof d.amount === 'number' && !isNaN(d.amount)) ? d.amount : 0)) : 1;
@@ -152,20 +144,8 @@ export default function HistoryScreen() {
     );
   };
 
-  // Show loading while database initializes (unless there's a permanent error)
-  if (!isInitialized && !hasDbError) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#B46A07" />
-          <Text style={styles.loadingText}>กำลังเริ่มต้นระบบ...</Text>
-        </View>
-      </SafeAreaView>
-    )
-  }
-
-  // Show loading only on first load with better null safety (unless there's a permanent error)
-  if (!hasDbError && transactionsLoading && (!Array.isArray(transactions) || transactions.length === 0)) {
+  // Show loading only on first load with better null safety
+  if (transactionsLoading && (!Array.isArray(transactions) || transactions.length === 0)) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -190,12 +170,12 @@ export default function HistoryScreen() {
           />
         }
       >
-        {/* Database Error Banner */}
-        {hasDbError && (
+        {/* API Error Banner */}
+        {hasApiError && (
           <View style={styles.errorBanner}>
             <MaterialIcons name="warning" size={20} color="#f59e0b" />
             <Text style={styles.errorBannerText}>
-              ระบบฐานข้อมูลมีปัญหา - แสดงข้อมูลเบื้องต้น
+              มีปัญหาในการเชื่อมต่อ - แสดงข้อมูลเบื้องต้น
             </Text>
           </View>
         )}
@@ -225,16 +205,16 @@ export default function HistoryScreen() {
         >
           <View style={styles.balanceHeader}>
             <Text style={styles.balanceLabel}>ยอดขายวันนี้</Text>
-            {(!hasDbError && summaryLoading) ? (
+            {summaryLoading ? (
               <ActivityIndicator size="small" color="rgba(255, 255, 255, 0.8)" />
             ) : (
-              <MaterialIcons name={hasDbError ? "error-outline" : "visibility"} size={20} color="rgba(255, 255, 255, 0.8)" />
+              <MaterialIcons name={hasApiError ? "error-outline" : "visibility"} size={20} color="rgba(255, 255, 255, 0.8)" />
             )}
           </View>
           <Text style={styles.balanceAmount}>{formatThaiCurrency(todaysTotals.revenue)}</Text>
           <Text style={styles.balanceChange}>
-            {hasDbError 
-              ? 'ข้อมูลจากหน่วยความจำ' 
+            {hasApiError
+              ? 'ข้อมูลจากหน่วยความจำ'
               : (summaryLoading ? 'กำลังอัปเดต...' : '+12.5% จากเมื่อวาน')
             }
           </Text>
@@ -311,10 +291,10 @@ export default function HistoryScreen() {
             <View style={styles.emptyState}>
               <MaterialIcons name="receipt-long" size={48} color="#d1d5db" />
               <Text style={styles.emptyText}>
-                {hasDbError ? 'ไม่สามารถโหลดรายการได้' : 'ยังไม่มีรายการขายที่บันทึก'}
+                {hasApiError ? 'ไม่สามารถโหลดรายการได้' : 'ยังไม่มีรายการขายที่บันทึก'}
               </Text>
               <Text style={styles.emptySubtext}>
-                {hasDbError ? 'กรุณาตรวจสอบระบบฐานข้อมูล' : 'เริ่มต้นขายและบันทึกผลไม้เลย!'}
+                {hasApiError ? 'กรุณาตรวจสอบการเชื่อมต่อ' : 'เริ่มต้นขายและบันทึกผลไม้เลย!'}
               </Text>
             </View>
           ) : (
@@ -324,10 +304,10 @@ export default function HistoryScreen() {
               const fruitName = (transaction?.fruit?.nameThai && typeof transaction.fruit.nameThai === 'string') ? transaction.fruit.nameThai : 'ไม่ระบุชื่อผลไม้';
               const weight = (transaction && typeof transaction?.weightKg === 'number' && !isNaN(transaction.weightKg)) ? transaction.weightKg : 0;
               const amount = (transaction && typeof transaction?.totalAmount === 'number' && !isNaN(transaction.totalAmount)) ? transaction.totalAmount : 0;
-              const timestamp = (transaction?.timestamp && typeof transaction.timestamp === 'string') ? transaction.timestamp : '';
-              
+              const timestamp = (transaction?.createdAt && typeof transaction.createdAt === 'string') ? transaction.createdAt : '';
+
               return (
-                <View key={transaction?.id || `transaction-${index}`} style={styles.transactionCard}>
+                <View key={transaction?.transactionId || `transaction-${index}`} style={styles.transactionCard}>
                   <View style={styles.transactionIcon}>
                     <Text style={styles.transactionEmoji}>{fruitEmoji}</Text>
                   </View>

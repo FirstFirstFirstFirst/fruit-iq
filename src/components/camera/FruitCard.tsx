@@ -1,4 +1,4 @@
-import { Fruit } from "@/src/data/mockData";
+import { Fruit } from "@/src/lib/api";
 import { formatThaiCurrency } from "@/src/lib/utils";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
@@ -19,8 +19,8 @@ export default function FruitCard({
   return (
     <TouchableOpacity
       style={cameraStyles.improvedFruitCard}
-      onPress={() => onSelect(fruit.id)}
-      onLongPress={() => onLongPress(fruit.id)}
+      onPress={() => onSelect(fruit.fruitId)}
+      onLongPress={() => onLongPress(fruit.fruitId)}
       activeOpacity={0.8}
     >
       <View style={cameraStyles.fruitImageContainer}>

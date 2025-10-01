@@ -19,32 +19,28 @@ export default function ProfileScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    Alert.alert(
-      "ออกจากระบบ",
-      "คุณต้องการออกจากระบบหรือไม่?",
-      [
-        {
-          text: "ยกเลิก",
-          style: "cancel",
+    Alert.alert("ออกจากระบบ", "คุณต้องการออกจากระบบหรือไม่?", [
+      {
+        text: "ยกเลิก",
+        style: "cancel",
+      },
+      {
+        text: "ออกจากระบบ",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            setIsLoggingOut(true);
+            await logout();
+            router.replace("/auth/login");
+          } catch (error) {
+            console.error("Logout error:", error);
+            Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถออกจากระบบได้");
+          } finally {
+            setIsLoggingOut(false);
+          }
         },
-        {
-          text: "ออกจากระบบ",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setIsLoggingOut(true);
-              await logout();
-              router.replace("/auth/login");
-            } catch (error) {
-              console.error("Logout error:", error);
-              Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถออกจากระบบได้");
-            } finally {
-              setIsLoggingOut(false);
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -72,7 +68,7 @@ export default function ProfileScreen() {
                 <View style={styles.farmInfo}>
                   <Text style={styles.farmName}>{selectedFarm.farmName}</Text>
                   <Text style={styles.farmDetail}>
-                    {selectedFarm.farmLocation || "ไม่มีที่อยู่"}
+                    {selectedFarm.farmProvince || "ไม่มีที่อยู่"}
                   </Text>
                 </View>
               </View>
@@ -92,7 +88,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.push('/auth/login')}
+              onPress={() => router.push("/auth/login")}
             >
               <MaterialIcons name="swap-horiz" size={24} color="#374151" />
               <Text style={styles.menuItemText}>สลับบัญชี</Text>

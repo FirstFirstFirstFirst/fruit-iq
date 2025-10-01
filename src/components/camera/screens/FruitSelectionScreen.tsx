@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { formatWeight } from '../../../lib/utils'
-import { Fruit } from '../../../data/mockData'
+import { Fruit } from '../../../lib/api'
 import { cameraStyles } from '../styles'
 import FruitCard from '../FruitCard'
 import AddFruitCard from '../AddFruitCard'
@@ -55,7 +55,7 @@ export default function FruitSelectionScreen({
           {fruits?.length > 0 ? (
             fruits.map(fruit => (
               <FruitCard
-                key={fruit.id}
+                key={fruit.fruitId}
                 fruit={fruit}
                 onSelect={onFruitSelect}
                 onLongPress={onFruitLongPress}

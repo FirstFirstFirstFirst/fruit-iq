@@ -48,7 +48,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loadFarms = useCallback(async (userId: number) => {
     try {
       setFarmsLoading(true);
+      // [...DEBUG] Track farms load attempt
+      console.log('[...DEBUG] AuthContext: Attempting to load farms for userId:', userId);
       const userFarms = await FarmAPI.getFarmsByUserId(userId);
+      // [...DEBUG] Track successful load
+      console.log('[...DEBUG] AuthContext: Farms loaded successfully', {
+        farmCount: userFarms.length,
+        userId
+      });
       setFarms(userFarms);
 
       // Auto-select first farm if no farm is selected
@@ -57,6 +64,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error("Error loading farms:", error);
+      // [...DEBUG] Enhanced error logging for farms
+      console.error('[...DEBUG] AuthContext Farm Load Error:', {
+        userId,
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       // Don't show alert for farm loading errors, as user might not have farms yet
     } finally {
       setFarmsLoading(false);

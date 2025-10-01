@@ -18,11 +18,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import { MaterialIcons } from '@expo/vector-icons';
 import generatePayload from 'promptpay-qr';
-import { useSettings, useTransactions } from '../hooks/useDatabase';
+import { useSettings, useTransactions } from '../hooks/useApi';
 import { formatThaiCurrency, formatWeight } from '../lib/utils';
-import { Fruit } from '../data/mockData';
+import { Fruit } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
-import { createFruitSaleActivity } from '../lib/api';
 
 const { width } = Dimensions.get('window');
 
@@ -95,29 +94,10 @@ export default function QRPaymentScreen({
     try {
       setSaving(true);
 
-      // Mark transaction as saved in database
+      // Mark transaction as saved via API (also creates farm activity if user has farm)
       await markTransactionAsSaved(transactionId);
 
       console.log(`Transaction ${transactionId} marked as saved successfully`);
-
-      // Add activity to API if user is authenticated and has a farm
-      if (isAuthenticated && selectedFarm) {
-        try {
-          console.log('Adding activity to farm:', selectedFarm.farmId);
-          await createFruitSaleActivity(
-            selectedFarm.farmId,
-            fruit.nameThai,
-            weight,
-            totalAmount,
-            `ขาย${fruit.nameThai} น้ำหนัก ${formatWeight(weight)} ราคา ${formatThaiCurrency(totalAmount)}`
-          );
-          console.log('Activity added to farm successfully');
-        } catch (apiError) {
-          console.error('Error adding activity to API:', apiError);
-          // Don't fail the whole transaction if API call fails
-          // User will still see local data
-        }
-      }
 
       // Show success message with actions
       Alert.alert(

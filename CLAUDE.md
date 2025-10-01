@@ -76,8 +76,8 @@ useEffect(() => {
 - Use NativeWind v4 for primary styling with TailwindCSS classes
 - StyleSheet.create is acceptable for complex layouts and platform-specific styles
 - Use Expo Vector Icons (@expo/vector-icons) for all icon needs
-- SQLite (expo-sqlite) for persistent data storage
-- Custom hooks pattern for database operations and state management
+- API-based architecture connecting to Durico NestJS backend
+- Custom hooks pattern for API operations and state management
 
 ## Project Structure (MANDATORY)
 
@@ -93,11 +93,12 @@ src/
 │   └── [feature]/    # Feature-specific components
 ├── lib/
 │   ├── utils.ts      # Utility functions and formatters
-│   ├── database.ts   # SQLite database operations
+│   ├── api.ts        # API client and endpoint functions
 │   ├── promptpay.ts  # PromptPay QR code generation
 │   └── constants.ts  # App constants and configuration
-├── hooks/            # Custom React hooks (useDatabase, etc.)
-├── data/             # Type definitions and mock data
+├── hooks/            # Custom React hooks (useApi, etc.)
+├── data/             # Type definitions and interfaces
+├── contexts/         # React contexts (AuthContext, etc.)
 └── screens/          # Legacy screen components (if needed)
 
 components/            # Root-level legacy components (migrate to src/)
@@ -226,7 +227,8 @@ const styles = StyleSheet.create({
   - Utils: `import { formatThaiCurrency } from '../../src/lib/utils'`
   - Components: `import ComponentName from '../../src/components/ComponentName'`
   - Icons: `import { MaterialIcons } from '@expo/vector-icons'`
-  - Database: `import { useFruits, useTransactions } from '../../src/hooks/useDatabase'`
+  - API Hooks: `import { useFruits, useTransactions } from '../../src/hooks/useApi'`
+  - API Client: `import { FruitAPI, TransactionAPI } from '../../src/lib/api'`
   - Navigation: `import { useRouter } from 'expo-router'`
 
 ## File Naming
@@ -247,9 +249,12 @@ const styles = StyleSheet.create({
 - At the end of each iteration, provide a concise Git commit message WITHOUT running `git commit` INSTEAD run `npm run lint:fix`, `npm run lint` and `npm run typecheck `
 - Include manual testing instructions: which screen, what functionality, and expected behavior
 
-## Tips
+## Architecture Notes
 
 - This application is in the precustomer production prototype stage
+- API-based architecture: All data operations go through NestJS backend
+- Backend URL: https://dapi.werapun.com (production)
+- Backend Source: E:\DurianFarm\durico-web-backend\durico-nest-backend\ (When it's come to `prisma.schema`, you are only allow to add relation and NEVER run any migration commands)  
+- Authentication: JWT tokens stored in SecureStore
 - Never run npx expo start
 - Always watchout for conflict in library
-- Backend: E:\DurianFarm\durico-web-backend\durico-nest-backend\

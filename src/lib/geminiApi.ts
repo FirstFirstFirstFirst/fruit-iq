@@ -5,6 +5,8 @@
 
 import * as FileSystem from "expo-file-system";
 
+const GEMINI_API_BASE_URL = process.env.EXPO_PUBLIC_GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta';
+
 export interface WeightDetectionResult {
   weight: number;
   confidence: "high" | "medium" | "low";
@@ -113,7 +115,7 @@ async function callGeminiAPI(
     console.log("Making API request to Gemini...");
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE_URL}/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -208,7 +210,7 @@ export async function testGeminiConnection(): Promise<boolean> {
 
     // Simple test request
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE_URL}/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
