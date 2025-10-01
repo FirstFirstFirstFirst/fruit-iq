@@ -95,6 +95,15 @@ export default function ProfileScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>การตั้งค่า</Text>
 
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => router.push('/auth/login')}
+              >
+                <MaterialIcons name="swap-horiz" size={24} color="#374151" />
+                <Text style={styles.menuItemText}>สลับบัญชี</Text>
+                <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem}>
                 <MaterialIcons name="person-outline" size={24} color="#374151" />
                 <Text style={styles.menuItemText}>ข้อมูลส่วนตัว</Text>

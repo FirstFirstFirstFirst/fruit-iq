@@ -15,6 +15,7 @@ interface FruitSelectionScreenProps {
   onFruitSelect: (fruitId: number) => void
   onFruitLongPress: (fruitId: number) => void
   onAddFruit: () => void
+  onCancel?: () => void
 }
 
 export default function FruitSelectionScreen({
@@ -24,6 +25,7 @@ export default function FruitSelectionScreen({
   onFruitSelect,
   onFruitLongPress,
   onAddFruit,
+  onCancel,
 }: FruitSelectionScreenProps) {
   return (
     <SafeAreaView style={cameraStyles.modernContainer}>
@@ -36,6 +38,11 @@ export default function FruitSelectionScreen({
           <Text style={cameraStyles.headerTitle}>เลือกผลไม้</Text>
           <Text style={cameraStyles.headerWeight}>น้ำหนัก {formatWeight(detectedWeight || 0)}</Text>
         </View>
+        {onCancel && (
+          <TouchableOpacity style={cameraStyles.cancelFlowButton} onPress={onCancel}>
+            <MaterialIcons name="close" size={24} color="#6b7280" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView

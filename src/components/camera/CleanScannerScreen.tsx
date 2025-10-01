@@ -9,11 +9,13 @@ import { cameraStyles } from './styles'
 interface CleanScannerScreenProps {
   isProcessingPhoto: boolean
   onScan: () => void
+  onCancel?: () => void
 }
 
 export default function CleanScannerScreen({
   isProcessingPhoto,
   onScan,
+  onCancel,
 }: CleanScannerScreenProps) {
   const renderInstructions = () => (
     <View style={cameraStyles.instructionsContainer}>
@@ -74,6 +76,17 @@ export default function CleanScannerScreen({
   return (
     <SafeAreaView style={cameraStyles.modernContainer}>
       <View style={cameraStyles.cleanScannerContainer}>
+        {/* Cancel button */}
+        {onCancel && (
+          <TouchableOpacity
+            style={cameraStyles.cancelFlowButton}
+            onPress={onCancel}
+            disabled={isProcessingPhoto}
+          >
+            <MaterialIcons name="close" size={24} color="#6b7280" />
+          </TouchableOpacity>
+        )}
+
         {!isProcessingPhoto && renderInstructions()}
 
         <View style={cameraStyles.cleanCameraArea}>

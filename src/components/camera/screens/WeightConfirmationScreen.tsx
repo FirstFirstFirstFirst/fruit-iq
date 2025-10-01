@@ -11,6 +11,7 @@ interface WeightConfirmationScreenProps {
   detectedWeight: number | null
   onBack: () => void
   onConfirm: () => void
+  onCancel?: () => void
 }
 
 export default function WeightConfirmationScreen({
@@ -18,6 +19,7 @@ export default function WeightConfirmationScreen({
   detectedWeight,
   onBack,
   onConfirm,
+  onCancel,
 }: WeightConfirmationScreenProps) {
   const totalAmount = (detectedWeight || 0) * (selectedFruit?.pricePerKg || 0)
 
@@ -30,6 +32,11 @@ export default function WeightConfirmationScreen({
             <MaterialIcons name="arrow-back" size={24} color="#1f2937" />
           </TouchableOpacity>
           <Text style={cameraStyles.confirmTitle}>ยืนยันรายการ</Text>
+          {onCancel && (
+            <TouchableOpacity style={cameraStyles.cancelFlowButton} onPress={onCancel}>
+              <MaterialIcons name="close" size={24} color="#6b7280" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Order summary */}

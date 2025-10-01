@@ -252,6 +252,15 @@ export const cameraStyles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 16,
   },
+  cancelFlowButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f8fafc",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 16,
+  },
   headerContent: {
     flex: 1,
   },

@@ -1,5 +1,6 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, Alert, Modal } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { modalStyles } from '../modalStyles'
 
@@ -32,8 +33,6 @@ export default function AddFruitModal({
   onSubmit,
   isFormValid,
 }: AddFruitModalProps) {
-  if (!visible) return null
-
   const handlePriceChange = (text: string) => {
     const numericText = text.replace(/[^0-9.]/g, '')
     const parts = numericText.split('.')
@@ -56,8 +55,14 @@ export default function AddFruitModal({
   }
 
   return (
-    <View style={modalStyles.modernModal}>
-      <View style={modalStyles.modernModalContent}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={modalStyles.modernModal}>
+        <View style={modalStyles.modernModalContent}>
         <View style={modalStyles.modalHeader}>
           <Text style={modalStyles.modalTitle}>
             {editingFruit ? 'แก้ไขผลไม้' : 'เพิ่มผลไม้ใหม่'}
@@ -133,7 +138,8 @@ export default function AddFruitModal({
             {editingFruit ? 'บันทึกการแก้ไข' : 'เพิ่มผลไม้'}
           </Text>
         </TouchableOpacity>
-      </View>
-    </View>
+        </View>
+      </SafeAreaView>
+    </Modal>
   )
 }

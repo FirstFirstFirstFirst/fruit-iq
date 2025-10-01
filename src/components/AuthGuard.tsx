@@ -20,6 +20,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
     const inAuthGroup = segments[0] === 'auth';
     const inFarmGroup = segments[0] === 'farm';
+    const inTabsGroup = segments[0] === '(tabs)';
 
     if (!isAuthenticated) {
       // User is not authenticated, redirect to login
@@ -28,8 +29,20 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       }
     } else {
       // User is authenticated
+      // Allow explicit navigation to auth screens (for switching accounts)
+      // Only auto-redirect if they're navigating FROM tabs, not TO auth explicitly
+      if (inAuthGroup && inTabsGroup) {
+        // User clicked "Switch Account" from tabs, allow it
+        return;
+      }
+
+      if (inAuthGroup && segments[1] === 'login') {
+        // Allow manual navigation to login screen (for switch account)
+        return;
+      }
+
       if (inAuthGroup) {
-        // User is in auth screens but authenticated, redirect to main app
+        // User is in auth screens (signup) but authenticated, redirect to main app
         if (farms.length === 0) {
           // No farms, redirect to farm setup
           router.replace('/farm/setup');

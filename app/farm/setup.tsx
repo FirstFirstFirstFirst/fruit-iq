@@ -139,6 +139,24 @@ export default function FarmSetupScreen() {
     province.toLowerCase().includes(farmProvince.toLowerCase())
   );
 
+  const handleCancel = () => {
+    Alert.alert(
+      'ยกเลิกการสร้างฟาร์ม?',
+      'ข้อมูลที่กรอกจะไม่ถูกบันทึก คุณสามารถสร้างฟาร์มได้ในภายหลัง',
+      [
+        {
+          text: 'ไม่ยกเลิก',
+          style: 'cancel',
+        },
+        {
+          text: 'ยกเลิก',
+          style: 'destructive',
+          onPress: () => router.replace('/(tabs)'),
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient colors={['#B46A07', '#D97706']} style={styles.gradient}>
@@ -151,6 +169,15 @@ export default function FarmSetupScreen() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
+            {/* Close button */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleCancel}
+              disabled={isSubmitting}
+            >
+              <MaterialIcons name="close" size={24} color="white" />
+            </TouchableOpacity>
+
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.logoContainer}>
@@ -325,7 +352,7 @@ export default function FarmSetupScreen() {
                 {/* Skip Button */}
                 <TouchableOpacity
                   style={styles.skipButton}
-                  onPress={() => router.replace('/(tabs)')}
+                  onPress={handleCancel}
                   disabled={isSubmitting}
                 >
                   <Text style={styles.skipButtonText}>ข้ามไปก่อน</Text>
@@ -354,6 +381,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     paddingTop: 60,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
   header: {
     alignItems: 'center',

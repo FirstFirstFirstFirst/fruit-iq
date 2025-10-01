@@ -119,18 +119,29 @@ export default function QRPaymentScreen({
         }
       }
 
-      // Show success message
+      // Show success message with actions
       Alert.alert(
-        'บันทึกสำเร็จ!',
-        isAuthenticated && selectedFarm
-          ? 'รายการขายได้รับการบันทึกแล้ว\nและเพิ่มกิจกรรมไปยังฟาร์มของคุณ\nคุณสามารถดูรายการในหน้าประวัติได้'
-          : 'รายการขายได้รับการบันทึกแล้ว\nคุณสามารถดูรายการในหน้าประวัติได้',
+        '✅ บันทึกสำเร็จ!',
+        `ขาย${fruit.nameThai}\nน้ำหนัก ${formatWeight(weight)}\nยอดเงิน ${formatThaiCurrency(totalAmount)}\n\n${
+          isAuthenticated && selectedFarm
+            ? 'รายการขายได้รับการบันทึกและเพิ่มกิจกรรมไปยังฟาร์มของคุณแล้ว'
+            : 'รายการขายได้รับการบันทึกแล้ว'
+        }`,
         [
           {
-            text: 'ตกลง',
-            onPress: onSave
+            text: 'สแกนใหม่',
+            onPress: onSave,
+            style: 'default'
+          },
+          {
+            text: 'ดูประวัติ',
+            onPress: () => {
+              onSave();
+              // Note: Navigation to history will be handled by parent component
+            }
           }
-        ]
+        ],
+        { cancelable: false }
       );
     } catch (error) {
       console.error('Error saving transaction:', error);

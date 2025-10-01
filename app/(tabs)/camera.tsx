@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert } from 'react-native'
+import { Alert, Modal } from 'react-native'
 import { useFruits, useDatabase } from '../../src/hooks/useDatabase'
 import QRPaymentScreen from '../../src/components/QRPaymentScreen'
 import WeighScaleCamera from '../../src/components/WeighScaleCamera'
@@ -7,7 +7,6 @@ import { useCameraState } from '../../src/hooks/useCameraState'
 import { useFruitForm } from '../../src/hooks/useFruitForm'
 import { useCameraActions } from '../../src/hooks/useCameraActions'
 import LoadingScreen from '../../src/components/camera/LoadingScreen'
-import SuccessScreen from '../../src/components/camera/SuccessScreen'
 import CleanScannerScreen from '../../src/components/camera/CleanScannerScreen'
 import FruitSelectionScreen from '../../src/components/camera/screens/FruitSelectionScreen'
 import WeightConfirmationScreen from '../../src/components/camera/screens/WeightConfirmationScreen'
@@ -55,6 +54,26 @@ export default function CameraScreen() {
 
   const handleQRPaymentCancel = () => {
     handleNewScan()
+  }
+
+  const handleCancelFlow = () => {
+    Alert.alert(
+      'ยกเลิกการขาย?',
+      'ข้อมูลที่กรอกจะไม่ถูกบันทึก',
+      [
+        {
+          text: 'ไม่ยกเลิก',
+          style: 'cancel'
+        },
+        {
+          text: 'ยกเลิก',
+          style: 'destructive',
+          onPress: () => {
+            handleNewScan()
+          }
+        }
+      ]
+    )
   }
 
   const handleDeleteFruit = async (fruitId: number) => {
@@ -121,30 +140,23 @@ export default function CameraScreen() {
     }
   }
 
-  // QR Payment screen
-  if (cameraState.step === 'qr-payment' && selectedFruit && cameraState.detectedWeight && cameraState.currentTransactionId) {
-    return (
-      <QRPaymentScreen
-        fruit={selectedFruit}
-        weight={cameraState.detectedWeight}
-        totalAmount={cameraState.totalAmount}
-        transactionId={cameraState.currentTransactionId}
-        onSave={cameraActions.handleQRPaymentSave}
-        onCancel={handleQRPaymentCancel}
-      />
-    )
-  }
+  // Store the base screen (weight confirmation) to show behind the modal
+  const baseScreen = cameraState.step === 'weight' && selectedFruit ? (
+    <WeightConfirmationScreen
+      selectedFruit={selectedFruit}
+      detectedWeight={cameraState.detectedWeight}
+      onBack={() => cameraState.setStep('select')}
+      onConfirm={cameraActions.handleConfirm}
+      onCancel={handleCancelFlow}
+    />
+  ) : null;
 
-  // Success screen
+  // Success handling - no longer a full screen, handled by Alert in handleQRPaymentSave
+  // The success step is kept for state management but doesn't render anything
   if (cameraState.step === 'success') {
-    return (
-      <SuccessScreen
-        totalAmount={cameraState.totalAmount}
-        selectedFruitName={selectedFruit?.nameThai}
-        detectedWeight={cameraState.detectedWeight}
-        onNewScan={handleNewScan}
-      />
-    )
+    // Automatically reset after showing success alert
+    handleNewScan()
+    return null
   }
 
   // Real camera step for photo capture
@@ -166,6 +178,7 @@ export default function CameraScreen() {
       <CleanScannerScreen
         isProcessingPhoto={cameraState.isProcessingPhoto}
         onScan={cameraActions.handleScan}
+        onCancel={handleCancelFlow}
       />
     )
   }
@@ -181,6 +194,7 @@ export default function CameraScreen() {
           onFruitSelect={cameraActions.handleFruitSelect}
           onFruitLongPress={(fruitId) => fruitForm.setContextMenuFruit(fruitId)}
           onAddFruit={() => fruitForm.setShowAddFruit(true)}
+          onCancel={handleCancelFlow}
         />
 
         <AddFruitModal
@@ -243,7 +257,34 @@ export default function CameraScreen() {
         detectedWeight={cameraState.detectedWeight}
         onBack={() => cameraState.setStep('select')}
         onConfirm={cameraActions.handleConfirm}
+        onCancel={handleCancelFlow}
       />
+    )
+  }
+
+  // QR Payment screen - now shown as modal over weight confirmation
+  if (cameraState.step === 'qr-payment') {
+    return (
+      <>
+        {baseScreen}
+        <Modal
+          visible={true}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={handleQRPaymentCancel}
+        >
+          {selectedFruit && cameraState.detectedWeight && cameraState.currentTransactionId && (
+            <QRPaymentScreen
+              fruit={selectedFruit}
+              weight={cameraState.detectedWeight}
+              totalAmount={cameraState.totalAmount}
+              transactionId={cameraState.currentTransactionId}
+              onSave={cameraActions.handleQRPaymentSave}
+              onCancel={handleQRPaymentCancel}
+            />
+          )}
+        </Modal>
+      </>
     )
   }
 
