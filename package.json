@@ -11,7 +11,8 @@
     "dev": "concurrently -n \"ANDROID,BACKEND\" -c \"cyan,magenta\" \"npm run android\" \"cd ../DurianFarm/durico-web-backend/durico-nest-backend && npm run start:dev\"",
     "lint": "expo lint",
     "lint:fix": "expo lint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "expo prebuild --clean"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

@@ -30,7 +30,10 @@
       "Bash(npx expo export:*)",
       "Read(//e/DurianFarm/durico-web-backend/durico-nest-backend/src/**)",
       "Read(//e/DurianFarm/durico-web-backend/durico-nest-backend/**)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(npx expo run:android:*)",
+      "Bash(dir:*)",
+      "Read(//e/JAVA//**)"
     ],
     "deny": [],
     "ask": []
