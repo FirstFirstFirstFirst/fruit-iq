@@ -1,6 +1,3 @@
-- never run npx expo start
-- always watchout for conflict in library
-
 ## NULL Pointer Best Practice
 - Initialize state and props with safe defaults
 Always give useState an initial value and use default values in destructuring or defaultProps so components don’t assume a prop exists. (React uses default values when prop is undefined, not when explicitly null.)
@@ -228,3 +225,5 @@ const styles = StyleSheet.create({
 
 ## Tips
 - This application is in the precustomer production prototype stage
+- Never run npx expo start
+- Always watchout for conflict in library
