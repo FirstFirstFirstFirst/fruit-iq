@@ -1,38 +1,42 @@
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
+  ActivityIndicator,
+  Alert,
   Dimensions,
   Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
   TextInput,
-  Alert,
-  ActivityIndicator,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSettings, useDatabase } from "../../src/hooks/useDatabase";
-import { useAuth } from "../../src/contexts/AuthContext";
 import AuthGuard from "../../src/components/AuthGuard";
+import { useAuth } from "../../src/contexts/AuthContext";
+import { useDatabase, useSettings } from "../../src/hooks/useDatabase";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { height } = Dimensions.get('window');
+  const { height } = Dimensions.get("window");
   const isSmallScreen = height < 700;
   const [isScrollable, setIsScrollable] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(true);
-  
+
   // PromptPay setup state
   const { isInitialized } = useDatabase();
-  const { promptpayPhone, setPromptpayPhone, loading: settingsLoading } = useSettings();
+  const {
+    promptpayPhone,
+    setPromptpayPhone,
+    loading: settingsLoading,
+  } = useSettings();
   const { isAuthenticated, selectedFarm } = useAuth();
   const [showSetupModal, setShowSetupModal] = useState(false);
-  const [setupInput, setSetupInput] = useState('');
-  const [setupInputType, setSetupInputType] = useState<'phone' | 'id'>('phone');
+  const [setupInput, setSetupInput] = useState("");
+  const [setupInputType, setSetupInputType] = useState<"phone" | "id">("phone");
   const [saving, setSaving] = useState(false);
 
   // Check if PromptPay is configured when database is ready
@@ -46,35 +50,37 @@ export default function HomeScreen() {
 
   // Validation functions
   const isValidThaiPhoneNumber = (phone: string): boolean => {
-    const cleaned = phone.replace(/\s|-/g, '');
+    const cleaned = phone.replace(/\s|-/g, "");
     const patterns = [
       /^(\+66|0)[0-9]{9}$/, // +66xxxxxxxxx or 0xxxxxxxxx
-      /^66[0-9]{9}$/        // 66xxxxxxxxx
+      /^66[0-9]{9}$/, // 66xxxxxxxxx
     ];
-    return patterns.some(pattern => pattern.test(cleaned));
+    return patterns.some((pattern) => pattern.test(cleaned));
   };
 
   const isValidThaiNationalId = (id: string): boolean => {
-    const cleaned = id.replace(/\s|-/g, '');
+    const cleaned = id.replace(/\s|-/g, "");
     return /^[0-9]{13}$/.test(cleaned);
   };
 
   const handleSetupSave = async () => {
     if (!setupInput.trim()) {
-      Alert.alert('ข้อผิดพลาด', 'กรุณากรอกข้อมูล');
+      Alert.alert("ข้อผิดพลาด", "กรุณากรอกข้อมูล");
       return;
     }
 
-    const isValid = setupInputType === 'phone' 
-      ? isValidThaiPhoneNumber(setupInput)
-      : isValidThaiNationalId(setupInput);
+    const isValid =
+      setupInputType === "phone"
+        ? isValidThaiPhoneNumber(setupInput)
+        : isValidThaiNationalId(setupInput);
 
     if (!isValid) {
-      const message = setupInputType === 'phone'
-        ? 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง\nกรุณากรอกเป็น 0xxxxxxxxx หรือ +66xxxxxxxxx'
-        : 'รูปแบบหมายเลขบัตรประชาชนไม่ถูกต้อง\nกรุณากรอก 13 หลัก';
-      
-      Alert.alert('ข้อมูลไม่ถูกต้อง', message);
+      const message =
+        setupInputType === "phone"
+          ? "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง\nกรุณากรอกเป็น 0xxxxxxxxx หรือ +66xxxxxxxxx"
+          : "รูปแบบหมายเลขบัตรประชาชนไม่ถูกต้อง\nกรุณากรอก 13 หลัก";
+
+      Alert.alert("ข้อมูลไม่ถูกต้อง", message);
       return;
     }
 
@@ -82,15 +88,13 @@ export default function HomeScreen() {
       setSaving(true);
       await setPromptpayPhone(setupInput.trim());
       setShowSetupModal(false);
-      setSetupInput('');
-      Alert.alert(
-        'ตั้งค่าสำเร็จ!', 
-        'คุณสามารถเริ่มใช้งาน WeighPay ได้แล้ว',
-        [{ text: 'ตกลง' }]
-      );
+      setSetupInput("");
+      Alert.alert("ตั้งค่าสำเร็จ!", "คุณสามารถเริ่มใช้งาน WeighPay ได้แล้ว", [
+        { text: "ตกลง" },
+      ]);
     } catch (error) {
-      console.error('Error saving PromptPay setting:', error);
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง');
+      console.error("Error saving PromptPay setting:", error);
+      Alert.alert("ข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง");
     } finally {
       setSaving(false);
     }
@@ -106,276 +110,390 @@ export default function HomeScreen() {
 
   return (
     <AuthGuard>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         <LinearGradient colors={["#B46A07", "#D97706"]} style={styles.gradient}>
-        <ScrollView 
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-          onScroll={(event) => {
-            const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-            const isScrollableContent = contentSize.height > layoutMeasurement.height;
-            setIsScrollable(isScrollableContent);
-            
-            // Hide scroll hint after user starts scrolling
-            if (contentOffset.y > 20) {
-              setShowScrollHint(false);
-            }
-          }}
-          scrollEventThrottle={16}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { minHeight: height - 100 }
-          ]}
-        >
-          {/* Hero Section */}
-          <View style={[styles.hero, isSmallScreen && styles.heroSmall]}>
-            <View style={[styles.logoContainer, isSmallScreen && styles.logoContainerSmall]}>
-              <MaterialIcons name="scale" size={isSmallScreen ? 48 : 60} color="white" />
-            </View>
-            <Text style={[styles.heroTitle, isSmallScreen && styles.heroTitleSmall]}>WeighPay</Text>
-            <Text style={[styles.heroSubtitle, isSmallScreen && styles.heroSubtitleSmall]}>
-              ระบบชั่งน้ำหนักและคำนวณราคา{"\n"}ผลไม้อัจฉริยะ
-            </Text>
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+            onScroll={(event) => {
+              const { layoutMeasurement, contentOffset, contentSize } =
+                event.nativeEvent;
+              const isScrollableContent =
+                contentSize.height > layoutMeasurement.height;
+              setIsScrollable(isScrollableContent);
 
-            {/* Farm Status */}
-            {isAuthenticated && selectedFarm && (
-              <View style={styles.farmStatus}>
-                <MaterialIcons name="agriculture" size={16} color="rgba(255, 255, 255, 0.9)" />
-                <Text style={styles.farmStatusText}>
-                  ฟาร์ม: {selectedFarm.farmName}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Features */}
-          <View style={styles.featuresContainer}>
-            <Text style={[styles.featuresTitle, isSmallScreen && styles.featuresTitleSmall]}>วิธีใช้งาน</Text>
-
-            <View style={[styles.featureCard, isSmallScreen && styles.featureCardSmall]}>
-              <View style={[styles.featureIcon, isSmallScreen && styles.featureIconSmall]}>
-                <Feather name="camera" size={isSmallScreen ? 20 : 26} color="#B46A07" />
-              </View>
-              <View style={styles.featureContent}>
-                <Text style={[styles.featureTitle, isSmallScreen && styles.featureTitleSmall]}>1. สแกนน้ำหนักผลไม้</Text>
-                <Text style={[styles.featureDescription, isSmallScreen && styles.featureDescriptionSmall]}>
-                  ตรวจจับน้ำหนักผลไม้อัตโนมัติ
-                </Text>
-              </View>
-            </View>
-
-            <View style={[styles.featureCard, isSmallScreen && styles.featureCardSmall]}>
-              <View style={[styles.featureIcon, isSmallScreen && styles.featureIconSmall]}>
-                <MaterialIcons name="shopping-cart" size={isSmallScreen ? 20 : 26} color="#B46A07" />
-              </View>
-              <View style={styles.featureContent}>
-                <Text style={[styles.featureTitle, isSmallScreen && styles.featureTitleSmall]}>2. เลือกผลไม้และคำนวณราคา</Text>
-                <Text style={[styles.featureDescription, isSmallScreen && styles.featureDescriptionSmall]}>
-                  เลือกผลไม้และคำนวณราคาอัตโนมัติ
-                </Text>
-              </View>
-            </View>
-
-            <View style={[styles.featureCard, isSmallScreen && styles.featureCardSmall]}>
-              <View style={[styles.featureIcon, isSmallScreen && styles.featureIconSmall]}>
-                <MaterialIcons name="qr-code" size={isSmallScreen ? 20 : 26} color="#B46A07" />
-              </View>
-              <View style={styles.featureContent}>
-                <Text style={[styles.featureTitle, isSmallScreen && styles.featureTitleSmall]}>
-                  3. รับชำระเงินผ่าน QR Code
-                </Text>
-                <Text style={[styles.featureDescription, isSmallScreen && styles.featureDescriptionSmall]}>
-                  สร้าง QR Code PromptPay
-                </Text>
-              </View> 
-            </View>
-          </View>
-
-          {/* CTA Button */}
-          <View style={[styles.ctaContainer, isSmallScreen && styles.ctaContainerSmall]}>
-            <TouchableOpacity
-              style={[styles.ctaButton, isSmallScreen && styles.ctaButtonSmall]}
-              onPress={handleStartUse}
-            >
-              <MaterialIcons name="play-arrow" size={20} color="white" />
-              <Text style={[styles.ctaText, isSmallScreen && styles.ctaTextSmall]}>เริ่มใช้งาน</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-        
-        {/* Scroll Hint Indicator */}
-        {isScrollable && showScrollHint && (
-          <View style={[styles.scrollHint, { bottom: 100 }]}>
-            <View style={styles.scrollDots}>
-              <View style={[styles.dot, styles.dotActive]} />
-              <View style={styles.dot} />
-              <View style={styles.dot} />
-            </View>
-            <Text style={styles.scrollHintText}>เลื่อนลงเพื่อดูเพิ่มเติม</Text>
-          </View>
-        )}
-        
-        {/* PromptPay Setup Modal */}
-        <Modal
-          visible={showSetupModal}
-          animationType="slide"
-          presentationStyle="pageSheet"
-        >
-          <SafeAreaView style={styles.modalContainer}>
-            <ScrollView
-              style={styles.modalScrollView}
-              contentContainerStyle={styles.modalContent}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              bounces={true}
-            >
-              {/* Modal Header */}
-              <View style={styles.modalHeader}>
-                <View style={styles.setupIcon}>
-                  <MaterialIcons name="qr-code" size={32} color="#B46A07" />
-                </View>
-                <Text style={styles.modalTitle}>ตั้งค่า PromptPay</Text>
-                <Text style={styles.modalSubtitle}>
-                  เพื่อใช้งานระบบชำระเงิน QR Code{'\n'}กรุณากรอกข้อมูลของคุณ
-                </Text>
-              </View>
-
-              {/* Input Type Selector */}
-              <View style={styles.inputTypeContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.inputTypeButton,
-                    setupInputType === 'phone' && styles.inputTypeButtonActive
-                  ]}
-                  onPress={() => {
-                    setSetupInputType('phone');
-                    setSetupInput('');
-                  }}
-                >
-                  <MaterialIcons 
-                    name="phone" 
-                    size={20} 
-                    color={setupInputType === 'phone' ? 'white' : '#6b7280'} 
-                  />
-                  <Text style={[
-                    styles.inputTypeText,
-                    setupInputType === 'phone' && styles.inputTypeTextActive
-                  ]}>
-                    เบอร์โทรศัพท์
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.inputTypeButton,
-                    setupInputType === 'id' && styles.inputTypeButtonActive
-                  ]}
-                  onPress={() => {
-                    setSetupInputType('id');
-                    setSetupInput('');
-                  }}
-                >
-                  <MaterialIcons 
-                    name="credit-card" 
-                    size={20} 
-                    color={setupInputType === 'id' ? 'white' : '#6b7280'} 
-                  />
-                  <Text style={[
-                    styles.inputTypeText,
-                    setupInputType === 'id' && styles.inputTypeTextActive
-                  ]}>
-                    เลขบัตรประชาชน
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Input Field */}
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>
-                  {setupInputType === 'phone' ? 'หมายเลขโทรศัพท์' : 'หมายเลขบัตรประชาชน'}
-                </Text>
-                <TextInput
-                  style={styles.setupInput}
-                  placeholder={
-                    setupInputType === 'phone' 
-                      ? '08xxxxxxxx หรือ +66xxxxxxxx' 
-                      : '1234567890123 (13 หลัก)'
-                  }
-                  value={setupInput}
-                  onChangeText={setSetupInput}
-                  keyboardType={setupInputType === 'phone' ? 'phone-pad' : 'numeric'}
-                  placeholderTextColor="#9ca3af"
-                  maxLength={setupInputType === 'phone' ? 15 : 13}
+              // Hide scroll hint after user starts scrolling
+              if (contentOffset.y > 20) {
+                setShowScrollHint(false);
+              }
+            }}
+            scrollEventThrottle={16}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {/* Hero Section */}
+            <View style={[styles.hero, isSmallScreen && styles.heroSmall]}>
+              <View
+                style={[
+                  styles.logoContainer,
+                  isSmallScreen && styles.logoContainerSmall,
+                ]}
+              >
+                <MaterialIcons
+                  name="scale"
+                  size={isSmallScreen ? 48 : 60}
+                  color="white"
                 />
-                
-                <View style={styles.inputHint}>
-                  <MaterialIcons name="info-outline" size={16} color="#6b7280" />
-                  <Text style={styles.inputHintText}>
-                    {setupInputType === 'phone'
-                      ? 'ใช้หมายเลขโทรศัพท์ที่ผูกกับ PromptPay'
-                      : 'ใช้หมายเลขบัตรประชาชนที่ผูกกับ PromptPay'
-                    }
+              </View>
+              <Text
+                style={[
+                  styles.heroTitle,
+                  isSmallScreen && styles.heroTitleSmall,
+                ]}
+              >
+                WeighPay
+              </Text>
+              <Text
+                style={[
+                  styles.heroSubtitle,
+                  isSmallScreen && styles.heroSubtitleSmall,
+                ]}
+              >
+                ระบบชั่งน้ำหนักและคำนวณราคา{"\n"}ผลไม้อัจฉริยะ
+              </Text>
+
+              {/* Farm Status */}
+              {isAuthenticated && selectedFarm && (
+                <View style={styles.farmStatus}>
+                  <MaterialIcons
+                    name="agriculture"
+                    size={16}
+                    color="rgba(255, 255, 255, 0.9)"
+                  />
+                  <Text style={styles.farmStatusText}>
+                    ฟาร์ม: {selectedFarm.farmName}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Features */}
+            <View style={styles.featuresContainer}>
+              <Text
+                style={[
+                  styles.featuresTitle,
+                  isSmallScreen && styles.featuresTitleSmall,
+                ]}
+              >
+                วิธีใช้งาน
+              </Text>
+
+              <View
+                style={[
+                  styles.featureCard,
+                  isSmallScreen && styles.featureCardSmall,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.featureIcon,
+                    isSmallScreen && styles.featureIconSmall,
+                  ]}
+                >
+                  <Feather
+                    name="camera"
+                    size={isSmallScreen ? 20 : 26}
+                    color="#B46A07"
+                  />
+                </View>
+                <View style={styles.featureContent}>
+                  <Text
+                    style={[
+                      styles.featureTitle,
+                      isSmallScreen && styles.featureTitleSmall,
+                    ]}
+                  >
+                    1. สแกนน้ำหนักผลไม้
+                  </Text>
+                  <Text
+                    style={[
+                      styles.featureDescription,
+                      isSmallScreen && styles.featureDescriptionSmall,
+                    ]}
+                  >
+                    ตรวจจับน้ำหนักผลไม้อัตโนมัติ
                   </Text>
                 </View>
               </View>
 
-              {/* Action Buttons */}
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  style={styles.setupSaveButton}
-                  onPress={handleSetupSave}
-                  disabled={saving}
+              <View
+                style={[
+                  styles.featureCard,
+                  isSmallScreen && styles.featureCardSmall,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.featureIcon,
+                    isSmallScreen && styles.featureIconSmall,
+                  ]}
                 >
-                  {saving ? (
-                    <ActivityIndicator color="white" size="small" />
-                  ) : (
-                    <>
-                      <MaterialIcons name="save" size={20} color="white" />
-                      <Text style={styles.setupSaveText}>บันทึกและเริ่มใช้งาน</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-                
+                  <MaterialIcons
+                    name="shopping-cart"
+                    size={isSmallScreen ? 20 : 26}
+                    color="#B46A07"
+                  />
+                </View>
+                <View style={styles.featureContent}>
+                  <Text
+                    style={[
+                      styles.featureTitle,
+                      isSmallScreen && styles.featureTitleSmall,
+                    ]}
+                  >
+                    2. เลือกผลไม้และคำนวณราคา
+                  </Text>
+                  <Text
+                    style={[
+                      styles.featureDescription,
+                      isSmallScreen && styles.featureDescriptionSmall,
+                    ]}
+                  >
+                    เลือกผลไม้และคำนวณราคาอัตโนมัติ
+                  </Text>
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.featureCard,
+                  isSmallScreen && styles.featureCardSmall,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.featureIcon,
+                    isSmallScreen && styles.featureIconSmall,
+                  ]}
+                >
+                  <MaterialIcons
+                    name="qr-code"
+                    size={isSmallScreen ? 20 : 26}
+                    color="#B46A07"
+                  />
+                </View>
+                <View style={styles.featureContent}>
+                  <Text
+                    style={[
+                      styles.featureTitle,
+                      isSmallScreen && styles.featureTitleSmall,
+                    ]}
+                  >
+                    3. รับชำระเงินผ่าน QR Code
+                  </Text>
+                  <Text
+                    style={[
+                      styles.featureDescription,
+                      isSmallScreen && styles.featureDescriptionSmall,
+                    ]}
+                  >
+                    สร้าง QR Code PromptPay
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* CTA Button */}
+            <View
+              style={[
+                styles.ctaContainer,
+                isSmallScreen && styles.ctaContainerSmall,
+              ]}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.ctaButton,
+                  isSmallScreen && styles.ctaButtonSmall,
+                ]}
+                onPress={handleStartUse}
+              >
+                <MaterialIcons name="play-arrow" size={20} color="white" />
+                <Text
+                  style={[styles.ctaText, isSmallScreen && styles.ctaTextSmall]}
+                >
+                  เริ่มใช้งาน
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+
+          {/* Scroll Hint Indicator */}
+          {isScrollable && showScrollHint && (
+            <View style={[styles.scrollHint, { bottom: 100 }]}>
+              <View style={styles.scrollDots}>
+                <View style={[styles.dot, styles.dotActive]} />
+                <View style={styles.dot} />
+                <View style={styles.dot} />
+              </View>
+              <Text style={styles.scrollHintText}>
+                เลื่อนลงเพื่อดูเพิ่มเติม
+              </Text>
+            </View>
+          )}
+
+          {/* PromptPay Setup Modal */}
+          <Modal
+            visible={showSetupModal}
+            animationType="slide"
+            presentationStyle="pageSheet"
+          >
+            <SafeAreaView style={styles.modalContainer}>
+              <ScrollView
+                style={styles.modalScrollView}
+                contentContainerStyle={styles.modalContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                bounces={true}
+              >
+                {/* Close button */}
                 <TouchableOpacity
-                  style={styles.setupSkipButton}
+                  style={styles.closeButton}
                   onPress={() => {
                     setShowSetupModal(false);
-                    setSetupInput('');
+                    setSetupInput("");
                   }}
                   disabled={saving}
                 >
-                  <Text style={styles.setupSkipText}>ข้ามไปก่อน</Text>
+                  <MaterialIcons name="close" size={24} color="#6b7280" />
                 </TouchableOpacity>
-              </View>
 
-              {/* Info Section */}
-              <View style={styles.infoSection}>
-                <Text style={styles.infoTitle}>PromptPay คืออะไร?</Text>
-                <View style={styles.infoItem}>
-                  <MaterialIcons name="account-balance" size={16} color="#6b7280" />
-                  <Text style={styles.infoText}>
-                    บริการโอนเงินผ่าน QR Code ของธนาคารไทย
+                {/* Modal Header */}
+                <View style={styles.modalHeader}>
+                  <View style={styles.setupIcon}>
+                    <MaterialIcons name="qr-code" size={32} color="#B46A07" />
+                  </View>
+                  <Text style={styles.modalTitle}>ตั้งค่า PromptPay</Text>
+                  <Text style={styles.modalSubtitle}>
+                    เพื่อใช้งานระบบชำระเงิน QR Code{"\n"}กรุณากรอกข้อมูลของคุณ
                   </Text>
                 </View>
-                <View style={styles.infoItem}>
-                  <MaterialIcons name="security" size={16} color="#6b7280" />
-                  <Text style={styles.infoText}>
-                    ปลอดภัย รวดเร็ว ไม่มีค่าธรรมเนียม
-                  </Text>
+
+                {/* Input Type Selector */}
+                <View style={styles.inputTypeContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.inputTypeButton,
+                      setupInputType === "phone" &&
+                        styles.inputTypeButtonActive,
+                    ]}
+                    onPress={() => {
+                      setSetupInputType("phone");
+                      setSetupInput("");
+                    }}
+                  >
+                    <MaterialIcons
+                      name="phone"
+                      size={20}
+                      color={setupInputType === "phone" ? "white" : "#6b7280"}
+                    />
+                    <Text
+                      style={[
+                        styles.inputTypeText,
+                        setupInputType === "phone" &&
+                          styles.inputTypeTextActive,
+                      ]}
+                    >
+                      เบอร์โทรศัพท์
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.inputTypeButton,
+                      setupInputType === "id" && styles.inputTypeButtonActive,
+                    ]}
+                    onPress={() => {
+                      setSetupInputType("id");
+                      setSetupInput("");
+                    }}
+                  >
+                    <MaterialIcons
+                      name="credit-card"
+                      size={20}
+                      color={setupInputType === "id" ? "white" : "#6b7280"}
+                    />
+                    <Text
+                      style={[
+                        styles.inputTypeText,
+                        setupInputType === "id" && styles.inputTypeTextActive,
+                      ]}
+                    >
+                      เลขบัตรประชาชน
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.infoItem}>
-                  <MaterialIcons name="smartphone" size={16} color="#6b7280" />
-                  <Text style={styles.infoText}>
-                    รองรับทุกแอปธนาคารในประเทศไทย
+
+                {/* Input Field */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>
+                    {setupInputType === "phone"
+                      ? "หมายเลขโทรศัพท์"
+                      : "หมายเลขบัตรประชาชน"}
                   </Text>
+                  <TextInput
+                    style={styles.setupInput}
+                    placeholder={
+                      setupInputType === "phone"
+                        ? "08xxxxxxxx หรือ +66xxxxxxxx"
+                        : "1234567890123 (13 หลัก)"
+                    }
+                    value={setupInput}
+                    onChangeText={setSetupInput}
+                    keyboardType={
+                      setupInputType === "phone" ? "phone-pad" : "numeric"
+                    }
+                    placeholderTextColor="#9ca3af"
+                    maxLength={setupInputType === "phone" ? 15 : 13}
+                  />
+
+                  <View style={styles.inputHint}>
+                    <MaterialIcons
+                      name="info-outline"
+                      size={16}
+                      color="#6b7280"
+                    />
+                    <Text style={styles.inputHintText}>
+                      {setupInputType === "phone"
+                        ? "ใช้หมายเลขโทรศัพท์ที่ผูกกับ PromptPay"
+                        : "ใช้หมายเลขบัตรประชาชนที่ผูกกับ PromptPay"}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </ScrollView>
-          </SafeAreaView>
-        </Modal>
-      </LinearGradient>
-    </SafeAreaView>
+
+                {/* Action Buttons */}
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={styles.setupSaveButton}
+                    onPress={handleSetupSave}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <ActivityIndicator color="white" size="small" />
+                    ) : (
+                      <>
+                        <MaterialIcons name="save" size={20} color="white" />
+                        <Text style={styles.setupSaveText}>
+                          บันทึกและเริ่มใช้งาน
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </SafeAreaView>
+          </Modal>
+        </LinearGradient>
+      </SafeAreaView>
     </AuthGuard>
   );
 }
@@ -383,6 +501,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#B46A07",
   },
   gradient: {
     flex: 1,
@@ -392,6 +511,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 0,
   },
   hero: {
     alignItems: "center",
@@ -442,20 +562,20 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   farmStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   farmStatusText: {
     fontSize: 14,
-    fontFamily: 'Kanit-Medium',
-    color: 'rgba(255, 255, 255, 0.9)',
+    fontFamily: "Kanit-Medium",
+    color: "rgba(255, 255, 255, 0.9)",
     marginLeft: 6,
   },
   featuresContainer: {
@@ -543,7 +663,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     backgroundColor: "white",
     alignItems: "center",
-    marginTop: 'auto',
+    marginTop: "auto",
   },
   ctaContainerSmall: {
     paddingVertical: 16,
@@ -615,7 +735,7 @@ const styles = StyleSheet.create({
   // PromptPay Setup Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   modalScrollView: {
     flex: 1,
@@ -624,9 +744,22 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 24,
     paddingBottom: 40,
+    paddingTop: 60,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(107, 114, 128, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
   },
   modalHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingTop: 40,
     paddingBottom: 32,
   },
@@ -634,83 +767,83 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(180, 106, 7, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(180, 106, 7, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
   },
   modalTitle: {
     fontSize: 24,
-    fontFamily: 'Kanit-Bold',
-    color: '#1f2937',
+    fontFamily: "Kanit-Bold",
+    color: "#1f2937",
     marginBottom: 8,
   },
   modalSubtitle: {
     fontSize: 16,
-    fontFamily: 'Kanit-Regular',
-    color: '#6b7280',
-    textAlign: 'center',
+    fontFamily: "Kanit-Regular",
+    color: "#6b7280",
+    textAlign: "center",
     lineHeight: 24,
   },
   inputTypeContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 24,
     gap: 12,
   },
   inputTypeButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#ffffff',
+    borderColor: "#e5e7eb",
+    backgroundColor: "#ffffff",
   },
   inputTypeButtonActive: {
-    backgroundColor: '#B46A07',
-    borderColor: '#B46A07',
+    backgroundColor: "#B46A07",
+    borderColor: "#B46A07",
   },
   inputTypeText: {
     fontSize: 14,
-    fontFamily: 'Kanit-Medium',
-    color: '#6b7280',
+    fontFamily: "Kanit-Medium",
+    color: "#6b7280",
     marginLeft: 8,
   },
   inputTypeTextActive: {
-    color: 'white',
+    color: "white",
   },
   inputContainer: {
     marginBottom: 32,
   },
   inputLabel: {
     fontSize: 16,
-    fontFamily: 'Kanit-SemiBold',
-    color: '#374151',
+    fontFamily: "Kanit-SemiBold",
+    color: "#374151",
     marginBottom: 12,
   },
   setupInput: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
-    fontFamily: 'Kanit-Regular',
-    backgroundColor: '#ffffff',
-    color: '#1f2937',
+    fontFamily: "Kanit-Regular",
+    backgroundColor: "#ffffff",
+    color: "#1f2937",
   },
   inputHint: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 8,
     paddingHorizontal: 4,
   },
   inputHintText: {
     fontSize: 12,
-    fontFamily: 'Kanit-Regular',
-    color: '#6b7280',
+    fontFamily: "Kanit-Regular",
+    color: "#6b7280",
     marginLeft: 6,
     lineHeight: 16,
   },
@@ -719,60 +852,60 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   setupSaveButton: {
-    backgroundColor: '#B46A07',
+    backgroundColor: "#B46A07",
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#B46A07',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#B46A07",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
   },
   setupSaveText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontFamily: 'Kanit-SemiBold',
+    fontFamily: "Kanit-SemiBold",
     marginLeft: 8,
   },
   setupSkipButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
   },
   setupSkipText: {
-    color: '#6b7280',
+    color: "#6b7280",
     fontSize: 16,
-    fontFamily: 'Kanit-Medium',
+    fontFamily: "Kanit-Medium",
   },
   infoSection: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: "#f8fafc",
     borderRadius: 16,
     padding: 20,
   },
   infoTitle: {
     fontSize: 16,
-    fontFamily: 'Kanit-SemiBold',
-    color: '#1f2937',
+    fontFamily: "Kanit-SemiBold",
+    color: "#1f2937",
     marginBottom: 16,
   },
   infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   infoText: {
     fontSize: 14,
-    fontFamily: 'Kanit-Regular',
-    color: '#374151',
+    fontFamily: "Kanit-Regular",
+    color: "#374151",
     marginLeft: 8,
     flex: 1,
     lineHeight: 20,

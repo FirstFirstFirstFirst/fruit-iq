@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
-import { AuthAPI, User, TokenManager, Farm, FarmAPI } from '../lib/api';
-import { Alert } from 'react-native';
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { Alert } from "react-native";
+import { AuthAPI, Farm, FarmAPI, TokenManager, User } from "../lib/api";
 
 interface AuthContextType {
   // User state
@@ -49,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSelectedFarm(userFarms[0]);
       }
     } catch (error) {
-      console.error('Error loading farms:', error);
+      console.error("Error loading farms:", error);
       // Don't show alert for farm loading errors, as user might not have farms yet
     } finally {
       setFarmsLoading(false);
@@ -68,8 +75,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (userId) {
           setUser({
             userId,
-            email: '', // Will be filled when we have profile endpoint
-            name: '',
+            email: "", // Will be filled when we have profile endpoint
+            name: "",
             firstName: null,
             lastName: null,
             nickname: null,
@@ -80,17 +87,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             gender: null,
             phone: null,
             verified: null,
-            createdAt: '',
-            updatedAt: '',
+            createdAt: "",
+            updatedAt: "",
             deletedAt: null,
             isAdmin: false,
             isExpert: false,
-            access_token: await TokenManager.getToken() || ''
+            access_token: (await TokenManager.getToken()) || "",
           });
         }
       }
     } catch (error) {
-      console.error('Error checking auth status:', error);
+      console.error("Error checking auth status:", error);
       setIsAuthenticated(false);
       setUser(null);
     } finally {
@@ -118,10 +125,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsAuthenticated(true);
       return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       Alert.alert(
-        'เข้าสู่ระบบไม่สำเร็จ',
-        'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง'
+        "เข้าสู่ระบบไม่สำเร็จ",
+        "อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง"
       );
       return false;
     } finally {
@@ -129,7 +136,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (email: string, password: string, name: string): Promise<boolean> => {
+  const signup = async (
+    email: string,
+    password: string,
+    name: string
+  ): Promise<boolean> => {
     try {
       setIsLoading(true);
       const userData = await AuthAPI.signup({ email, password, name });
@@ -137,10 +148,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsAuthenticated(true);
       return true;
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error("Signup error:", error);
       Alert.alert(
-        'สมัครสมาชิกไม่สำเร็จ',
-        'ไม่สามารถสมัครสมาชิกได้ กรุณาตรวจสอบข้อมูลและลองอีกครั้ง'
+        "สมัครสมาชิกไม่สำเร็จ",
+        "ไม่สามารถสมัครสมาชิกได้ กรุณาตรวจสอบข้อมูลและลองอีกครั้ง"
       );
       return false;
     } finally {
@@ -156,7 +167,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setFarms([]);
       setSelectedFarm(null);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
@@ -171,7 +182,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const createFarm = async (farmData: any): Promise<Farm | null> => {
     try {
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
 
       const farmRequest = {
@@ -183,7 +194,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const newFarm = response.createdFarm;
 
       // Add new farm to the list
-      setFarms(prev => [...prev, newFarm]);
+      setFarms((prev) => [...prev, newFarm]);
 
       // Auto-select the new farm if it's the first one
       if (farms.length === 0) {
@@ -192,10 +203,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       return newFarm;
     } catch (error) {
-      console.error('Error creating farm:', error);
+      console.error("Error creating farm:", error);
       Alert.alert(
-        'ไม่สามารถสร้างฟาร์มได้',
-        'เกิดข้อผิดพลาดในการสร้างฟาร์ม กรุณาลองอีกครั้ง'
+        "ไม่สามารถสร้างฟาร์มได้",
+        "เกิดข้อผิดพลาดในการสร้างฟาร์ม กรุณาลองอีกครั้ง"
       );
       return null;
     }
@@ -223,17 +234,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     createFarm,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
