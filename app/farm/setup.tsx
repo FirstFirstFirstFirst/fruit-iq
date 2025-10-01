@@ -355,7 +355,7 @@ export default function FarmSetupScreen() {
                   onPress={handleCancel}
                   disabled={isSubmitting}
                 >
-                  <Text style={styles.skipButtonText}>ข้ามไปก่อน</Text>
+                  <Text style={styles.skipButtonText}>ยกเลิก</Text>
                 </TouchableOpacity>
               </View>
             </View>

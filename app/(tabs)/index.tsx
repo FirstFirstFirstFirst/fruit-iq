@@ -223,7 +223,13 @@ export default function HomeScreen() {
           presentationStyle="pageSheet"
         >
           <SafeAreaView style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+            <ScrollView
+              style={styles.modalScrollView}
+              contentContainerStyle={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={true}
+            >
               {/* Modal Header */}
               <View style={styles.modalHeader}>
                 <View style={styles.setupIcon}>
@@ -365,7 +371,7 @@ export default function HomeScreen() {
                   </Text>
                 </View>
               </View>
-            </View>
+            </ScrollView>
           </SafeAreaView>
         </Modal>
       </LinearGradient>
@@ -611,9 +617,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
   },
-  modalContent: {
+  modalScrollView: {
     flex: 1,
+  },
+  modalContent: {
+    flexGrow: 1,
     padding: 24,
+    paddingBottom: 40,
   },
   modalHeader: {
     alignItems: 'center',
