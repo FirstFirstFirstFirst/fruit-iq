@@ -15,19 +15,23 @@ interface DatabaseProviderProps {
 export default function DatabaseProvider({ children }: DatabaseProviderProps) {
   const { isInitialized, error } = useDatabase();
 
+  // Guard: Block rendering children until database is ready or errored
   if (error) {
     return (
       <View style={styles.container}>
         <View style={styles.content}>
           <MaterialIcons name="error" size={64} color="#ef4444" />
-          <Text style={styles.errorTitle}>เกิดข้อผิดพลาด</Text>
-          <Text style={styles.errorText}>{error}</Text>
-          <Text style={styles.errorSubtext}>กรุณาปิดและเปิดแอปใหม่อีกครั้ง</Text>
+          <Text style={styles.errorTitle}>ไม่สามารถเริ่มต้นระบบได้</Text>
+          <Text style={styles.errorText}>
+            กรุณาปิดแอปและเปิดใหม่อีกครั้ง{'\n'}
+            หากปัญหายังคงอยู่ โปรดติดต่อฝ่ายสนับสนุน
+          </Text>
         </View>
       </View>
     );
   }
 
+  // Guard: Don't render children until database is fully initialized
   if (!isInitialized) {
     return (
       <View style={styles.container}>
@@ -41,6 +45,7 @@ export default function DatabaseProvider({ children }: DatabaseProviderProps) {
     );
   }
 
+  // Only render children when database is successfully initialized
   return <>{children}</>;
 }
 

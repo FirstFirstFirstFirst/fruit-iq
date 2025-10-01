@@ -16,17 +16,34 @@ let db: SQLite.SQLiteDatabase | null = null;
  */
 export async function initializeDatabase(): Promise<void> {
   try {
+    // Guard: Check if SQLite module is available
+    if (!SQLite?.openDatabaseAsync) {
+      throw new Error('SQLite module not available. Please check expo-sqlite installation.');
+    }
+
     db = await SQLite.openDatabaseAsync(DB_NAME);
-    
+
+    // Guard: Verify database instance was created
+    if (!db) {
+      throw new Error('Failed to open database. Database instance is null.');
+    }
+
+    // Guard: Check if execAsync method exists before calling
+    if (!db.execAsync) {
+      throw new Error('Database execAsync method not available.');
+    }
+
     // Enable foreign keys
     await db.execAsync('PRAGMA foreign_keys = ON;');
-    
+
     // Create tables
     await createTables();
-    
+
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Failed to initialize database:', error);
+    // Ensure db is null on failure
+    db = null;
     throw error;
   }
 }
@@ -39,61 +56,71 @@ async function createTables(): Promise<void> {
     throw new Error('Database not initialized');
   }
 
-  // Create fruits table
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS fruits (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name_thai TEXT NOT NULL,
-      name_english TEXT,
-      emoji TEXT NOT NULL DEFAULT '🍎',
-      price_per_kg REAL NOT NULL,
-      category TEXT NOT NULL DEFAULT 'fruit',
-      description TEXT,
-      nutrition_facts TEXT, -- JSON string
-      is_active INTEGER DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
+  // Guard: Verify execAsync method exists
+  if (!db.execAsync) {
+    throw new Error('Database execAsync method not available');
+  }
 
-  // Create transactions table
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS transactions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      fruit_id INTEGER NOT NULL,
-      weight_kg REAL NOT NULL,
-      price_per_kg REAL NOT NULL,
-      total_amount REAL NOT NULL,
-      qr_code_data TEXT,
-      promptpay_phone TEXT,
-      photo_path TEXT,
-      is_saved INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (fruit_id) REFERENCES fruits(id)
-    );
-  `);
+  try {
+    // Create fruits table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS fruits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name_thai TEXT NOT NULL,
+        name_english TEXT,
+        emoji TEXT NOT NULL DEFAULT '🍎',
+        price_per_kg REAL NOT NULL,
+        category TEXT NOT NULL DEFAULT 'fruit',
+        description TEXT,
+        nutrition_facts TEXT,
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-  // Create daily summaries table for sales reports
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS daily_summaries (
-      date TEXT PRIMARY KEY,
-      total_transactions INTEGER DEFAULT 0,
-      total_revenue REAL DEFAULT 0,
-      top_fruit_id INTEGER,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (top_fruit_id) REFERENCES fruits(id)
-    );
-  `);
+    // Create transactions table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fruit_id INTEGER NOT NULL,
+        weight_kg REAL NOT NULL,
+        price_per_kg REAL NOT NULL,
+        total_amount REAL NOT NULL,
+        qr_code_data TEXT,
+        promptpay_phone TEXT,
+        photo_path TEXT,
+        is_saved INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (fruit_id) REFERENCES fruits(id)
+      );
+    `);
 
-  // Create settings table for app configuration
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
+    // Create daily summaries table for sales reports
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS daily_summaries (
+        date TEXT PRIMARY KEY,
+        total_transactions INTEGER DEFAULT 0,
+        total_revenue REAL DEFAULT 0,
+        top_fruit_id INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (top_fruit_id) REFERENCES fruits(id)
+      );
+    `);
+
+    // Create settings table for app configuration
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+  } catch (error) {
+    console.error('Error creating tables:', error);
+    throw new Error(`Failed to create database tables: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**

@@ -225,3 +225,6 @@ const styles = StyleSheet.create({
 ## Commit Messages
 - At the end of each iteration, provide a concise Git commit message WITHOUT running `git commit` INSTEAD run `npm run lint:fix`, `npm run lint` and `npm run typecheck `
 - Include manual testing instructions: which screen, what functionality, and expected behavior
+
+## Tips
+- This application is in the precustomer production prototype stage

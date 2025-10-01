@@ -47,10 +47,16 @@ export function useDatabase() {
         await seedInitialData();
         setIsInitialized(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Database initialization failed');
+        const errorMessage = err instanceof Error ? err.message : 'Database initialization failed';
+        console.error('Database initialization error:', {
+          error: err,
+          message: errorMessage,
+          stack: err instanceof Error ? err.stack : undefined
+        });
+        setError(errorMessage);
       }
     }
-    
+
     setup();
   }, []);
 
