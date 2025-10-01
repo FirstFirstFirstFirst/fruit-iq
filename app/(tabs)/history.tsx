@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTransactions, useDatabase, useDailySales } from '../../src/hooks/useDatabase'
 import { formatThaiCurrency, formatWeight } from '../../src/lib/utils'
 import { MaterialIcons } from '@expo/vector-icons'

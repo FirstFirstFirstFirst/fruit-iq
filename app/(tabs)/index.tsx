@@ -3,7 +3,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,6 +14,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings, useDatabase } from "../../src/hooks/useDatabase";
 import { useAuth } from "../../src/contexts/AuthContext";
 import AuthGuard from "../../src/components/AuthGuard";

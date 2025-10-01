@@ -9,12 +9,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
   Dimensions,
   ScrollView,
   ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import { MaterialIcons } from '@expo/vector-icons';
 import generatePayload from 'promptpay-qr';

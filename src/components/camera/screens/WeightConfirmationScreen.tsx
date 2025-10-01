@@ -1,5 +1,6 @@
 import React from 'react'
-import { View, Text, SafeAreaView, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { formatThaiCurrency, formatWeight } from '../../../lib/utils'
 import { Fruit } from '../../../data/mockData'

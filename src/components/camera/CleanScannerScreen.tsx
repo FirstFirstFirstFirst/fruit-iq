@@ -1,7 +1,8 @@
 import { THAI_TEXT } from '@/src/lib/constants'
 import { MaterialIcons } from '@expo/vector-icons'
 import React from 'react'
-import { SafeAreaView, TouchableOpacity, View, Text, ScrollView } from 'react-native'
+import { TouchableOpacity, View, Text, ScrollView } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import ProcessingOverlay from './ProcessingOverlay'
 import { cameraStyles } from './styles'
 
