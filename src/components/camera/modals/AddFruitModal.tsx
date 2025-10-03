@@ -130,11 +130,17 @@ export default function AddFruitModal({
         </View>
 
         <TouchableOpacity
-          style={modalStyles.modernAddButton}
+          style={[
+            modalStyles.modernAddButton,
+            !isFormValid && modalStyles.modernAddButtonDisabled
+          ]}
           onPress={onSubmit}
           disabled={!isFormValid}
         >
-          <Text style={modalStyles.modernAddButtonText}>
+          <Text style={[
+            modalStyles.modernAddButtonText,
+            !isFormValid && modalStyles.modernAddButtonTextDisabled
+          ]}>
             {editingFruit ? 'บันทึกการแก้ไข' : 'เพิ่มผลไม้'}
           </Text>
         </TouchableOpacity>

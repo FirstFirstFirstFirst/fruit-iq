@@ -1,5 +1,6 @@
 import React from "react";
 import { Alert, Modal } from "react-native";
+import { useRouter } from "expo-router";
 import CleanScannerScreen from "../../src/components/camera/CleanScannerScreen";
 import LoadingScreen from "../../src/components/camera/LoadingScreen";
 import AddFruitModal from "../../src/components/camera/modals/AddFruitModal";
@@ -16,6 +17,7 @@ import { useCameraState } from "../../src/hooks/useCameraState";
 import { useFruitForm } from "../../src/hooks/useFruitForm";
 
 export default function CameraScreen() {
+  const router = useRouter();
   const {
     fruits,
     addFruit,
@@ -180,7 +182,8 @@ export default function CameraScreen() {
       <CleanScannerScreen
         isProcessingPhoto={cameraState.isProcessingPhoto}
         onScan={cameraActions.handleScan}
-        onCancel={handleCancelFlow}
+        onManualEntry={cameraActions.handleManualEntry}
+        onCancel={() => router.push("/")}
       />
     );
   }

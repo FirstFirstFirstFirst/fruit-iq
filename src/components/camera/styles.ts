@@ -143,6 +143,24 @@ export const cameraStyles = StyleSheet.create({
     fontFamily: "Kanit-SemiBold",
     marginTop: 8,
   },
+  manualEntryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#B46A07",
+    marginTop: 16,
+    gap: 8,
+  },
+  manualEntryButtonText: {
+    color: "#B46A07",
+    fontSize: 14,
+    fontFamily: "Kanit-SemiBold",
+  },
 
   // Instructions Container
   instructionsContainer: {
@@ -639,6 +657,33 @@ export const cameraStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Kanit-Regular",
     color: "#6b7280",
+  },
+  weightInputContainer: {
+    marginTop: 4,
+  },
+  weightEditRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  weightInput: {
+    fontSize: 16,
+    fontFamily: "Kanit-SemiBold",
+    color: "#1f2937",
+    borderBottomWidth: 2,
+    borderBottomColor: "#B46A07",
+    paddingVertical: 4,
+    minWidth: 80,
+  },
+  weightUnit: {
+    fontSize: 14,
+    fontFamily: "Kanit-Regular",
+    color: "#6b7280",
+  },
+  weightDisplayRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   priceBreakdown: {
     backgroundColor: "#f8fafc",

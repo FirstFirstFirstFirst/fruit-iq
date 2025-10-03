@@ -103,8 +103,7 @@ export function useCameraActions({
         {
           text: THAI_TEXT.enterManually,
           onPress: () => {
-            setDetectedWeight(1.0);
-            setStep("weight");
+            handleManualEntry();
           },
         },
       ];
@@ -131,16 +130,25 @@ export function useCameraActions({
     setStep("weight");
   };
 
-  const handleConfirm = async () => {
-    if (!selectedFruit || !detectedWeight) return;
+  const handleManualEntry = () => {
+    setDetectedWeight(null);
+    setStep("select");
+  };
 
-    const total = detectedWeight * selectedFruit.pricePerKg;
+  const handleConfirm = async (weight?: number) => {
+    const finalWeight = weight ?? detectedWeight;
+    if (!selectedFruit || !finalWeight) return;
+
+    const total = finalWeight * selectedFruit.pricePerKg;
     setTotalAmount(total);
+
+    // Update detectedWeight state so QR screen can access it
+    setDetectedWeight(finalWeight);
 
     try {
       const transaction = await addTransaction({
         fruitId: selectedFruit.fruitId,
-        weightKg: detectedWeight,
+        weightKg: finalWeight,
         pricePerKg: selectedFruit.pricePerKg,
         totalAmount: total,
         farmId: selectedFarm?.farmId,
@@ -163,6 +171,7 @@ export function useCameraActions({
     handlePhotoTaken,
     handleCameraCancel,
     handleFruitSelect,
+    handleManualEntry,
     handleConfirm,
     handleQRPaymentSave,
   };

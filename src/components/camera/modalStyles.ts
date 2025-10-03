@@ -154,11 +154,19 @@ export const modalStyles = StyleSheet.create({
     elevation: 8,
     transform: [{ scale: 1 }],
   },
+  modernAddButtonDisabled: {
+    backgroundColor: '#d1d5db',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
   modernAddButtonText: {
     color: 'white',
     fontSize: 18,
     fontFamily: 'Kanit-Bold',
     letterSpacing: 0.5,
+  },
+  modernAddButtonTextDisabled: {
+    color: '#9ca3af',
   },
 
   // Delete Confirmation Modal

@@ -36,7 +36,9 @@ export default function FruitSelectionScreen({
         </TouchableOpacity>
         <View style={cameraStyles.headerContent}>
           <Text style={cameraStyles.headerTitle}>เลือกผลไม้</Text>
-          <Text style={cameraStyles.headerWeight}>น้ำหนัก {formatWeight(detectedWeight || 0)}</Text>
+          <Text style={cameraStyles.headerWeight}>
+            {detectedWeight ? `น้ำหนัก ${formatWeight(detectedWeight)}` : 'กรอกน้ำหนักในขั้นตอนถัดไป'}
+          </Text>
         </View>
         {onCancel && (
           <TouchableOpacity style={cameraStyles.cancelFlowButton} onPress={onCancel}>

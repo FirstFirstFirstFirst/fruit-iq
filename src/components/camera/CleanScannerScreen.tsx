@@ -9,12 +9,14 @@ import { cameraStyles } from './styles'
 interface CleanScannerScreenProps {
   isProcessingPhoto: boolean
   onScan: () => void
+  onManualEntry?: () => void
   onCancel?: () => void
 }
 
 export default function CleanScannerScreen({
   isProcessingPhoto,
   onScan,
+  onManualEntry,
   onCancel,
 }: CleanScannerScreenProps) {
   const renderInstructions = () => (
@@ -114,6 +116,17 @@ export default function CleanScannerScreen({
             <Text style={cameraStyles.scanButtonText}>เริ่มถ่ายรูป</Text>
           )}
         </View>
+
+        {/* Manual entry button */}
+        {!isProcessingPhoto && onManualEntry && (
+          <TouchableOpacity
+            style={cameraStyles.manualEntryButton}
+            onPress={onManualEntry}
+          >
+            <MaterialIcons name="edit" size={20} color="#B46A07" />
+            <Text style={cameraStyles.manualEntryButtonText}>{THAI_TEXT.enterManually}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   )
