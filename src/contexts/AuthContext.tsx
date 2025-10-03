@@ -71,6 +71,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
       });
+
+      // Check if error is due to invalid/expired token or non-existent user
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('401') || errorMessage.includes('Unauthorized') ||
+          errorMessage.includes('does not exist')) {
+        console.log('[...DEBUG] AuthContext: Invalid token detected, logging out');
+        await logout();
+      }
       // Don't show alert for farm loading errors, as user might not have farms yet
     } finally {
       setFarmsLoading(false);
@@ -220,10 +228,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return newFarm;
     } catch (error) {
       console.error("Error creating farm:", error);
-      Alert.alert(
-        "ไม่สามารถสร้างฟาร์มได้",
-        "เกิดข้อผิดพลาดในการสร้างฟาร์ม กรุณาลองอีกครั้ง"
-      );
+
+      // Check if error is due to non-existent user (foreign key constraint)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('does not exist') || errorMessage.includes('Foreign key constraint')) {
+        Alert.alert(
+          "เซสชันหมดอายุ",
+          "กรุณาเข้าสู่ระบบใหม่อีกครั้ง",
+          [
+            {
+              text: "ตกลง",
+              onPress: () => logout(),
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          "ไม่สามารถสร้างฟาร์มได้",
+          "เกิดข้อผิดพลาดในการสร้างฟาร์ม กรุณาลองอีกครั้ง"
+        );
+      }
       return null;
     }
   };

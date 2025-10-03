@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
 - This application is in the precustomer production prototype stage
 - API-based architecture: All data operations go through NestJS backend
 - Backend URL: https://dapi.werapun.com (production)
-- Backend Source: E:\DurianFarm\durico-web-backend\durico-nest-backend\ (When it's come to `prisma.schema`, you are only allow to add relation and NEVER run any migration commands)  
+- Backend Source: E:\DurianFarm\durico-web-backend\durico-nest-backend\ (When it's come to `prisma.schema`, you are only allow to add relation and NEVER run any migration commands)
 - Authentication: JWT tokens stored in SecureStore
-- Never run npx expo start
+- Never run `npx expo start`, `npx expo run`, `concurrently` ALWAYS ask for logs instead
 - Always watchout for conflict in library

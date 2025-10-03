@@ -8,18 +8,27 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children }: AuthGuardProps) {
-  const { isAuthenticated, isLoading, farms } = useAuth();
+  const { isAuthenticated, isLoading, farms, farmsLoading, selectedFarm } = useAuth();
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
-    if (isLoading) {
-      // Still checking authentication status
+    console.log('[...DEBUG] AuthGuard useEffect triggered', {
+      isLoading,
+      farmsLoading,
+      farmsLength: farms.length,
+      isAuthenticated,
+      segments: segments.join('/'),
+      selectedFarm: selectedFarm?.farmName ?? 'none'
+    });
+
+    if (isLoading || farmsLoading) {
+      console.log('[...DEBUG] AuthGuard: Waiting for auth/farms to load');
+      // Still checking authentication status or loading farms
       return;
     }
 
     const inAuthGroup = segments[0] === 'auth';
-    const inFarmGroup = segments[0] === 'farm';
     const inTabsGroup = segments[0] === '(tabs)';
 
     if (!isAuthenticated) {
@@ -43,22 +52,16 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
       if (inAuthGroup) {
         // User is in auth screens (signup) but authenticated, redirect to main app
-        if (farms.length === 0) {
-          // No farms, redirect to farm setup
-          router.replace('/farm/setup');
-        } else {
-          // Has farms, redirect to main app
-          router.replace('/(tabs)');
-        }
-      } else if (farms.length === 0 && !inFarmGroup) {
-        // User has no farms and not in farm setup, redirect to farm setup
-        router.replace('/farm/setup');
+        console.log('[...DEBUG] AuthGuard: Redirecting to tabs (from auth)');
+        router.replace('/(tabs)');
       }
+      // Note: We no longer force users to farm setup screen
+      // Users can create farms from the app when they're ready
     }
-  }, [isAuthenticated, isLoading, farms, segments, router]);
+  }, [isAuthenticated, isLoading, farms, farmsLoading, segments, router, selectedFarm]);
 
-  // Show loading screen while checking authentication
-  if (isLoading) {
+  // Show loading screen while checking authentication or loading farms
+  if (isLoading || farmsLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#B46A07" />

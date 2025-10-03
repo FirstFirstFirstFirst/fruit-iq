@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AuthGuard from "../../src/components/AuthGuard";
-import FarmSetupForm from "../../src/components/farm/FarmSetupForm";
 import { useAuth } from "../../src/contexts/AuthContext";
 import { useSettings } from "../../src/hooks/useApi";
 
@@ -33,26 +32,23 @@ export default function HomeScreen() {
     updateSettings,
     loading: settingsLoading,
   } = useSettings();
-  const { isAuthenticated, selectedFarm, farms } = useAuth();
+  const { isAuthenticated, selectedFarm } = useAuth();
   const [showPromptPayModal, setShowPromptPayModal] = useState(false);
-  const [showFarmModal, setShowFarmModal] = useState(false);
   const [setupInput, setSetupInput] = useState("");
   const [setupInputType, setSetupInputType] = useState<"phone" | "id">("phone");
   const [saving, setSaving] = useState(false);
 
-  // Check farm and PromptPay setup status
+  // Check PromptPay setup status (farm setup is handled by AuthGuard)
   useEffect(() => {
-    if (!settingsLoading && isAuthenticated) {
-      // First check if user has a farm
-      if (!selectedFarm && farms.length === 0) {
-        setShowFarmModal(true);
-      }
-      // If user has farm but no PromptPay, show PromptPay setup
-      else if (selectedFarm && !promptpayPhone) {
-        setShowPromptPayModal(true);
-      }
+    if (
+      !settingsLoading &&
+      isAuthenticated &&
+      selectedFarm &&
+      !promptpayPhone
+    ) {
+      setShowPromptPayModal(true);
     }
-  }, [settingsLoading, isAuthenticated, selectedFarm, farms, promptpayPhone]);
+  }, [settingsLoading, isAuthenticated, selectedFarm, promptpayPhone]);
 
   // Validation functions
   const isValidThaiPhoneNumber = (phone: string): boolean => {
@@ -93,7 +89,7 @@ export default function HomeScreen() {
     try {
       setSaving(true);
       await updateSettings({
-        promptpayPhone: setupInput.trim()
+        promptpayPhone: setupInput.trim(),
       });
       setShowPromptPayModal(false);
       setSetupInput("");
@@ -108,18 +104,10 @@ export default function HomeScreen() {
     }
   };
 
-  const handleFarmSuccess = () => {
-    setShowFarmModal(false);
-  };
-
-  const handleFarmCancel = () => {
-    setShowFarmModal(false);
-  };
-
   const handleStartUse = () => {
-    if (!selectedFarm && farms.length === 0) {
-      setShowFarmModal(true);
-    } else if (!promptpayPhone) {
+    // AuthGuard will redirect to /farm/setup if no farm exists
+    // Here we only check PromptPay setup
+    if (!promptpayPhone) {
       setShowPromptPayModal(true);
     } else {
       router.push("/(tabs)/camera");
@@ -192,6 +180,23 @@ export default function HomeScreen() {
                     ฟาร์ม: {selectedFarm.farmName}
                   </Text>
                 </View>
+              )}
+
+              {/* No Farm Notice */}
+              {isAuthenticated && !selectedFarm && (
+                <TouchableOpacity
+                  style={styles.noFarmNotice}
+                  onPress={() => router.push("/farm/setup")}
+                >
+                  <MaterialIcons
+                    name="add-circle"
+                    size={16}
+                    color="rgba(255, 255, 255, 0.9)"
+                  />
+                  <Text style={styles.noFarmNoticeText}>
+                    คลิกเพื่อสร้างฟาร์ม
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
 
@@ -510,48 +515,6 @@ export default function HomeScreen() {
               </ScrollView>
             </SafeAreaView>
           </Modal>
-
-          {/* Farm Setup Modal */}
-          <Modal
-            visible={showFarmModal}
-            animationType="slide"
-            presentationStyle="pageSheet"
-          >
-            <SafeAreaView style={styles.modalContainer}>
-              <ScrollView
-                style={styles.modalScrollView}
-                contentContainerStyle={styles.modalContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                bounces={true}
-              >
-                {/* Close button */}
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={handleFarmCancel}
-                >
-                  <MaterialIcons name="close" size={24} color="#6b7280" />
-                </TouchableOpacity>
-
-                {/* Modal Header */}
-                <View style={styles.modalHeader}>
-                  <View style={styles.setupIcon}>
-                    <MaterialIcons name="agriculture" size={32} color="#B46A07" />
-                  </View>
-                  <Text style={styles.modalTitle}>ตั้งค่าฟาร์ม</Text>
-                  <Text style={styles.modalSubtitle}>
-                    สร้างฟาร์มใหม่เพื่อเริ่มบันทึกกิจกรรม
-                  </Text>
-                </View>
-
-                {/* Farm Setup Form */}
-                <FarmSetupForm
-                  onSuccess={handleFarmSuccess}
-                  onCancel={handleFarmCancel}
-                />
-              </ScrollView>
-            </SafeAreaView>
-          </Modal>
         </LinearGradient>
       </SafeAreaView>
     </AuthGuard>
@@ -636,6 +599,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Kanit-Medium",
     color: "rgba(255, 255, 255, 0.9)",
+    marginLeft: 6,
+  },
+  noFarmNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "rgba(255, 255, 255, 0.4)",
+  },
+  noFarmNoticeText: {
+    fontSize: 13,
+    fontFamily: "Kanit-Regular",
+    color: "rgba(255, 255, 255, 0.85)",
     marginLeft: 6,
   },
   featuresContainer: {
@@ -970,5 +951,4 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 20,
   },
-
 });

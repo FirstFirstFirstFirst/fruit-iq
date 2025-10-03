@@ -25,16 +25,16 @@ export default function FarmSetupScreen() {
   const handleCancel = () => {
     Alert.alert(
       "ยกเลิกการสร้างฟาร์ม?",
-      "ข้อมูลที่กรอกจะไม่ถูกบันทึก คุณสามารถสร้างฟาร์มได้ในภายหลัง",
+      "ข้อมูลที่กรอกจะไม่ถูกบันทึก คุณสามารถสร้างฟาร์มได้ในภายหลังจากหน้าหลัก",
       [
         {
-          text: "ไม่ยกเลิก",
+          text: "ยังไม่ยกเลิก",
           style: "cancel",
         },
         {
           text: "ยกเลิก",
           style: "destructive",
-          onPress: () => router.replace("/(tabs)"),
+          onPress: () => router.back(),
         },
       ]
     );

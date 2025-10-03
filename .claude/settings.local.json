@@ -33,7 +33,14 @@
       "Bash(git log:*)",
       "Bash(npx expo run:android:*)",
       "Bash(dir:*)",
-      "Read(//e/JAVA//**)"
+      "Read(//e/JAVA//**)",
+      "Read(//c/Users/ASUS/AppData/Local/Android/Sdk/ndk//**)",
+      "Bash(\"C:\\Users\\ASUS\\AppData\\Local\\Android\\Sdk\\cmdline-tools\\latest\\bin\\sdkmanager.bat\" --install \"ndk;27.1.12297006\")",
+      "Bash(echo $JAVA_HOME)",
+      "Bash(export:*)",
+      "Bash(curl http://localhost:3001/weighpay-settings)",
+      "Bash(curl http://localhost:3001/fruits)",
+      "Bash(curl http://10.0.2.2:3001/weighpay-settings)"
     ],
     "deny": [],
     "ask": []
