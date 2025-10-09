@@ -43,12 +43,11 @@ export default function HomeScreen() {
     if (
       !settingsLoading &&
       isAuthenticated &&
-      selectedFarm &&
       !promptpayPhone
     ) {
       setShowPromptPayModal(true);
     }
-  }, [settingsLoading, isAuthenticated, selectedFarm, promptpayPhone]);
+  }, [settingsLoading, isAuthenticated, promptpayPhone]);
 
   // Validation functions
   const isValidThaiPhoneNumber = (phone: string): boolean => {

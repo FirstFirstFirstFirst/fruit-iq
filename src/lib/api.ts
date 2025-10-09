@@ -578,3 +578,34 @@ export const SettingsAPI = {
     );
   }
 };
+
+// ============================================
+// Weight Detection API - Scale Image Processing
+// ============================================
+
+export interface WeightDetectionResult {
+  weight: number;
+  confidence: "high" | "medium" | "low";
+}
+
+export interface ProcessImageRequest {
+  imageBase64?: string;
+  imageUrl?: string;
+}
+
+// Weight Detection API
+export const WeightDetectionAPI = {
+  async processImage(imageBase64: string): Promise<WeightDetectionResult> {
+    return apiClient.post<WeightDetectionResult>('/weight-detection/process', {
+      imageBase64,
+    });
+  },
+
+  async testConnection(): Promise<{ success: boolean; message: string }> {
+    return apiClient.get<{ success: boolean; message: string }>('/weight-detection/test');
+  },
+
+  async getStatus(): Promise<{ configured: boolean; available: boolean }> {
+    return apiClient.get<{ configured: boolean; available: boolean }>('/weight-detection/status');
+  }
+};

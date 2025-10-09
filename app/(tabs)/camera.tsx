@@ -144,17 +144,6 @@ export default function CameraScreen() {
     }
   };
 
-  // Store the base screen (weight confirmation) to show behind the modal
-  const baseScreen =
-    cameraState.step === "weight" && selectedFruit ? (
-      <WeightConfirmationScreen
-        selectedFruit={selectedFruit}
-        detectedWeight={cameraState.detectedWeight}
-        onBack={() => cameraState.setStep("select")}
-        onConfirm={cameraActions.handleConfirm}
-        onCancel={handleCancelFlow}
-      />
-    ) : null;
 
   // Success handling - no longer a full screen, handled by Alert in handleQRPaymentSave
   // The success step is kept for state management but doesn't render anything
@@ -256,24 +245,69 @@ export default function CameraScreen() {
     );
   }
 
-  // Weight confirmation and price calculation
+  // Weight confirmation - shown as modal over fruit selection
   if (cameraState.step === "weight") {
     return (
-      <WeightConfirmationScreen
-        selectedFruit={selectedFruit}
-        detectedWeight={cameraState.detectedWeight}
-        onBack={() => cameraState.setStep("select")}
-        onConfirm={cameraActions.handleConfirm}
-        onCancel={handleCancelFlow}
-      />
+      <>
+        <FruitSelectionScreen
+          detectedWeight={cameraState.detectedWeight}
+          fruits={fruits || []}
+          onBack={() => cameraState.setStep("scan")}
+          onFruitSelect={cameraActions.handleFruitSelect}
+          onFruitLongPress={(fruitId) => fruitForm.setContextMenuFruit(fruitId)}
+          onAddFruit={() => fruitForm.setShowAddFruit(true)}
+          onCancel={handleCancelFlow}
+        />
+        <Modal
+          visible={true}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => cameraState.setStep("select")}
+        >
+          <WeightConfirmationScreen
+            selectedFruit={selectedFruit}
+            detectedWeight={cameraState.detectedWeight}
+            onBack={() => cameraState.setStep("select")}
+            onConfirm={cameraActions.handleConfirm}
+            onCancel={handleCancelFlow}
+          />
+        </Modal>
+      </>
     );
   }
 
-  // QR Payment screen - now shown as modal over weight confirmation
+  // QR Payment screen - shown as modal over weight confirmation modal
   if (cameraState.step === "qr-payment") {
     return (
       <>
-        {baseScreen}
+        {/* Base: Fruit Selection Screen */}
+        <FruitSelectionScreen
+          detectedWeight={cameraState.detectedWeight}
+          fruits={fruits || []}
+          onBack={() => cameraState.setStep("scan")}
+          onFruitSelect={cameraActions.handleFruitSelect}
+          onFruitLongPress={(fruitId) => fruitForm.setContextMenuFruit(fruitId)}
+          onAddFruit={() => fruitForm.setShowAddFruit(true)}
+          onCancel={handleCancelFlow}
+        />
+
+        {/* First Modal: Weight Confirmation */}
+        <Modal
+          visible={true}
+          animationType="none"
+          presentationStyle="pageSheet"
+          transparent={false}
+        >
+          <WeightConfirmationScreen
+            selectedFruit={selectedFruit}
+            detectedWeight={cameraState.detectedWeight}
+            onBack={() => cameraState.setStep("select")}
+            onConfirm={cameraActions.handleConfirm}
+            onCancel={handleCancelFlow}
+          />
+        </Modal>
+
+        {/* Second Modal: QR Payment */}
         <Modal
           visible={true}
           animationType="slide"

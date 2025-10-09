@@ -1,9 +1,11 @@
+import * as FileSystem from "expo-file-system/legacy";
+import * as ImageManipulator from "expo-image-manipulator";
 import { Alert } from "react-native";
+import { useAuth } from "../contexts/AuthContext";
+import { WeightDetectionAPI } from "../lib/api";
 import { THAI_TEXT } from "../lib/constants";
-import { processPhotoWithGemini } from "../lib/geminiApi";
 import { formatWeight } from "../lib/utils";
 import { useTransactions } from "./useApi";
-import { useAuth } from "../contexts/AuthContext";
 
 interface UseCameraActionsProps {
   setCapturedPhotoPath: (path: string | null) => void;
@@ -42,10 +44,34 @@ export function useCameraActions({
     setIsProcessingPhoto(true);
 
     try {
-      console.log("Starting Gemini processing for photo:", photoPath);
+      console.log("Starting weight detection for photo:", photoPath);
 
-      const result = await processPhotoWithGemini(photoPath);
-      console.log("Gemini processing result:", result);
+      // Resize and compress image to reduce payload size
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        photoPath,
+        [{ resize: { width: 1024 } }], // Resize to max width 1024px (maintains aspect ratio)
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+
+      console.log("Image compressed:", manipulatedImage.uri);
+
+      // Convert compressed image to base64
+      const base64Image = await FileSystem.readAsStringAsync(
+        manipulatedImage.uri,
+        {
+          encoding: "base64",
+        }
+      );
+
+      console.log(
+        "Base64 size (approx):",
+        Math.round(base64Image.length / 1024),
+        "KB"
+      );
+
+      // Call Weight Detection API
+      const result = await WeightDetectionAPI.processImage(base64Image);
+      console.log("Weight detection result:", result);
 
       setDetectedWeight(result.weight);
       setIsProcessingPhoto(false);
@@ -66,7 +92,7 @@ export function useCameraActions({
           "ตรวจพบน้ำหนัก",
           `ตรวจพบน้ำหนัก ${formatWeight(
             result.weight
-          )}\n(ความมั่นใจ: ต่ำ)\n\nกรุณาตรวจสอบและแก้ไขน้ำหนักในขั้นตอนถัดไป`,
+          )}\n(ความมั่นใจ: ต่ำ)\n\nกรุณาตรวจสอบและแก้ไขน้ำหนักหลังเลือกผลไม้`,
           [{ text: "ตกลง" }]
         );
       }
@@ -87,10 +113,17 @@ export function useCameraActions({
       let showRetry = true;
 
       if (error instanceof Error) {
-        if (error.message.includes("API key") || error.message.includes("Gemini")) {
-          errorMessage = "การตั้งค่า Gemini API ไม่ถูกต้อง\n\nกรุณาตั้งค่า Gemini API Key ให้ถูกต้อง";
+        if (
+          error.message.includes("API key") ||
+          error.message.includes("API")
+        ) {
+          errorMessage =
+            "เซิร์ฟเวอร์ยังไม่พร้อมใช้งาน\n\nกรุณาติดต่อผู้ดูแลระบบ";
           showRetry = false;
-        } else if (error.message.includes("network") || error.message.includes("fetch")) {
+        } else if (
+          error.message.includes("network") ||
+          error.message.includes("fetch")
+        ) {
           errorMessage = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
         } else if (error.message.includes("weight")) {
           errorMessage = "ไม่พบน้ำหนักในรูปภาพ กรุณาถ่ายใหม่";
@@ -123,7 +156,6 @@ export function useCameraActions({
     setStep("scan");
     setCapturedPhotoPath(null);
   };
-
 
   const handleFruitSelect = (fruitId: number) => {
     setSelectedFruitId(fruitId);

@@ -22,7 +22,7 @@ export default function WeightConfirmationScreen({
   onCancel,
 }: WeightConfirmationScreenProps) {
   const [weightInput, setWeightInput] = useState(detectedWeight?.toString() || '')
-  const [isEditing, setIsEditing] = useState(!detectedWeight) // Auto-edit if no weight detected
+  const [isEditing, setIsEditing] = useState(true) // Always start in editing mode for easy weight adjustment
 
   const currentWeight = parseFloat(weightInput) || 0
   const totalAmount = currentWeight * (selectedFruit?.pricePerKg || 0)
