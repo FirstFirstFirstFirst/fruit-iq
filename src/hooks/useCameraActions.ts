@@ -77,33 +77,19 @@ export function useCameraActions({
       setIsProcessingPhoto(false);
       setStep("select");
 
-      if (result.confidence === "high") {
-        console.log("High confidence weight detection:", result.weight, "kg");
-      } else if (result.confidence === "medium") {
-        Alert.alert(
-          "ตรวจพบน้ำหนัก",
-          `ตรวจพบน้ำหนัก ${formatWeight(
-            result.weight
-          )}\n(ความมั่นใจ: ปานกลาง)\n\nกรุณาตรวจสอบน้ำหนักให้ถูกต้อง`,
-          [{ text: "ตกลง" }]
-        );
-      } else {
-        Alert.alert(
-          "ตรวจพบน้ำหนัก",
-          `ตรวจพบน้ำหนัก ${formatWeight(
-            result.weight
-          )}\n(ความมั่นใจ: ต่ำ)\n\nกรุณาตรวจสอบและแก้ไขน้ำหนักหลังเลือกผลไม้`,
-          [{ text: "ตกลง" }]
-        );
-      }
+      Alert.alert(
+        "ตรวจพบน้ำหนัก",
+        `ตรวจพบน้ำหนัก ${formatWeight(
+          result.weight
+        )}\n\nกรุณาตรวจสอบน้ำหนักให้ถูกต้องหลังเลือกผลไม้`,
+        [{ text: "ตกลง" }]
+      );
 
       console.log(
         "Photo processed successfully:",
         photoPath,
         "Weight detected:",
-        result.weight,
-        "Confidence:",
-        result.confidence
+        result.weight
       );
     } catch (error) {
       console.error("Error processing photo:", error);

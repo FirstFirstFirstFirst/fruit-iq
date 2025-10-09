@@ -585,7 +585,6 @@ export const SettingsAPI = {
 
 export interface WeightDetectionResult {
   weight: number;
-  confidence: "high" | "medium" | "low";
 }
 
 export interface ProcessImageRequest {

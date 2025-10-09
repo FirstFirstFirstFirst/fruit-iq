@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import generatePayload from 'promptpay-qr';
 import { useSettings, useTransactions } from '../hooks/useApi';
 import { formatThaiCurrency, formatWeight } from '../lib/utils';
@@ -47,6 +48,7 @@ export default function QRPaymentScreen({
   const [saving, setSaving] = useState(false);
   const [qrGenerated, setQrGenerated] = useState(false);
 
+  const router = useRouter();
   const { promptpayPhone, getPromptpayPhone } = useSettings();
   const { markTransactionAsSaved } = useTransactions();
   const { isAuthenticated, selectedFarm } = useAuth();
@@ -117,7 +119,7 @@ export default function QRPaymentScreen({
             text: 'ดูประวัติ',
             onPress: () => {
               onSave();
-              // Note: Navigation to history will be handled by parent component
+              router.push('/(tabs)/history');
             }
           }
         ],
