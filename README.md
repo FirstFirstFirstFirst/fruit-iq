@@ -1,50 +1,170 @@
-# Welcome to your Expo app 👋
+# WeighPay - Fruit-IQ App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native Expo app for managing fruit weighing and payment operations with PromptPay integration. Built with TypeScript, NativeWind v4, and Expo Router.
 
-## Get started
+## Architecture
 
-1. Install dependencies
+- **Frontend**: React Native (Expo SDK 54) with New Architecture enabled
+- **Backend**: NestJS API at https://dapi.werapun.com
+- **Routing**: Expo Router (file-based routing)
+- **Styling**: NativeWind v4 (TailwindCSS)
+- **State**: Custom hooks with API integration
+- **Authentication**: JWT tokens via SecureStore
 
-   ```bash
-   npm install
-   ```
+## Prerequisites
 
-2. Start the app
+- Node.js (LTS version)
+- npm or yarn
+- For Android: Android Studio & Android SDK
+- For iOS: macOS with Xcode
+- EAS CLI for cloud builds: `npm install -g eas-cli`
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Installation
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Build Options
 
-## Learn more
+### Option 1: Local Development Builds (Prebuild Required)
 
-To learn more about developing your project with Expo, look at the following resources:
+This app uses native modules (Camera, Vision Camera, etc.) and requires prebuild to generate native code.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+# 1. Generate native code (android/ios folders)
+npx expo prebuild
 
-## Join the community
+# 2. Build and run on Android
+npx expo run:android
 
-Join our community of developers creating universal apps.
+# 3. Build and run on iOS (macOS only)
+npx expo run:ios
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# Clean prebuild (if needed)
+npm run clean
+```
+
+### Option 2: EAS Build (Cloud Builds - Recommended)
+
+EAS Build handles prebuild automatically and builds in the cloud.
+
+```bash
+# Development build (with dev client)
+eas build --profile development --platform android
+eas build --profile development --platform ios
+
+# Preview build (APK for testing)
+eas build --profile preview --platform android
+
+# Production build (App Bundle for Play Store)
+eas build --profile production --platform android
+eas build --profile production --platform ios
+```
+
+**Note**: First time using EAS Build requires login: `eas login`
+
+## Development
+
+```bash
+# Start development server (DO NOT RUN - check logs instead)
+# npm start
+
+# Start with cache cleared
+npm run start:clear
+
+# Run with backend (full dev environment)
+npm run dev
+
+# Run backend only
+npm run backend
+
+# Type checking
+npm run typecheck
+
+# Linting
+npm run lint
+npm run lint:fix
+```
+
+## Quality Checks
+
+Before committing, always run:
+
+```bash
+npm run lint:fix
+npm run lint
+npm run typecheck
+```
+
+## Project Structure
+
+```
+app/                    # Expo Router screens
+├── (tabs)/            # Tab navigation
+├── _layout.tsx        # Root layout
+└── +not-found.tsx     # 404 screen
+
+src/
+├── components/        # Reusable UI components
+│   ├── ui/           # Base components
+│   └── [feature]/    # Feature components
+├── lib/              # Core utilities
+│   ├── api.ts        # API client
+│   ├── utils.ts      # Helper functions
+│   ├── promptpay.ts  # PromptPay QR generation
+│   └── constants.ts  # App constants
+├── hooks/            # Custom hooks (useApi, etc.)
+├── data/             # TypeScript interfaces
+└── contexts/         # React contexts
+
+assets/               # Static files (fonts, images)
+```
+
+## Key Features
+
+- Thai fruit management system
+- Real-time weight tracking
+- PromptPay QR code generation
+- Camera integration for fruit identification
+- Transaction history with filtering
+- Multi-farm support
+- Offline-capable architecture
+
+## Tech Stack
+
+- React Native 0.81.4 (New Architecture)
+- Expo SDK 54
+- TypeScript 5.9
+- NativeWind v4
+- Expo Router 6
+- React Navigation 7
+- Expo Camera & Vision Camera
+- Kanit font family (Thai support)
+
+## Backend Integration
+
+Backend source: `E:\DurianFarm\durico-web-backend\durico-nest-backend\`
+
+API endpoints are managed through `src/lib/api.ts` with custom hooks in `src/hooks/useApi.ts`.
+
+## Build Types
+
+- **Development**: Debug build with dev client for testing native modules
+- **Preview**: APK for internal testing and sharing
+- **Production**: Optimized build for app stores (App Bundle for Android, IPA for iOS)
+
+## Notes
+
+- This app is in precustomer production prototype stage
+- Never run migrations on backend Prisma schema (only add relations)
+- Authentication tokens stored securely in SecureStore
+- Always check for library conflicts when adding dependencies
+- Ask for logs instead of running expo start/run commands directly
+
+## Learn More
+
+- [Expo Documentation](https://docs.expo.dev/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
+- [EAS Build](https://docs.expo.dev/build/introduction/)
+- [NativeWind v4](https://www.nativewind.dev/)

@@ -40,7 +40,12 @@
       "Bash(export:*)",
       "Bash(curl http://localhost:3001/weighpay-settings)",
       "Bash(curl http://localhost:3001/fruits)",
-      "Bash(curl http://10.0.2.2:3001/weighpay-settings)"
+      "Bash(curl http://10.0.2.2:3001/weighpay-settings)",
+      "Bash(findstr:*)",
+      "Bash(npx expo config:*)",
+      "Bash(test:*)",
+      "WebFetch(domain:expo.dev)",
+      "Bash(.gradlew assembleRelease)"
     ],
     "deny": [],
     "ask": []
