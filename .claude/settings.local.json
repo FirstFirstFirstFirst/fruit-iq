@@ -45,7 +45,13 @@
       "Bash(npx expo config:*)",
       "Bash(test:*)",
       "WebFetch(domain:expo.dev)",
-      "Bash(.gradlew assembleRelease)"
+      "Bash(.gradlew assembleRelease)",
+      "Bash(gradlew.bat assembleRelease:*)",
+      "Bash(./gradlew:*)",
+      "Bash(timeout:*)",
+      "Bash(tee:*)",
+      "Read(//c/Users/ASUS/.gradle/caches/8.14.3/transforms/56c9e43bac8cee30091ca543a0d403b7/transformed/react-android-0.81.4-release/prefab/modules/**)",
+      "Bash(./gradlew.bat:*)"
     ],
     "deny": [],
     "ask": []

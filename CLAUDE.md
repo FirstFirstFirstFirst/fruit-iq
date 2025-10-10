@@ -258,3 +258,4 @@ const styles = StyleSheet.create({
 - Authentication: JWT tokens stored in SecureStore
 - Never run `npx expo start`, `npx expo run`, `concurrently` ALWAYS ask for logs instead
 - Always watchout for conflict in library
+- Never run EAS build this project only run for local apk
