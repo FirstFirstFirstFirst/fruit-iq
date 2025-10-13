@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import {
-  Alert,
+  Image,
   Modal,
   Text,
   TextInput,
@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PRESET_EMOJIS } from "../constants";
 import { modalStyles } from "../modalStyles";
 
 interface AddFruitModalProps {
@@ -16,11 +17,11 @@ interface AddFruitModalProps {
   editingFruit: any;
   newFruitName: string;
   newFruitPrice: string;
-  newFruitEmoji: string;
+  newFruitEmoji: string; // Now stores emoji ID (e.g., 'apple', 'durian')
   onClose: () => void;
   onNameChange: (text: string) => void;
   onPriceChange: (text: string) => void;
-  onEmojiChange: (emoji: string) => void;
+  onEmojiChange: (emojiId: string) => void;
   onShowEmojiPicker: () => void;
   onSubmit: () => void;
   isFormValid: boolean;
@@ -40,28 +41,18 @@ export default function AddFruitModal({
   onSubmit,
   isFormValid,
 }: AddFruitModalProps) {
+  // Get the emoji/image item by ID
+  const selectedEmojiItem = PRESET_EMOJIS.find(
+    (item) => item.id === newFruitEmoji
+  );
+  const defaultEmojiItem = PRESET_EMOJIS.find((item) => item.id === "apple");
+
   const handlePriceChange = (text: string) => {
     const numericText = text.replace(/[^0-9.]/g, "");
     const parts = numericText.split(".");
     if (parts.length <= 2) {
       onPriceChange(numericText);
     }
-  };
-
-  const handleEmojiChange = (text: string) => {
-    const emojiOnly = text.replace(
-      /[^\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Modifier_Base}\p{Emoji_Presentation}]/gu,
-      ""
-    );
-    onEmojiChange(emojiOnly.slice(0, 2));
-  };
-
-  const handlePhotoOption = () => {
-    Alert.alert(
-      "รูปภาพ",
-      "ฟีเจอร์การเลือกรูปภาพยังไม่พร้อมใช้งาน\nกรุณาใช้อีโมจิแทน",
-      [{ text: "ตกลง" }]
-    );
   };
 
   return (
@@ -100,9 +91,23 @@ export default function AddFruitModal({
               style={modalStyles.emojiPickerButton}
               onPress={onShowEmojiPicker}
             >
-              <Text style={modalStyles.emojiDisplay}>
-                {newFruitEmoji || "🍎"}
-              </Text>
+              <View style={modalStyles.emojiDisplay}>
+                {selectedEmojiItem ? (
+                  selectedEmojiItem.type === "emoji" ? (
+                    <Text style={{ fontSize: 40 }}>
+                      {selectedEmojiItem.value}
+                    </Text>
+                  ) : (
+                    <Image
+                      source={selectedEmojiItem.source}
+                      style={{ width: 40, height: 40 }}
+                      resizeMode="contain"
+                    />
+                  )
+                ) : defaultEmojiItem?.type === "emoji" ? (
+                  <Text style={{ fontSize: 40 }}>{defaultEmojiItem.value}</Text>
+                ) : null}
+              </View>
               <Text style={modalStyles.emojiPickerText}>
                 แตะเพื่อเลือกอีโมจิ
               </Text>

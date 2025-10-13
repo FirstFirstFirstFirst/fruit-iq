@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Modal, Image } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { PRESET_EMOJIS } from '../constants'
 import { modalStyles } from '../modalStyles'
@@ -8,7 +8,7 @@ interface EmojiPickerModalProps {
   visible: boolean
   selectedEmoji: string
   onClose: () => void
-  onSelectEmoji: (emoji: string) => void
+  onSelectEmoji: (emojiId: string) => void
 }
 
 export default function EmojiPickerModal({
@@ -17,8 +17,8 @@ export default function EmojiPickerModal({
   onClose,
   onSelectEmoji,
 }: EmojiPickerModalProps) {
-  const handleSelectEmoji = (emoji: string) => {
-    onSelectEmoji(emoji)
+  const handleSelectEmoji = (emojiId: string) => {
+    onSelectEmoji(emojiId)
     onClose()
   }
 
@@ -40,16 +40,24 @@ export default function EmojiPickerModal({
 
           <ScrollView style={modalStyles.emojiGrid} showsVerticalScrollIndicator={false}>
             <View style={modalStyles.emojiGridContainer}>
-              {PRESET_EMOJIS.map((emoji, index) => (
+              {PRESET_EMOJIS.map((item) => (
                 <TouchableOpacity
-                  key={index}
+                  key={item.id}
                   style={[
                     modalStyles.emojiGridItem,
-                    selectedEmoji === emoji && modalStyles.selectedEmojiItem
+                    selectedEmoji === item.id && modalStyles.selectedEmojiItem
                   ]}
-                  onPress={() => handleSelectEmoji(emoji)}
+                  onPress={() => handleSelectEmoji(item.id)}
                 >
-                  <Text style={modalStyles.emojiGridEmoji}>{emoji}</Text>
+                  {item.type === 'emoji' ? (
+                    <Text style={modalStyles.emojiGridEmoji}>{item.value}</Text>
+                  ) : (
+                    <Image
+                      source={item.source}
+                      style={{ width: 40, height: 40 }}
+                      resizeMode="contain"
+                    />
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
