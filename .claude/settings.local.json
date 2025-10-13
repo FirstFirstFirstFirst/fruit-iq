@@ -5,7 +5,6 @@
       "Bash(npm install:*)",
       "Bash(npm view:*)",
       "Bash(mkdir:*)",
-      "Bash(rm:*)",
       "Bash(npm run lint)",
       "Bash(npx expo start:*)",
       "WebSearch",
@@ -51,7 +50,13 @@
       "Bash(timeout:*)",
       "Bash(tee:*)",
       "Read(//c/Users/ASUS/.gradle/caches/8.14.3/transforms/56c9e43bac8cee30091ca543a0d403b7/transformed/react-android-0.81.4-release/prefab/modules/**)",
-      "Bash(./gradlew.bat:*)"
+      "Bash(./gradlew.bat:*)",
+      "Bash(rm:*)",
+      "Bash(pkill:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(set CI=1)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []

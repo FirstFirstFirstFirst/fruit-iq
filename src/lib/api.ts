@@ -316,6 +316,24 @@ export const AuthAPI = {
   async isAuthenticated(): Promise<boolean> {
     const token = await TokenManager.getToken();
     return !!token;
+  },
+
+  async generateWebAccessLink(): Promise<string> {
+    try {
+      const response = await apiClient.post<{ oneTimeCode: string; expiresIn: number }>(
+        '/auth/generate-web-token'
+      );
+
+      // Construct the web app URL with the one-time code
+      const webAppUrl = process.env.EXPO_PUBLIC_WEB_APP_URL || 'https://durico.werapun.com';
+      const url = `${webAppUrl}/fruit-sales?token=${response.oneTimeCode}`;
+
+      console.log('Generated web access link:', url);
+      return url;
+    } catch (error) {
+      console.error('Error generating web access link:', error);
+      throw new Error('Failed to generate web access link. Please try again.');
+    }
   }
 };
 

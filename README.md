@@ -25,44 +25,94 @@ A React Native Expo app for managing fruit weighing and payment operations with 
 npm install
 ```
 
-## Build Options
+## Development Workflow
 
-### Option 1: Local Development Builds (Prebuild Required)
+### 🟢 Local Development (Daily Work)
 
-This app uses native modules (Camera, Vision Camera, etc.) and requires prebuild to generate native code.
+For regular development where you're just changing JavaScript/TypeScript code:
 
+**Step 1: One-time setup** (or when native dependencies change)
 ```bash
-# 1. Generate native code (android/ios folders)
-npx expo prebuild
+# Install dependencies
+npm install
 
-# 2. Build and run on Android
-npx expo run:android
-
-# 3. Build and run on iOS (macOS only)
-npx expo run:ios
-
-# Clean prebuild (if needed)
-npm run clean
+# Build and install debug APK on emulator/device (takes 2-3 minutes)
+cd android && ./gradlew installDebug
+cd ..
 ```
 
-### Option 2: EAS Build (Cloud Builds - Recommended)
+**Step 2: Start Metro bundler** (every time you develop)
+```bash
+# Metro server will hot-reload your JS/TS changes
+# Ask for logs instead of running this yourself (per project rules)
+```
 
-EAS Build handles prebuild automatically and builds in the cloud.
+**When do you need to rebuild?**
+- ✅ First time setup
+- ✅ After `npm install` (especially when native modules update)
+- ✅ After running `npx expo prebuild --clean`
+- ✅ When you see "Mismatch between JavaScript part and native part" errors
+- ❌ NOT needed for regular JS/TS code changes (hot reload works)
+
+### 🔴 Building Release APK (For Distribution)
+
+When you need to share/deploy the actual APK file:
+
+```bash
+# Generate native code
+npx expo prebuild --clean
+
+# Build release APK (takes 10+ minutes)
+cd android && ./gradlew assembleRelease
+
+# APK location:
+# android/app/build/outputs/apk/release/app-release.apk
+```
+
+### ☁️ EAS Build (Cloud Builds - Alternative)
+
+EAS Build handles everything in the cloud (no local Android Studio needed).
 
 ```bash
 # Development build (with dev client)
 eas build --profile development --platform android
-eas build --profile development --platform ios
 
 # Preview build (APK for testing)
 eas build --profile preview --platform android
 
 # Production build (App Bundle for Play Store)
 eas build --profile production --platform android
-eas build --profile production --platform ios
 ```
 
 **Note**: First time using EAS Build requires login: `eas login`
+
+## Build Types Explained
+
+| Build Type | Command | Time | Use Case |
+|------------|---------|------|----------|
+| **Debug (installDebug)** | `./gradlew installDebug` | 2-3 min | Local development, connects to Metro for hot reload |
+| **Release (assembleRelease)** | `./gradlew assembleRelease` | 10+ min | Production APK, all JS bundled inside |
+| **EAS Cloud** | `eas build --profile [profile]` | 15-20 min | Cloud builds, no local setup needed |
+
+## Troubleshooting Native Modules
+
+If you see version mismatch errors (e.g., "worklets 0.6.1 vs 0.5.1"):
+
+```bash
+# 1. Clean everything
+rm -rf node_modules
+rm -rf .expo
+rm -rf android/app/build android/build
+
+# 2. Reinstall
+npm install
+
+# 3. Regenerate native code
+npx expo prebuild --clean
+
+# 4. Rebuild and install debug APK
+cd android && ./gradlew installDebug
+```
 
 ## Development
 
