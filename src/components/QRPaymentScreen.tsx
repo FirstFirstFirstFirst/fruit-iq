@@ -12,7 +12,8 @@ import {
   Alert,
   Dimensions,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
@@ -20,7 +21,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import generatePayload from 'promptpay-qr';
 import { useSettings, useTransactions } from '../hooks/useApi';
-import { formatThaiCurrency, formatWeight } from '../lib/utils';
+import { formatThaiCurrency, formatWeight, getEmojiById } from '../lib/utils';
 import { Fruit } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -52,6 +53,8 @@ export default function QRPaymentScreen({
   const { promptpayPhone, getPromptpayPhone } = useSettings();
   const { markTransactionAsSaved } = useTransactions();
   const { isAuthenticated, selectedFarm } = useAuth();
+
+  const emojiItem = getEmojiById(fruit.emoji);
 
   const generateQRCode = useCallback(async () => {
     try {
@@ -183,7 +186,17 @@ export default function QRPaymentScreen({
         {/* Transaction Summary */}
         <View style={styles.summaryCard}>
           <View style={styles.fruitSummary}>
-            <Text style={styles.fruitEmoji}>{fruit.emoji}</Text>
+            {emojiItem?.type === 'emoji' ? (
+              <Text style={styles.fruitEmoji}>{emojiItem.value}</Text>
+            ) : emojiItem?.type === 'image' ? (
+              <Image
+                source={emojiItem.source}
+                style={{ width: 48, height: 48, marginRight: 16 }}
+                resizeMode="contain"
+              />
+            ) : (
+              <Text style={styles.fruitEmoji}>🍎</Text>
+            )}
             <View style={styles.fruitDetails}>
               <Text style={styles.fruitName}>{fruit.nameThai}</Text>
               <Text style={styles.fruitWeight}>{formatWeight(weight)}</Text>

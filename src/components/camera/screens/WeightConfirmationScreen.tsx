@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, Alert, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
-import { formatThaiCurrency } from '../../../lib/utils'
+import { formatThaiCurrency, getEmojiById } from '../../../lib/utils'
 import { Fruit } from '../../../data/mockData'
 import { cameraStyles } from '../styles'
 
@@ -26,6 +26,8 @@ export default function WeightConfirmationScreen({
 
   const currentWeight = parseFloat(weightInput) || 0
   const totalAmount = currentWeight * (selectedFruit?.pricePerKg || 0)
+
+  const emojiItem = selectedFruit?.emoji ? getEmojiById(selectedFruit.emoji) : undefined
 
   const handleConfirm = () => {
     const weight = parseFloat(weightInput)
@@ -55,7 +57,17 @@ export default function WeightConfirmationScreen({
         {/* Order summary */}
         <View style={cameraStyles.orderSummary}>
           <View style={cameraStyles.fruitSummary}>
-            <Text style={cameraStyles.summaryEmoji}>{selectedFruit?.emoji}</Text>
+            {emojiItem?.type === 'emoji' ? (
+              <Text style={cameraStyles.summaryEmoji}>{emojiItem.value}</Text>
+            ) : emojiItem?.type === 'image' ? (
+              <Image
+                source={emojiItem.source}
+                style={{ width: 64, height: 64, marginRight: 16 }}
+                resizeMode="contain"
+              />
+            ) : (
+              <Text style={cameraStyles.summaryEmoji}>🍎</Text>
+            )}
             <View style={cameraStyles.summaryDetails}>
               <Text style={cameraStyles.summaryFruitName}>{selectedFruit?.nameThai}</Text>
               <TouchableOpacity

@@ -13,12 +13,13 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../src/contexts/AuthContext";
 import { useDailySales, useTransactions } from "../../src/hooks/useApi";
 import { AuthAPI } from "../../src/lib/api";
-import { formatThaiCurrency, formatWeight } from "../../src/lib/utils";
+import { formatThaiCurrency, formatWeight, getEmojiById } from "../../src/lib/utils";
 
 export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -425,11 +426,12 @@ export default function HistoryScreen() {
           ) : (
             savedTransactions.slice(0, 5).map((transaction, index) => {
               // Enhanced safe data extraction with fallbacks
-              const fruitEmoji =
+              const fruitEmojiId =
                 transaction?.fruit?.emoji &&
                 typeof transaction.fruit.emoji === "string"
                   ? transaction.fruit.emoji
-                  : "🍎";
+                  : "apple";
+              const emojiItem = getEmojiById(fruitEmojiId);
               const fruitName =
                 transaction?.fruit?.nameThai &&
                 typeof transaction.fruit.nameThai === "string"
@@ -459,7 +461,17 @@ export default function HistoryScreen() {
                   style={styles.transactionCard}
                 >
                   <View style={styles.transactionIcon}>
-                    <Text style={styles.transactionEmoji}>{fruitEmoji}</Text>
+                    {emojiItem?.type === 'emoji' ? (
+                      <Text style={styles.transactionEmoji}>{emojiItem.value}</Text>
+                    ) : emojiItem?.type === 'image' ? (
+                      <Image
+                        source={emojiItem.source}
+                        style={{ width: 24, height: 24 }}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Text style={styles.transactionEmoji}>🍎</Text>
+                    )}
                   </View>
                   <View style={styles.transactionDetails}>
                     <Text style={styles.transactionName}>{fruitName}</Text>
