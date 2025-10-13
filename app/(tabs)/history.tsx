@@ -2,10 +2,11 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Linking,
   RefreshControl,
   ScrollView,
@@ -13,13 +14,16 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../src/contexts/AuthContext";
 import { useDailySales, useTransactions } from "../../src/hooks/useApi";
 import { AuthAPI } from "../../src/lib/api";
-import { formatThaiCurrency, formatWeight, getEmojiById } from "../../src/lib/utils";
+import {
+  formatThaiCurrency,
+  formatWeight,
+  getEmojiById,
+} from "../../src/lib/utils";
 
 export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -181,23 +185,6 @@ export default function HistoryScreen() {
         )
       : 1;
 
-  const handleLogout = () => {
-    Alert.alert("ออกจากระบบ", "คุณต้องการออกจากระบบหรือไม่?", [
-      {
-        text: "ยกเลิก",
-        style: "cancel",
-      },
-      {
-        text: "ออกจากระบบ",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace("/auth/login");
-        },
-      },
-    ]);
-  };
-
   const handleOpenWebReport = async () => {
     try {
       setLoadingWebLink(true);
@@ -274,29 +261,26 @@ export default function HistoryScreen() {
             )}
           </View>
           {isAuthenticated && (
-            <View style={styles.headerButtons}>
-              <TouchableOpacity
-                style={styles.webButton}
-                onPress={handleOpenWebReport}
-                disabled={loadingWebLink}
-              >
-                {loadingWebLink ? (
-                  <ActivityIndicator size="small" color="#B46A07" />
-                ) : (
+            <TouchableOpacity
+              style={styles.webButton}
+              onPress={handleOpenWebReport}
+              disabled={loadingWebLink}
+              accessibilityLabel="เปิดใน Durico"
+              accessibilityRole="button"
+            >
+              {loadingWebLink ? (
+                <ActivityIndicator size="small" color="#B46A07" />
+              ) : (
+                <>
                   <MaterialIcons
                     name="open-in-browser"
-                    size={20}
+                    size={18}
                     color="#B46A07"
                   />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={handleLogout}
-              >
-                <MaterialIcons name="logout" size={20} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
+                  <Text style={styles.webButtonText}>เปิดใน Durico</Text>
+                </>
+              )}
+            </TouchableOpacity>
           )}
         </View>
 
@@ -461,9 +445,11 @@ export default function HistoryScreen() {
                   style={styles.transactionCard}
                 >
                   <View style={styles.transactionIcon}>
-                    {emojiItem?.type === 'emoji' ? (
-                      <Text style={styles.transactionEmoji}>{emojiItem.value}</Text>
-                    ) : emojiItem?.type === 'image' ? (
+                    {emojiItem?.type === "emoji" ? (
+                      <Text style={styles.transactionEmoji}>
+                        {emojiItem.value}
+                      </Text>
+                    ) : emojiItem?.type === "image" ? (
                       <Image
                         source={emojiItem.source}
                         style={{ width: 24, height: 24 }}
@@ -564,12 +550,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   webButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fef3c7",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: "#fef3c7",
+    gap: 6,
+  },
+  webButtonText: {
+    fontSize: 13,
+    fontFamily: "Kanit-Medium",
+    color: "#B46A07",
   },
   logoutButton: {
     width: 40,

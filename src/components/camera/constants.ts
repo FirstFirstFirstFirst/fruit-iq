@@ -26,7 +26,7 @@ export const PRESET_EMOJIS: PresetEmojiItem[] = [
   { type: "emoji", value: "🥕", id: "carrot" },
   {
     type: "image",
-    source: require("../../../assets/images/durian.png"),
+    source: require("../../../assets/images/durian-emoji.png"),
     id: "durian",
   },
 ];

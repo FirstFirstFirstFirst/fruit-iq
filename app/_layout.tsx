@@ -3,25 +3,23 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Platform } from "react-native";
 import "react-native-reanimated";
 import "../global.css"; // Import NativeWind styles
-import { useFonts } from "expo-font";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
 import { AuthProvider } from "../src/contexts/AuthContext";
 
 export default function RootLayout() {
-  console.log(
-    "🔍 RootLayout: Component initializing with local fonts..."
-  );
+  console.log("🔍 RootLayout: Component initializing with local fonts...");
 
   const colorScheme = useColorScheme();
   console.log("🎨 RootLayout: Color scheme detected:", colorScheme);
-  
+
   const [loaded] = useFonts({
     "Kanit-Black": require("../assets/fonts/Kanit-Black.ttf"),
     "Kanit-BlackItalic": require("../assets/fonts/Kanit-BlackItalic.ttf"),
@@ -47,13 +45,28 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      console.log("✅ RootLayout: All local fonts have been loaded successfully");
+      console.log(
+        "✅ RootLayout: All local fonts have been loaded successfully"
+      );
       const availableFonts = [
-        "Kanit-Black", "Kanit-BlackItalic", "Kanit-Bold", "Kanit-BoldItalic",
-        "Kanit-ExtraBold", "Kanit-ExtraBoldItalic", "Kanit-ExtraLight", "Kanit-ExtraLightItalic",
-        "Kanit-Italic", "Kanit-Light", "Kanit-LightItalic", "Kanit-Medium",
-        "Kanit-MediumItalic", "Kanit-Regular", "Kanit-SemiBold", "Kanit-SemiBoldItalic",
-        "Kanit-Thin", "Kanit-ThinItalic"
+        "Kanit-Black",
+        "Kanit-BlackItalic",
+        "Kanit-Bold",
+        "Kanit-BoldItalic",
+        "Kanit-ExtraBold",
+        "Kanit-ExtraBoldItalic",
+        "Kanit-ExtraLight",
+        "Kanit-ExtraLightItalic",
+        "Kanit-Italic",
+        "Kanit-Light",
+        "Kanit-LightItalic",
+        "Kanit-Medium",
+        "Kanit-MediumItalic",
+        "Kanit-Regular",
+        "Kanit-SemiBold",
+        "Kanit-SemiBoldItalic",
+        "Kanit-Thin",
+        "Kanit-ThinItalic",
       ];
       console.log("📝 RootLayout: Available font families:", availableFonts);
     } else {

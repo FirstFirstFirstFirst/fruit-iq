@@ -8,6 +8,8 @@
     "scheme": "weighpay",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": { "enabled": false },
+    "runtimeVersion": { "policy": "appVersion" },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {

@@ -3,10 +3,10 @@ module.exports = function (api) {
   return {
     presets: [
       "babel-preset-expo", // Or 'module:metro-react-native-babel-preset' for React Native CLI projects
-      "nativewind/babel",
     ],
     plugins: [
       // Ensure 'react-native-reanimated/plugin' is the last plugin in the array
+      // "nativewind/babel",
       "react-native-reanimated/plugin",
     ],
   };

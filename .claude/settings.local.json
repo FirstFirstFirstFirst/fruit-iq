@@ -56,7 +56,9 @@
       "Bash(netstat:*)",
       "Bash(taskkill:*)",
       "Bash(set CI=1)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(npm ls:*)",
+      "WebFetch(domain:www.nativewind.dev)"
     ],
     "deny": [],
     "ask": []
