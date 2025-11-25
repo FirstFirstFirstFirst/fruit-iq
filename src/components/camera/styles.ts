@@ -116,7 +116,7 @@ export const cameraStyles = StyleSheet.create({
     marginTop: 12,
   },
   cleanButtonContainer: {
-    paddingBottom: 60,
+    paddingBottom: 24,
     alignItems: "center",
   },
   cleanScanButton: {
@@ -245,6 +245,20 @@ export const cameraStyles = StyleSheet.create({
     color: "#6b7280",
     marginLeft: 8,
   },
+  tipHintContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    gap: 8,
+  },
+  tipHintText: {
+    fontSize: 14,
+    fontFamily: "Kanit-Regular",
+    color: "#B46A07",
+  },
 
   // Modern Food Delivery Style
   modernContainer: {
@@ -254,8 +268,8 @@ export const cameraStyles = StyleSheet.create({
   modernHeader: {
     flexDirection: "row",
     alignItems: "center",
-    paddingTop: 60,
-    paddingBottom: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
     paddingHorizontal: 20,
     backgroundColor: "#ffffff",
     borderBottomWidth: 1,

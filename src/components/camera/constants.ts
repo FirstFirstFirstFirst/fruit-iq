@@ -34,7 +34,6 @@ export const PRESET_EMOJIS: PresetEmojiItem[] = [
 export type CameraStep =
   | "scan"
   | "camera"
-  | "manual-weight"
   | "select"
   | "weight"
   | "confirm"

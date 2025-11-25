@@ -8,7 +8,6 @@ import ContextMenu from "../../src/components/camera/modals/ContextMenu";
 import DeleteConfirmModal from "../../src/components/camera/modals/DeleteConfirmModal";
 import EmojiPickerModal from "../../src/components/camera/modals/EmojiPickerModal";
 import FruitSelectionScreen from "../../src/components/camera/screens/FruitSelectionScreen";
-import ManualWeightEntryScreen from "../../src/components/camera/screens/ManualWeightEntryScreen";
 import WeightConfirmationScreen from "../../src/components/camera/screens/WeightConfirmationScreen";
 import CartScreen from "../../src/components/camera/screens/CartScreen";
 import QRPaymentScreen from "../../src/components/QRPaymentScreen";
@@ -255,17 +254,6 @@ export default function CameraScreen() {
         onScan={cameraActions.handleScan}
         onManualEntry={cameraActions.handleManualEntry}
         onCancel={() => router.push("/")}
-      />
-    );
-  }
-
-  // Manual weight entry - bypass camera OCR
-  if (cameraState.step === "manual-weight") {
-    return (
-      <ManualWeightEntryScreen
-        onConfirm={cameraActions.handleManualWeightConfirm}
-        onBack={() => cameraState.setStep("scan")}
-        onCancel={handleCancelFlow}
       />
     );
   }
