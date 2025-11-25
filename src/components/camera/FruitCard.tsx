@@ -1,9 +1,10 @@
 import { Fruit } from "@/src/lib/api";
-import { formatThaiCurrency, getEmojiById } from "@/src/lib/utils";
+import { formatThaiCurrency } from "@/src/lib/utils";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { Text, TouchableOpacity, View, Image } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { cameraStyles } from "./styles";
+import EmojiDisplay from "./EmojiDisplay";
 
 interface FruitCardProps {
   fruit: Fruit;
@@ -16,8 +17,6 @@ export default function FruitCard({
   onSelect,
   onLongPress,
 }: FruitCardProps) {
-  const emojiItem = getEmojiById(fruit.emoji);
-
   return (
     <TouchableOpacity
       style={cameraStyles.improvedFruitCard}
@@ -26,17 +25,7 @@ export default function FruitCard({
       activeOpacity={0.8}
     >
       <View style={cameraStyles.fruitImageContainer}>
-        {emojiItem?.type === 'emoji' ? (
-          <Text style={cameraStyles.improvedFruitEmoji}>{emojiItem.value}</Text>
-        ) : emojiItem?.type === 'image' ? (
-          <Image
-            source={emojiItem.source}
-            style={{ width: 48, height: 48 }}
-            resizeMode="contain"
-          />
-        ) : (
-          <Text style={cameraStyles.improvedFruitEmoji}>🍎</Text>
-        )}
+        <EmojiDisplay emojiId={fruit.emoji} size={48} />
       </View>
       <View style={cameraStyles.improvedFruitInfo}>
         <Text style={cameraStyles.improvedFruitName}>{fruit.nameThai}</Text>

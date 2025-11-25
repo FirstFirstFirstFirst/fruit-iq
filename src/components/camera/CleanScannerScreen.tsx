@@ -5,6 +5,7 @@ import { TouchableOpacity, View, Text, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import ProcessingOverlay from './ProcessingOverlay'
 import { cameraStyles } from './styles'
+import { useNetworkStatus } from '../../hooks/useNetworkStatus'
 
 interface CleanScannerScreenProps {
   isProcessingPhoto: boolean
@@ -19,6 +20,18 @@ export default function CleanScannerScreen({
   onManualEntry,
   onCancel,
 }: CleanScannerScreenProps) {
+  const { isOffline } = useNetworkStatus();
+
+  const renderOfflineNotice = () => (
+    <View style={cameraStyles.offlineNotice}>
+      <MaterialIcons name="wifi-off" size={28} color="#f59e0b" />
+      <View style={cameraStyles.offlineTextContainer}>
+        <Text style={cameraStyles.offlineTitle}>ไม่มีอินเทอร์เน็ต</Text>
+        <Text style={cameraStyles.offlineText}>กรุณาใช้โหมดกรอกน้ำหนักด้วยตนเอง</Text>
+      </View>
+    </View>
+  );
+
   const renderInstructions = () => (
     <View style={cameraStyles.instructionsContainer}>
       <View style={cameraStyles.instructionsHeader}>
@@ -89,7 +102,11 @@ export default function CleanScannerScreen({
           </TouchableOpacity>
         )}
 
-        {!isProcessingPhoto && renderInstructions()}
+        {/* Offline notice */}
+        {isOffline && renderOfflineNotice()}
+
+        {/* Instructions - only show when online and not processing */}
+        {!isProcessingPhoto && !isOffline && renderInstructions()}
 
         <View style={cameraStyles.cleanCameraArea}>
           {isProcessingPhoto && (
@@ -101,30 +118,36 @@ export default function CleanScannerScreen({
           <TouchableOpacity
             style={[
               cameraStyles.cleanScanButton,
-              isProcessingPhoto && cameraStyles.scanButtonDisabled,
+              (isProcessingPhoto || isOffline) && cameraStyles.scanButtonDisabled,
             ]}
             onPress={onScan}
-            disabled={isProcessingPhoto}
+            disabled={isProcessingPhoto || isOffline}
           >
             {isProcessingPhoto ? (
               <MaterialIcons name="hourglass-empty" size={32} color="rgba(255, 255, 255, 0.6)" />
+            ) : isOffline ? (
+              <MaterialIcons name="wifi-off" size={32} color="rgba(255, 255, 255, 0.6)" />
             ) : (
               <MaterialIcons name="camera-alt" size={32} color="white" />
             )}
           </TouchableOpacity>
           {!isProcessingPhoto && (
-            <Text style={cameraStyles.scanButtonText}>เริ่มถ่ายรูป</Text>
+            <Text style={cameraStyles.scanButtonText}>
+              {isOffline ? 'ต้องเชื่อมต่ออินเทอร์เน็ต' : 'เริ่มถ่ายรูป'}
+            </Text>
           )}
         </View>
 
-        {/* Manual entry button */}
+        {/* Manual entry button - prominent when offline */}
         {!isProcessingPhoto && onManualEntry && (
           <TouchableOpacity
-            style={cameraStyles.manualEntryButton}
+            style={isOffline ? cameraStyles.manualEntryButtonProminent : cameraStyles.manualEntryButton}
             onPress={onManualEntry}
           >
-            <MaterialIcons name="edit" size={20} color="#B46A07" />
-            <Text style={cameraStyles.manualEntryButtonText}>{THAI_TEXT.enterManually}</Text>
+            <MaterialIcons name="edit" size={20} color={isOffline ? 'white' : '#B46A07'} />
+            <Text style={isOffline ? cameraStyles.manualEntryButtonProminentText : cameraStyles.manualEntryButtonText}>
+              {THAI_TEXT.enterManually}
+            </Text>
           </TouchableOpacity>
         )}
       </View>

@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Linking,
   RefreshControl,
   ScrollView,
@@ -22,8 +21,8 @@ import { AuthAPI } from "../../src/lib/api";
 import {
   formatThaiCurrency,
   formatWeight,
-  getEmojiById,
 } from "../../src/lib/utils";
+import EmojiDisplay from "../../src/components/camera/EmojiDisplay";
 
 export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -415,7 +414,6 @@ export default function HistoryScreen() {
                 typeof transaction.fruit.emoji === "string"
                   ? transaction.fruit.emoji
                   : "apple";
-              const emojiItem = getEmojiById(fruitEmojiId);
               const fruitName =
                 transaction?.fruit?.nameThai &&
                 typeof transaction.fruit.nameThai === "string"
@@ -445,19 +443,7 @@ export default function HistoryScreen() {
                   style={styles.transactionCard}
                 >
                   <View style={styles.transactionIcon}>
-                    {emojiItem?.type === "emoji" ? (
-                      <Text style={styles.transactionEmoji}>
-                        {emojiItem.value}
-                      </Text>
-                    ) : emojiItem?.type === "image" ? (
-                      <Image
-                        source={emojiItem.source}
-                        style={{ width: 24, height: 24 }}
-                        resizeMode="contain"
-                      />
-                    ) : (
-                      <Text style={styles.transactionEmoji}>🍎</Text>
-                    )}
+                    <EmojiDisplay emojiId={fruitEmojiId} size={24} />
                   </View>
                   <View style={styles.transactionDetails}>
                     <Text style={styles.transactionName}>{fruitName}</Text>

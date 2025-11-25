@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://dapi.werapun.com';
 
@@ -156,12 +157,17 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
     const headers = await this.getAuthHeaders();
 
+    // Add timeout with AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
     const config: RequestInit = {
       ...options,
       headers: {
         ...headers,
         ...options.headers,
       },
+      signal: controller.signal,
     };
 
     // [...DEBUG] Log request details for debugging
@@ -175,6 +181,7 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
+      clearTimeout(timeoutId);
 
       // [...DEBUG] Log response status
       console.log('[...DEBUG] API Response Status:', response.status);
@@ -196,6 +203,17 @@ class ApiClient {
       console.log('[...DEBUG] API Success Response:', { endpoint, dataReceived: !!data });
       return data;
     } catch (error) {
+      clearTimeout(timeoutId);
+
+      // Handle timeout abort error
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('[...DEBUG] Request Timeout:', {
+          url,
+          timeout: '8 seconds',
+        });
+        throw new Error('Request timeout - please check your connection');
+      }
+
       // [...DEBUG] Enhanced error logging
       if (error instanceof TypeError && error.message === 'Network request failed') {
         console.error('[...DEBUG] Network Request Failed:', {
@@ -625,4 +643,66 @@ export const WeightDetectionAPI = {
   async getStatus(): Promise<{ configured: boolean; available: boolean }> {
     return apiClient.get<{ configured: boolean; available: boolean }>('/weight-detection/status');
   }
+};
+
+// ============================================
+// Custom Emoji/Image Upload API
+// ============================================
+
+export interface UploadedEmoji {
+  id: string;
+  url: string;
+  createdAt: string;
+}
+
+const UPLOADED_EMOJIS_KEY = 'uploaded_emojis';
+
+// Emoji Upload API - Mock implementation using AsyncStorage
+// TODO: Replace with actual backend API when available
+export const EmojiUploadAPI = {
+  async uploadImage(imageUri: string): Promise<{ url: string; id: string }> {
+    try {
+      // Generate unique ID for the uploaded image
+      const id = `custom:${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+      // Store the image URI locally (in production, this would upload to server)
+      const existingEmojis = await this.getUploadedEmojis();
+      const newEmoji: UploadedEmoji = {
+        id,
+        url: imageUri,
+        createdAt: new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem(
+        UPLOADED_EMOJIS_KEY,
+        JSON.stringify([...existingEmojis, newEmoji])
+      );
+
+      return { url: imageUri, id };
+    } catch (error) {
+      console.error('Error uploading emoji image:', error);
+      throw new Error('Failed to upload image');
+    }
+  },
+
+  async getUploadedEmojis(): Promise<UploadedEmoji[]> {
+    try {
+      const stored = await AsyncStorage.getItem(UPLOADED_EMOJIS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error getting uploaded emojis:', error);
+      return [];
+    }
+  },
+
+  async deleteUploadedEmoji(id: string): Promise<void> {
+    try {
+      const existingEmojis = await this.getUploadedEmojis();
+      const filtered = existingEmojis.filter((emoji) => emoji.id !== id);
+      await AsyncStorage.setItem(UPLOADED_EMOJIS_KEY, JSON.stringify(filtered));
+    } catch (error) {
+      console.error('Error deleting uploaded emoji:', error);
+      throw new Error('Failed to delete image');
+    }
+  },
 };

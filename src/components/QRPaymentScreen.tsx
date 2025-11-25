@@ -21,19 +21,26 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import generatePayload from 'promptpay-qr';
 import { useSettings, useTransactions } from '../hooks/useApi';
-import { formatThaiCurrency, formatWeight, getEmojiById } from '../lib/utils';
+import { formatThaiCurrency, formatWeight } from '../lib/utils';
 import { Fruit } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
+import EmojiDisplay from './camera/EmojiDisplay';
+import type { CartItem } from '../hooks/useCart';
 
 const { width } = Dimensions.get('window');
 
+// PromptPay logo for QR payment branding
+const PromptPayLogo = require('../../assets/images/prompt-pay-logo.png');
+
 interface QRPaymentScreenProps {
-  fruit: Fruit;
-  weight: number;
+  fruit?: Fruit;
+  weight?: number;
   totalAmount: number;
-  transactionId: number;
+  transactionId?: number;
+  transactionIds?: number[];
   onSave: () => void;
   onCancel: () => void;
+  cartItems?: CartItem[];
 }
 
 export default function QRPaymentScreen({
@@ -41,9 +48,13 @@ export default function QRPaymentScreen({
   weight,
   totalAmount,
   transactionId,
+  transactionIds,
   onSave,
-  onCancel
+  onCancel,
+  cartItems,
 }: QRPaymentScreenProps) {
+  // Determine if we're in cart mode
+  const isCartMode = cartItems && cartItems.length > 0;
   const [qrCodeData, setQrCodeData] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,8 +64,6 @@ export default function QRPaymentScreen({
   const { promptpayPhone, getPromptpayPhone } = useSettings();
   const { markTransactionAsSaved } = useTransactions();
   const { isAuthenticated, selectedFarm } = useAuth();
-
-  const emojiItem = getEmojiById(fruit.emoji);
 
   const generateQRCode = useCallback(async () => {
     try {
@@ -99,15 +108,32 @@ export default function QRPaymentScreen({
     try {
       setSaving(true);
 
-      // Mark transaction as saved via API (also creates farm activity if user has farm)
-      await markTransactionAsSaved(transactionId);
+      // Mark transaction(s) as saved via API
+      if (isCartMode && transactionIds && transactionIds.length > 0) {
+        // Cart mode: mark all transactions as saved
+        await Promise.all(transactionIds.map((id) => markTransactionAsSaved(id)));
+        console.log(`Cart transactions ${transactionIds.join(', ')} marked as saved successfully`);
+      } else if (transactionId) {
+        // Single item mode
+        await markTransactionAsSaved(transactionId);
+        console.log(`Transaction ${transactionId} marked as saved successfully`);
+      }
 
-      console.log(`Transaction ${transactionId} marked as saved successfully`);
+      // Build success message
+      let successMessage = '';
+      if (isCartMode && cartItems) {
+        const itemsSummary = cartItems
+          .map((item) => `${item.fruitName} ${item.weight.toFixed(2)} กก.`)
+          .join('\n');
+        successMessage = `${itemsSummary}\n\nยอดรวม ${formatThaiCurrency(totalAmount)}`;
+      } else if (fruit && weight) {
+        successMessage = `ขาย${fruit.nameThai}\nน้ำหนัก ${formatWeight(weight)}\nยอดเงิน ${formatThaiCurrency(totalAmount)}`;
+      }
 
       // Show success message with actions
       Alert.alert(
         '✅ บันทึกสำเร็จ!',
-        `ขาย${fruit.nameThai}\nน้ำหนัก ${formatWeight(weight)}\nยอดเงิน ${formatThaiCurrency(totalAmount)}\n\n${
+        `${successMessage}\n\n${
           isAuthenticated && selectedFarm
             ? 'รายการขายได้รับการบันทึกและเพิ่มกิจกรรมไปยังฟาร์มของคุณแล้ว'
             : 'รายการขายได้รับการบันทึกแล้ว'
@@ -185,54 +211,77 @@ export default function QRPaymentScreen({
 
         {/* Transaction Summary */}
         <View style={styles.summaryCard}>
-          <View style={styles.fruitSummary}>
-            {emojiItem?.type === 'emoji' ? (
-              <Text style={styles.fruitEmoji}>{emojiItem.value}</Text>
-            ) : emojiItem?.type === 'image' ? (
-              <Image
-                source={emojiItem.source}
-                style={{ width: 48, height: 48, marginRight: 16 }}
-                resizeMode="contain"
-              />
-            ) : (
-              <Text style={styles.fruitEmoji}>🍎</Text>
-            )}
-            <View style={styles.fruitDetails}>
-              <Text style={styles.fruitName}>{fruit.nameThai}</Text>
-              <Text style={styles.fruitWeight}>{formatWeight(weight)}</Text>
-            </View>
-          </View>
-          
-          <View style={styles.priceDetails}>
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>น้ำหนัก</Text>
-              <Text style={styles.priceValue}>{formatWeight(weight)}</Text>
-            </View>
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>ราคาต่อกิโลกรัม</Text>
-              <Text style={styles.priceValue}>{formatThaiCurrency(fruit.pricePerKg)}</Text>
-            </View>
-            <View style={[styles.priceRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>ยอดรวม</Text>
-              <Text style={styles.totalPrice}>{formatThaiCurrency(totalAmount)}</Text>
-            </View>
-          </View>
+          {isCartMode && cartItems ? (
+            // Cart mode: show all items
+            <>
+              <Text style={styles.cartTitle}>รายการในตะกร้า ({cartItems.length} รายการ)</Text>
+              {cartItems.map((item, index) => (
+                <View key={item.id} style={[styles.cartItemRow, index > 0 && styles.cartItemBorder]}>
+                  <View style={styles.cartItemLeft}>
+                    <EmojiDisplay emojiId={item.emoji} size={36} />
+                    <View style={styles.cartItemDetails}>
+                      <Text style={styles.cartItemName}>{item.fruitName}</Text>
+                      <Text style={styles.cartItemWeight}>
+                        {item.weight.toFixed(2)} กก. × {formatThaiCurrency(item.pricePerKg)}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.cartItemSubtotal}>{formatThaiCurrency(item.subtotal)}</Text>
+                </View>
+              ))}
+              <View style={[styles.priceRow, styles.totalRow, styles.cartTotalRow]}>
+                <Text style={styles.totalLabel}>ยอดรวมทั้งหมด</Text>
+                <Text style={styles.totalPrice}>{formatThaiCurrency(totalAmount)}</Text>
+              </View>
+            </>
+          ) : (
+            // Single item mode
+            <>
+              <View style={styles.fruitSummary}>
+                <View style={{ marginRight: 16 }}>
+                  <EmojiDisplay emojiId={fruit?.emoji || 'apple'} size={48} />
+                </View>
+                <View style={styles.fruitDetails}>
+                  <Text style={styles.fruitName}>{fruit?.nameThai ?? '-'}</Text>
+                  <Text style={styles.fruitWeight}>{formatWeight(weight ?? 0)}</Text>
+                </View>
+              </View>
+
+              <View style={styles.priceDetails}>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>น้ำหนัก</Text>
+                  <Text style={styles.priceValue}>{formatWeight(weight ?? 0)}</Text>
+                </View>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>ราคาต่อกิโลกรัม</Text>
+                  <Text style={styles.priceValue}>{formatThaiCurrency(fruit?.pricePerKg ?? 0)}</Text>
+                </View>
+                <View style={[styles.priceRow, styles.totalRow]}>
+                  <Text style={styles.totalLabel}>ยอดรวม</Text>
+                  <Text style={styles.totalPrice}>{formatThaiCurrency(totalAmount)}</Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
 
         {/* QR Code Display */}
         <View style={styles.qrContainer}>
           <View style={styles.qrCard}>
-            <Text style={styles.qrTitle}>สแกนเพื่อชำระเงิน</Text>
-            <Text style={styles.qrSubtitle}>PromptPay QR Code</Text>
-            
+            {/* PromptPay Logo Banner */}
+            <Image
+              source={PromptPayLogo}
+              style={styles.promptPayLogo}
+              resizeMode="contain"
+            />
+
             <View style={styles.qrCodeContainer}>
               {qrGenerated && qrCodeData ? (
                 <QRCode
                   value={qrCodeData}
-                  size={width * 0.6}
+                  size={width * 0.5}
                   backgroundColor="white"
-                  color="black"
-                  logo={undefined}
+                  color="#1e4068"
                 />
               ) : (
                 <View style={styles.qrPlaceholder}>
@@ -242,15 +291,17 @@ export default function QRPaymentScreen({
               )}
             </View>
 
+            <Text style={styles.qrTitle}>สแกนเพื่อชำระเงิน</Text>
+
             <View style={styles.qrInfo}>
               <View style={styles.qrInfoRow}>
-                <MaterialIcons name="smartphone" size={16} color="#6b7280" />
+                <MaterialIcons name="smartphone" size={16} color="rgba(255, 255, 255, 0.8)" />
                 <Text style={styles.qrInfoText}>
                   เปิดแอปธนาคารของคุณและสแกน QR Code
                 </Text>
               </View>
               <View style={styles.qrInfoRow}>
-                <MaterialIcons name="security" size={16} color="#6b7280" />
+                <MaterialIcons name="security" size={16} color="rgba(255, 255, 255, 0.8)" />
                 <Text style={styles.qrInfoText}>
                   การชำระเงินปลอดภัยผ่าน PromptPay
                 </Text>
@@ -459,41 +510,41 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   qrCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1e4068',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
+    elevation: 8,
+  },
+  promptPayLogo: {
+    width: '80%',
+    height: 50,
+    marginBottom: 16,
   },
   qrTitle: {
-    fontSize: 18,
-    fontFamily: 'Kanit-SemiBold',
-    color: '#1f2937',
-    marginBottom: 4,
+    fontSize: 16,
+    fontFamily: 'Kanit-Medium',
+    color: '#ffffff',
+    marginTop: 16,
   },
   qrSubtitle: {
     fontSize: 14,
     fontFamily: 'Kanit-Regular',
-    color: '#6b7280',
+    color: 'rgba(255, 255, 255, 0.8)',
     marginBottom: 24,
   },
   qrCodeContainer: {
-    padding: 20,
+    padding: 16,
     backgroundColor: '#ffffff',
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    marginBottom: 24,
   },
   qrPlaceholder: {
-    width: width * 0.6,
-    height: width * 0.6,
+    width: width * 0.5,
+    height: width * 0.5,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f8fafc',
@@ -508,6 +559,7 @@ const styles = StyleSheet.create({
   },
   qrInfo: {
     alignItems: 'center',
+    marginTop: 16,
   },
   qrInfoRow: {
     flexDirection: 'row',
@@ -518,7 +570,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 12,
     fontFamily: 'Kanit-Regular',
-    color: '#6b7280',
+    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
   },
 
@@ -623,5 +675,50 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontSize: 16,
     fontFamily: 'Kanit-Medium',
+  },
+
+  // Cart mode styles
+  cartTitle: {
+    fontSize: 16,
+    fontFamily: 'Kanit-SemiBold',
+    color: '#1f2937',
+    marginBottom: 16,
+  },
+  cartItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  cartItemBorder: {
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  cartItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  cartItemDetails: {
+    flex: 1,
+  },
+  cartItemName: {
+    fontSize: 15,
+    fontFamily: 'Kanit-Medium',
+    color: '#1f2937',
+  },
+  cartItemWeight: {
+    fontSize: 13,
+    fontFamily: 'Kanit-Regular',
+    color: '#6b7280',
+  },
+  cartItemSubtotal: {
+    fontSize: 15,
+    fontFamily: 'Kanit-SemiBold',
+    color: '#B46A07',
+  },
+  cartTotalRow: {
+    marginTop: 8,
   },
 });

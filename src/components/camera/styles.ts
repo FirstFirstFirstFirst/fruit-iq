@@ -740,4 +740,53 @@ export const cameraStyles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Kanit-SemiBold",
   },
+
+  // Offline Notice
+  offlineNotice: {
+    backgroundColor: "#fef3c7",
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#fcd34d",
+  },
+  offlineTextContainer: {
+    flex: 1,
+  },
+  offlineTitle: {
+    fontSize: 16,
+    fontFamily: "Kanit-SemiBold",
+    color: "#92400e",
+    marginBottom: 2,
+  },
+  offlineText: {
+    fontSize: 14,
+    fontFamily: "Kanit-Regular",
+    color: "#b45309",
+  },
+  manualEntryButtonProminent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#B46A07",
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 24,
+    marginTop: 16,
+    gap: 8,
+    shadowColor: "#B46A07",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  manualEntryButtonProminentText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: "Kanit-SemiBold",
+  },
 });

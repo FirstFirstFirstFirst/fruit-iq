@@ -6,13 +6,14 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import "react-native-reanimated";
 import "../global.css"; // Import NativeWind styles
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { AuthProvider } from "../src/contexts/AuthContext";
+import { OfflineBanner } from "../src/components/OfflineBanner";
 
 export default function RootLayout() {
   console.log("🔍 RootLayout: Component initializing with local fonts...");
@@ -88,13 +89,16 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-          <Stack.Screen name="auth/signup" options={{ headerShown: false }} />
-          <Stack.Screen name="farm/setup" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        <View style={{ flex: 1 }}>
+          <OfflineBanner />
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/signup" options={{ headerShown: false }} />
+            <Stack.Screen name="farm/setup" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </View>
         <StatusBar style="auto" />
       </ThemeProvider>
     </AuthProvider>

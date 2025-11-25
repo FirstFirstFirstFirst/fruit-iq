@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Alert, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import CleanScannerScreen from "../../src/components/camera/CleanScannerScreen";
@@ -8,13 +8,17 @@ import ContextMenu from "../../src/components/camera/modals/ContextMenu";
 import DeleteConfirmModal from "../../src/components/camera/modals/DeleteConfirmModal";
 import EmojiPickerModal from "../../src/components/camera/modals/EmojiPickerModal";
 import FruitSelectionScreen from "../../src/components/camera/screens/FruitSelectionScreen";
+import ManualWeightEntryScreen from "../../src/components/camera/screens/ManualWeightEntryScreen";
 import WeightConfirmationScreen from "../../src/components/camera/screens/WeightConfirmationScreen";
+import CartScreen from "../../src/components/camera/screens/CartScreen";
 import QRPaymentScreen from "../../src/components/QRPaymentScreen";
 import WeighScaleCamera from "../../src/components/WeighScaleCamera";
-import { useFruits } from "../../src/hooks/useApi";
+import { useFruits, useTransactions } from "../../src/hooks/useApi";
 import { useCameraActions } from "../../src/hooks/useCameraActions";
 import { useCameraState } from "../../src/hooks/useCameraState";
 import { useFruitForm } from "../../src/hooks/useFruitForm";
+import { useCart } from "../../src/hooks/useCart";
+import type { PriceType } from "../../src/components/camera/modals/BulkPriceModal";
 
 export default function CameraScreen() {
   const router = useRouter();
@@ -25,10 +29,15 @@ export default function CameraScreen() {
     deleteFruit,
     loading: fruitsLoading,
   } = useFruits();
+  const { addTransaction } = useTransactions();
 
   // Custom hooks
   const cameraState = useCameraState();
   const fruitForm = useFruitForm();
+  const cart = useCart();
+
+  // Track transaction IDs for cart items
+  const [cartTransactionIds, setCartTransactionIds] = useState<number[]>([]);
 
   const selectedFruit = fruits?.find(
     (f) => f.fruitId === cameraState.selectedFruitId
@@ -55,6 +64,8 @@ export default function CameraScreen() {
   const handleNewScan = () => {
     cameraState.resetCameraState();
     fruitForm.closeAllModals();
+    cart.clearCart();
+    setCartTransactionIds([]);
   };
 
   const handleQRPaymentCancel = () => {
@@ -144,6 +155,77 @@ export default function CameraScreen() {
     }
   };
 
+  // Cart functions
+  const handleAddToCart = async (
+    weight: number,
+    customTotal: number | null,
+    priceType: PriceType
+  ) => {
+    if (!selectedFruit) return;
+
+    try {
+      // Calculate subtotal
+      const subtotal =
+        customTotal ?? weight * selectedFruit.pricePerKg;
+
+      // Create transaction for this item
+      const transaction = await addTransaction({
+        fruitId: selectedFruit.fruitId,
+        weightKg: weight,
+        pricePerKg:
+          priceType === "normal"
+            ? selectedFruit.pricePerKg
+            : subtotal / weight,
+        totalAmount: subtotal,
+      });
+
+      // Add to cart
+      cart.addItem({
+        fruitId: selectedFruit.fruitId,
+        fruitName: selectedFruit.nameThai,
+        emoji: selectedFruit.emoji,
+        weight,
+        pricePerKg:
+          priceType === "normal"
+            ? selectedFruit.pricePerKg
+            : subtotal / weight,
+        // Use effective price per kg for bulk/custom
+      });
+
+      // Track transaction ID
+      setCartTransactionIds((prev) => [...prev, transaction.transactionId]);
+
+      // Go to cart review
+      cameraState.setStep("cart-review");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      Alert.alert(
+        "ข้อผิดพลาด",
+        "ไม่สามารถเพิ่มสินค้าลงตะกร้าได้ กรุณาลองอีกครั้ง"
+      );
+    }
+  };
+
+  const handleCartAddMore = () => {
+    // Reset for adding new item, but keep cart
+    cameraState.setStep("scan");
+    cameraState.setSelectedFruitId(null);
+    cameraState.setDetectedWeight(null);
+  };
+
+  const handleCartCheckout = () => {
+    if (cart.isEmpty) {
+      Alert.alert("ตะกร้าว่าง", "กรุณาเพิ่มสินค้าก่อนชำระเงิน");
+      return;
+    }
+    cameraState.setStep("qr-payment");
+  };
+
+  const handleCartClear = () => {
+    cart.clearCart();
+    setCartTransactionIds([]);
+    cameraState.setStep("scan");
+  };
 
   // Success handling - no longer a full screen, handled by Alert in handleQRPaymentSave
   // The success step is kept for state management but doesn't render anything
@@ -173,6 +255,32 @@ export default function CameraScreen() {
         onScan={cameraActions.handleScan}
         onManualEntry={cameraActions.handleManualEntry}
         onCancel={() => router.push("/")}
+      />
+    );
+  }
+
+  // Manual weight entry - bypass camera OCR
+  if (cameraState.step === "manual-weight") {
+    return (
+      <ManualWeightEntryScreen
+        onConfirm={cameraActions.handleManualWeightConfirm}
+        onBack={() => cameraState.setStep("scan")}
+        onCancel={handleCancelFlow}
+      />
+    );
+  }
+
+  // Cart review screen
+  if (cameraState.step === "cart-review") {
+    return (
+      <CartScreen
+        items={cart.items}
+        total={cart.total}
+        onAddMore={handleCartAddMore}
+        onCheckout={handleCartCheckout}
+        onRemoveItem={cart.removeItem}
+        onClearCart={handleCartClear}
+        onBack={() => cameraState.setStep("scan")}
       />
     );
   }
@@ -270,14 +378,39 @@ export default function CameraScreen() {
             onBack={() => cameraState.setStep("select")}
             onConfirm={cameraActions.handleConfirm}
             onCancel={handleCancelFlow}
+            onAddToCart={handleAddToCart}
+            cartItemCount={cart.itemCount}
           />
         </Modal>
       </>
     );
   }
 
-  // QR Payment screen - shown as modal over weight confirmation modal
+  // QR Payment screen - handles both single item and cart mode
   if (cameraState.step === "qr-payment") {
+    const isCartMode = cart.items.length > 0;
+
+    // Cart mode: show QR for cart total
+    if (isCartMode) {
+      return (
+        <Modal
+          visible={true}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={handleQRPaymentCancel}
+        >
+          <QRPaymentScreen
+            cartItems={cart.items}
+            totalAmount={cart.total}
+            transactionIds={cartTransactionIds}
+            onSave={handleNewScan}
+            onCancel={handleQRPaymentCancel}
+          />
+        </Modal>
+      );
+    }
+
+    // Single item mode: show modals stack
     return (
       <>
         {/* Base: Fruit Selection Screen */}

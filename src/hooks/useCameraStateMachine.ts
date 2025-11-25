@@ -12,9 +12,15 @@ const STEP_CONFIG: Record<CameraStep, CameraStepConfig> = {
   scan: {
     canGoBack: false,
     nextStep: 'camera',
-    allowedTransitions: ['camera', 'add-fruit'],
+    allowedTransitions: ['camera', 'manual-weight', 'add-fruit'],
   },
   camera: {
+    canGoBack: true,
+    previousStep: 'scan',
+    nextStep: 'select',
+    allowedTransitions: ['scan', 'select'],
+  },
+  'manual-weight': {
     canGoBack: true,
     previousStep: 'scan',
     nextStep: 'select',
@@ -30,7 +36,13 @@ const STEP_CONFIG: Record<CameraStep, CameraStepConfig> = {
     canGoBack: true,
     previousStep: 'select',
     nextStep: 'confirm',
-    allowedTransitions: ['select', 'confirm'],
+    allowedTransitions: ['select', 'confirm', 'cart-review', 'qr-payment'],
+  },
+  'cart-review': {
+    canGoBack: true,
+    previousStep: 'weight',
+    nextStep: 'qr-payment',
+    allowedTransitions: ['scan', 'qr-payment'],
   },
   confirm: {
     canGoBack: true,

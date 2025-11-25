@@ -150,6 +150,11 @@ export function useCameraActions({
 
   const handleManualEntry = () => {
     setDetectedWeight(null);
+    setStep("manual-weight");
+  };
+
+  const handleManualWeightConfirm = (weight: number) => {
+    setDetectedWeight(weight);
     setStep("select");
   };
 
@@ -190,6 +195,7 @@ export function useCameraActions({
     handleCameraCancel,
     handleFruitSelect,
     handleManualEntry,
+    handleManualWeightConfirm,
     handleConfirm,
     handleQRPaymentSave,
   };

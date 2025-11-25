@@ -94,6 +94,17 @@ export default function ProfileScreen() {
               <Text style={styles.menuItemText}>สลับบัญชี</Text>
               <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push("/privacy-policy" as "/auth/login")}
+              accessibilityRole="button"
+              accessibilityLabel="นโยบายความเป็นส่วนตัว"
+            >
+              <MaterialIcons name="policy" size={24} color="#374151" />
+              <Text style={styles.menuItemText}>นโยบายความเป็นส่วนตัว</Text>
+              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+            </TouchableOpacity>
           </View>
 
           {/* Logout Button */}

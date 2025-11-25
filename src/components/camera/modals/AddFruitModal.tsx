@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import {
-  Image,
   Modal,
   Text,
   TextInput,
@@ -9,8 +8,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PRESET_EMOJIS } from "../constants";
 import { modalStyles } from "../modalStyles";
+import EmojiDisplay from "../EmojiDisplay";
 
 interface AddFruitModalProps {
   visible: boolean;
@@ -41,12 +40,6 @@ export default function AddFruitModal({
   onSubmit,
   isFormValid,
 }: AddFruitModalProps) {
-  // Get the emoji/image item by ID
-  const selectedEmojiItem = PRESET_EMOJIS.find(
-    (item) => item.id === newFruitEmoji
-  );
-  const defaultEmojiItem = PRESET_EMOJIS.find((item) => item.id === "apple");
-
   const handlePriceChange = (text: string) => {
     const numericText = text.replace(/[^0-9.]/g, "");
     const parts = numericText.split(".");
@@ -92,24 +85,10 @@ export default function AddFruitModal({
               onPress={onShowEmojiPicker}
             >
               <View style={modalStyles.emojiDisplay}>
-                {selectedEmojiItem ? (
-                  selectedEmojiItem.type === "emoji" ? (
-                    <Text style={{ fontSize: 40 }}>
-                      {selectedEmojiItem.value}
-                    </Text>
-                  ) : (
-                    <Image
-                      source={selectedEmojiItem.source}
-                      style={{ width: 40, height: 40 }}
-                      resizeMode="contain"
-                    />
-                  )
-                ) : defaultEmojiItem?.type === "emoji" ? (
-                  <Text style={{ fontSize: 40 }}>{defaultEmojiItem.value}</Text>
-                ) : null}
+                <EmojiDisplay emojiId={newFruitEmoji || "apple"} size={40} />
               </View>
               <Text style={modalStyles.emojiPickerText}>
-                แตะเพื่อเลือกอีโมจิ
+                แตะเพื่อเลือกไอคอน
               </Text>
               <MaterialIcons
                 name="keyboard-arrow-down"
