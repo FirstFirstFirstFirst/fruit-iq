@@ -28,7 +28,7 @@ export default function FruitSelectionScreen({
   onCancel,
 }: FruitSelectionScreenProps) {
   return (
-    <SafeAreaView style={cameraStyles.modernContainer}>
+    <SafeAreaView style={cameraStyles.modernContainer} edges={["top"]}>
       {/* Modern Header */}
       <View style={cameraStyles.modernHeader}>
         <TouchableOpacity style={cameraStyles.backButton} onPress={onBack}>
