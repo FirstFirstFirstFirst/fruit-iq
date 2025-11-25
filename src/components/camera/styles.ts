@@ -670,7 +670,7 @@ export const cameraStyles = StyleSheet.create({
   summaryWeight: {
     fontSize: 14,
     fontFamily: "Kanit-Regular",
-    color: "#6b7280",
+    color: "#374151",
   },
   weightInputContainer: {
     marginTop: 4,
@@ -692,7 +692,7 @@ export const cameraStyles = StyleSheet.create({
   weightUnit: {
     fontSize: 14,
     fontFamily: "Kanit-Regular",
-    color: "#6b7280",
+    color: "#374151",
   },
   weightDisplayRow: {
     flexDirection: "row",
