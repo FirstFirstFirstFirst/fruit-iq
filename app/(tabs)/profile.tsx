@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -44,7 +45,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <LinearGradient colors={["#B46A07", "#D97706"]} style={styles.gradient}>
         {/* Header */}
         <View style={styles.header}>
@@ -56,7 +57,11 @@ export default function ProfileScreen() {
         </View>
 
         {/* Content Card */}
-        <View style={styles.contentCard}>
+        <ScrollView
+          style={styles.contentCard}
+          contentContainerStyle={styles.contentCardInner}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Farm Info Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>ฟาร์มของฉัน</Text>
@@ -128,7 +133,7 @@ export default function ProfileScreen() {
 
           {/* Version Info */}
           <Text style={styles.versionText}>Version 1.0.0</Text>
-        </View>
+        </ScrollView>
       </LinearGradient>
     </SafeAreaView>
   );
@@ -173,8 +178,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+  },
+  contentCardInner: {
     paddingTop: 24,
     paddingHorizontal: 24,
+    paddingBottom: 100,
   },
   section: {
     marginBottom: 24,

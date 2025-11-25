@@ -41,11 +41,7 @@ export default function HomeScreen() {
 
   // Check PromptPay setup status (farm setup is handled by AuthGuard)
   useEffect(() => {
-    if (
-      !settingsLoading &&
-      isAuthenticated &&
-      !promptpayPhone
-    ) {
+    if (!settingsLoading && isAuthenticated && !promptpayPhone) {
       setShowPromptPayModal(true);
     }
   }, [settingsLoading, isAuthenticated, promptpayPhone]);
@@ -534,7 +530,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 0,
+    paddingBottom: 100,
   },
   hero: {
     alignItems: "center",
@@ -621,11 +617,11 @@ const styles = StyleSheet.create({
   },
   featuresContainer: {
     backgroundColor: "white",
+    marginHorizontal: 8,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 24,
-    paddingHorizontal: 24,
-    paddingBottom: 20,
+    paddingHorizontal: 12,
   },
   featuresTitle: {
     fontSize: 20,
@@ -700,11 +696,14 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   ctaContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     paddingVertical: 20,
     backgroundColor: "white",
     alignItems: "center",
     marginTop: "auto",
+    marginHorizontal: 8,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   ctaContainerSmall: {
     paddingVertical: 16,
@@ -722,7 +721,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
-    minWidth: 150,
+    minWidth: 320,
   },
   ctaButtonSmall: {
     paddingVertical: 10,

@@ -223,10 +223,11 @@ export default function HistoryScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -472,6 +473,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 100,
+  },
   errorBanner: {
     backgroundColor: "#fef3c7",
     borderLeftWidth: 4,
@@ -506,7 +510,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    paddingTop: 60,
+    paddingTop: 20,
     paddingHorizontal: 24,
     paddingBottom: 20,
   },

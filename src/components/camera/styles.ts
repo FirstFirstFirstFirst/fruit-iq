@@ -93,6 +93,7 @@ export const cameraStyles = StyleSheet.create({
   cleanScannerContainer: {
     flex: 1,
     backgroundColor: "#000",
+    paddingTop: 24,
   },
   cleanCameraArea: {
     flex: 1,
@@ -165,8 +166,8 @@ export const cameraStyles = StyleSheet.create({
   // Instructions Container
   instructionsContainer: {
     backgroundColor: "#ffffff",
-    marginTop: 60,
-    margin: 20,
+    marginTop: 40,
+    marginHorizontal: 20,
     borderRadius: 20,
     padding: 20,
     shadowColor: "#000",
@@ -264,6 +265,11 @@ export const cameraStyles = StyleSheet.create({
   modernContainer: {
     flex: 1,
     backgroundColor: "#ffffff",
+  },
+  // Clean Scanner SafeArea - black background to match scanner
+  cleanScannerSafeArea: {
+    flex: 1,
+    backgroundColor: "#000",
   },
   modernHeader: {
     flexDirection: "row",
@@ -632,7 +638,6 @@ export const cameraStyles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 20,
-    paddingTop: 60,
     borderBottomWidth: 1,
     borderBottomColor: "#e2e8f0",
   },

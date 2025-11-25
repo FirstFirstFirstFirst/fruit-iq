@@ -657,19 +657,34 @@ export interface UploadedEmoji {
 
 const UPLOADED_EMOJIS_KEY = 'uploaded_emojis';
 
-// Emoji Upload API - Mock implementation using AsyncStorage
-// TODO: Replace with actual backend API when available
+// Emoji Upload API - Uses backend S3/R2 storage with local cache
 export const EmojiUploadAPI = {
   async uploadImage(imageUri: string): Promise<{ url: string; id: string }> {
     try {
-      // Generate unique ID for the uploaded image
-      const id = `custom:${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      console.log('📤 Uploading emoji image to backend...');
 
-      // Store the image URI locally (in production, this would upload to server)
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      formData.append('file', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: `emoji_${Date.now()}.jpg`,
+      } as unknown as Blob);
+
+      // Upload to backend
+      const response = await apiClient.postFormData<{
+        message: string;
+        emojiUrl: string;
+        emojiKey: string;
+      }>('/fruits/upload-emoji', formData);
+
+      console.log('✅ Emoji uploaded to backend:', response.emojiUrl);
+
+      // Cache locally for quick access
       const existingEmojis = await this.getUploadedEmojis();
       const newEmoji: UploadedEmoji = {
-        id,
-        url: imageUri,
+        id: response.emojiUrl, // Use URL as ID (stored in fruit.emoji field)
+        url: response.emojiUrl,
         createdAt: new Date().toISOString(),
       };
 
@@ -678,7 +693,8 @@ export const EmojiUploadAPI = {
         JSON.stringify([...existingEmojis, newEmoji])
       );
 
-      return { url: imageUri, id };
+      // Return URL as both id and url (URL is stored in fruit.emoji)
+      return { url: response.emojiUrl, id: response.emojiUrl };
     } catch (error) {
       console.error('Error uploading emoji image:', error);
       throw new Error('Failed to upload image');

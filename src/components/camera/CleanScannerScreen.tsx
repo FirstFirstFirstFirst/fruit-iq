@@ -1,17 +1,17 @@
-import { THAI_TEXT } from '@/src/lib/constants'
-import { MaterialIcons } from '@expo/vector-icons'
-import React from 'react'
-import { TouchableOpacity, View, Text } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import ProcessingOverlay from './ProcessingOverlay'
-import { cameraStyles } from './styles'
-import { useNetworkStatus } from '../../hooks/useNetworkStatus'
+import { THAI_TEXT } from "@/src/lib/constants";
+import { MaterialIcons } from "@expo/vector-icons";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNetworkStatus } from "../../hooks/useNetworkStatus";
+import ProcessingOverlay from "./ProcessingOverlay";
+import { cameraStyles } from "./styles";
 
 interface CleanScannerScreenProps {
-  isProcessingPhoto: boolean
-  onScan: () => void
-  onManualEntry?: () => void
-  onCancel?: () => void
+  isProcessingPhoto: boolean;
+  onScan: () => void;
+  onManualEntry?: () => void;
+  onCancel?: () => void;
 }
 
 export default function CleanScannerScreen({
@@ -27,7 +27,9 @@ export default function CleanScannerScreen({
       <MaterialIcons name="wifi-off" size={28} color="#f59e0b" />
       <View style={cameraStyles.offlineTextContainer}>
         <Text style={cameraStyles.offlineTitle}>ไม่มีอินเทอร์เน็ต</Text>
-        <Text style={cameraStyles.offlineText}>กรุณาใช้โหมดกรอกน้ำหนักด้วยตนเอง</Text>
+        <Text style={cameraStyles.offlineText}>
+          กรุณาใช้โหมดกรอกน้ำหนักด้วยตนเอง
+        </Text>
       </View>
     </View>
   );
@@ -51,7 +53,9 @@ export default function CleanScannerScreen({
           <View style={cameraStyles.stepNumber}>
             <Text style={cameraStyles.stepNumberText}>2</Text>
           </View>
-          <Text style={cameraStyles.stepText}>รอให้ตัวเลขน้ำหนักแสดงผลชัดเจน</Text>
+          <Text style={cameraStyles.stepText}>
+            รอให้ตัวเลขน้ำหนักแสดงผลชัดเจน
+          </Text>
         </View>
 
         <View style={cameraStyles.instructionStep}>
@@ -64,13 +68,15 @@ export default function CleanScannerScreen({
 
       <View style={cameraStyles.tipHintContainer}>
         <MaterialIcons name="lightbulb" size={16} color="#B46A07" />
-        <Text style={cameraStyles.tipHintText}>โปรดถ่ายในที่แสงสว่างเพียงพอ</Text>
+        <Text style={cameraStyles.tipHintText}>
+          โปรดถ่ายในที่แสงสว่างเพียงพอ
+        </Text>
       </View>
     </View>
-  )
+  );
 
   return (
-    <SafeAreaView style={cameraStyles.modernContainer}>
+    <SafeAreaView style={cameraStyles.cleanScannerSafeArea}>
       <View style={cameraStyles.cleanScannerContainer}>
         {/* Cancel button */}
         {onCancel && (
@@ -99,33 +105,56 @@ export default function CleanScannerScreen({
           <TouchableOpacity
             style={[
               cameraStyles.cleanScanButton,
-              (isProcessingPhoto || isOffline) && cameraStyles.scanButtonDisabled,
+              (isProcessingPhoto || isOffline) &&
+                cameraStyles.scanButtonDisabled,
             ]}
             onPress={onScan}
             disabled={isProcessingPhoto || isOffline}
           >
             {isProcessingPhoto ? (
-              <MaterialIcons name="hourglass-empty" size={32} color="rgba(255, 255, 255, 0.6)" />
+              <MaterialIcons
+                name="hourglass-empty"
+                size={32}
+                color="rgba(255, 255, 255, 0.6)"
+              />
             ) : isOffline ? (
-              <MaterialIcons name="wifi-off" size={32} color="rgba(255, 255, 255, 0.6)" />
+              <MaterialIcons
+                name="wifi-off"
+                size={32}
+                color="rgba(255, 255, 255, 0.6)"
+              />
             ) : (
               <MaterialIcons name="camera-alt" size={32} color="white" />
             )}
           </TouchableOpacity>
           {!isProcessingPhoto && (
             <Text style={cameraStyles.scanButtonText}>
-              {isOffline ? 'ต้องเชื่อมต่ออินเทอร์เน็ต' : 'เริ่มถ่ายรูป'}
+              {isOffline ? "ต้องเชื่อมต่ออินเทอร์เน็ต" : "เริ่มถ่ายรูป"}
             </Text>
           )}
 
           {/* Manual entry button - prominent when offline */}
           {!isProcessingPhoto && onManualEntry && (
             <TouchableOpacity
-              style={isOffline ? cameraStyles.manualEntryButtonProminent : cameraStyles.manualEntryButton}
+              style={
+                isOffline
+                  ? cameraStyles.manualEntryButtonProminent
+                  : cameraStyles.manualEntryButton
+              }
               onPress={onManualEntry}
             >
-              <MaterialIcons name="edit" size={20} color={isOffline ? 'white' : '#B46A07'} />
-              <Text style={isOffline ? cameraStyles.manualEntryButtonProminentText : cameraStyles.manualEntryButtonText}>
+              <MaterialIcons
+                name="edit"
+                size={20}
+                color={isOffline ? "white" : "#B46A07"}
+              />
+              <Text
+                style={
+                  isOffline
+                    ? cameraStyles.manualEntryButtonProminentText
+                    : cameraStyles.manualEntryButtonText
+                }
+              >
                 {THAI_TEXT.enterManually}
               </Text>
             </TouchableOpacity>
@@ -133,5 +162,5 @@ export default function CleanScannerScreen({
         </View>
       </View>
     </SafeAreaView>
-  )
+  );
 }
