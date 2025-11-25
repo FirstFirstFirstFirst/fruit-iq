@@ -268,6 +268,8 @@ const localStyles = StyleSheet.create({
   },
   actionButtonsContainer: {
     gap: 12,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   addToCartButton: {
     flexDirection: 'row',
