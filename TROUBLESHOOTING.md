@@ -4,6 +4,137 @@ Quick reference for common React Native / Expo development issues.
 
 ---
 
+## Table of Contents
+
+1. [Development Workflow](#development-workflow)
+2. [Expo Go vs Development Build](#expo-go-vs-development-build)
+3. [Package.json Scripts](#packagejson-scripts)
+4. [Native Module Version Mismatch](#native-module-version-mismatch)
+5. [Metro Bundler Cache Issues](#metro-bundler-cache-issues)
+6. [Gradle Build Failures](#gradle-build-failures)
+7. [When to Rebuild Native Code](#when-to-rebuild-native-code)
+8. [Quick Reference Commands](#quick-reference-commands)
+
+---
+
+## Development Workflow
+
+### Daily Development (after initial setup)
+
+```bash
+# Start Metro bundler
+npm run start
+# or
+npx expo start
+```
+
+Then open the app on your phone - it connects via network automatically.
+
+### First Time Setup / After Native Package Changes
+
+```bash
+# Build and install dev client (only needed ONCE or when native packages change)
+npx expo run:android
+```
+
+### The Key Concept
+
+```
+npx expo run:android  →  Build & install app (do ONCE)
+npx expo start        →  Start Metro server (do EVERY TIME you develop)
+```
+
+---
+
+## Expo Go vs Development Build
+
+### Why You Can't Use Expo Go
+
+This project uses **custom native modules** that are NOT included in Expo Go:
+- `react-native-vision-camera`
+- `react-native-worklets-core`
+- `react-native-reanimated` (custom version)
+
+**Expo Go** = Pre-built app with fixed native modules (like a demo app)
+**Development Build** = Custom app with YOUR native modules (your own "Expo Go")
+
+### Comparison
+
+| Feature | Expo Go | Development Build |
+|---------|---------|-------------------|
+| Connect via network (IP:8081) | ✅ | ✅ |
+| Hot reload / Fast refresh | ✅ | ✅ |
+| See changes instantly | ✅ | ✅ |
+| Custom native modules | ❌ | ✅ |
+| Build time | 0 (pre-built) | ~10 min (once) |
+| Rebuild frequency | Never | Only when native packages change |
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     YOUR COMPUTER                           │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Metro Bundler (npx expo start)                     │   │
+│  │  - Serves JavaScript code                           │   │
+│  │  - Hot reload / Fast refresh                        │   │
+│  │  - Runs on http://YOUR_IP:8081                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            │ Network (WiFi)
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       YOUR PHONE                            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Development Build (installed via run:android)      │   │
+│  │  - Contains native code (C++, Java)                 │   │
+│  │  - Camera, animations, etc.                         │   │
+│  │  - Connects to Metro for JS updates                 │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### When to Rebuild
+
+| Scenario | Action |
+|----------|--------|
+| Changed JS/TSX files | Just save - hot reload handles it |
+| Added pure JS package (lodash, axios) | No rebuild needed |
+| Added native package (camera, sqlite) | Must run `npx expo run:android` |
+| Updated native package version | Must run `npx expo run:android` |
+| First time setup | Must run `npx expo run:android` |
+
+---
+
+## Package.json Scripts
+
+### Available Scripts
+
+```bash
+npm run start          # Start Metro bundler for development
+npm run start:clear    # Start Metro with cleared cache
+npm run android        # Build and run on Android (npx expo run:android)
+npm run ios            # Build and run on iOS (npx expo run:ios)
+npm run web            # Start web version
+npm run lint           # Check code for errors
+npm run lint:fix       # Auto-fix linting errors
+npm run typecheck      # Check TypeScript types
+npm run clean          # Clean and regenerate native folders
+```
+
+### When to Use Each
+
+| Task | Command |
+|------|---------|
+| Daily development | `npm run start` |
+| Clear cache issues | `npm run start:clear` |
+| First time / native changes | `npm run android` |
+| Before committing | `npm run lint:fix && npm run lint && npm run typecheck` |
+| Full clean rebuild | `npm run clean && npm run android` |
+
+---
+
 ## Native Module Version Mismatch
 
 ### Symptoms
@@ -76,6 +207,8 @@ rm -rf .expo node_modules package-lock.json && npm install && npx expo prebuild 
 ```bash
 # Clear Metro cache and restart
 npx expo start --clear
+# or
+npm run start:clear
 ```
 
 Or manually:
@@ -152,17 +285,41 @@ npx expo run:android
 
 | Task | Command |
 |------|---------|
+| Start development | `npm run start` |
+| Start with clean cache | `npm run start:clear` |
+| Build & install app | `npx expo run:android` |
 | Clear Metro cache | `npx expo start --clear` |
 | Clean Gradle | `cd android && ./gradlew clean && cd ..` |
 | Clean prebuild | `npx expo prebuild --clean` |
-| Full rebuild | `npx expo run:android` |
+| Full rebuild | `npm run clean && npm run android` |
 | Check installed versions | `npm ls react-native-reanimated` |
+| Lint & typecheck | `npm run lint:fix && npm run lint && npm run typecheck` |
+
+---
+
+## Common Mistakes
+
+### Mistake 1: Using Expo Go with custom native modules
+**Problem:** App crashes with version mismatch errors
+**Solution:** Build a development client with `npx expo run:android`
+
+### Mistake 2: Running `run:android` every time
+**Problem:** Wasting 10 minutes on unnecessary builds
+**Solution:** Only run once. Use `npm run start` for daily development.
+
+### Mistake 3: Not rebuilding after native package changes
+**Problem:** Version mismatch between JS and native code
+**Solution:** Run `npx expo run:android` after adding/updating native packages
+
+### Mistake 4: Forgetting to clean before rebuild
+**Problem:** Old cached native code causes issues
+**Solution:** Run `npx expo prebuild --clean` before `run:android`
 
 ---
 
 ## Prevention Tips
 
-1. **After `npm install` with native packages**: Always run `npx expo prebuild --clean`
+1. **After `npm install` with native packages**: Always run `npx expo prebuild --clean && npx expo run:android`
 2. **Before major updates**: Commit your changes first
 3. **When switching branches**: Run clean prebuild if native packages differ
 4. **Regular maintenance**: Occasionally do a full clean rebuild
