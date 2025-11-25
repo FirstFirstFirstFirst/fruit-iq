@@ -14,6 +14,13 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import React, { useEffect } from "react";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import { OfflineBanner } from "../src/components/OfflineBanner";
+import { useDepaTracking } from "../src/hooks/useDepaTracking";
+
+// Component to handle DEPA tracking (must be inside AuthProvider)
+function DepaTracker() {
+  useDepaTracking();
+  return null;
+}
 
 export default function RootLayout() {
   console.log("🔍 RootLayout: Component initializing with local fonts...");
@@ -88,6 +95,7 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
+      <DepaTracker />
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <View style={{ flex: 1 }}>
           <OfflineBanner />
