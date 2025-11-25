@@ -26,13 +26,14 @@ export default function HomeScreen() {
   const [isScrollable, setIsScrollable] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(true);
 
-  // PromptPay setup state
+  const { isAuthenticated, selectedFarm } = useAuth();
+
+  // PromptPay setup state - only fetch settings when authenticated
   const {
     promptpayPhone,
     updateSettings,
     loading: settingsLoading,
-  } = useSettings();
-  const { isAuthenticated, selectedFarm } = useAuth();
+  } = useSettings(isAuthenticated);
   const [showPromptPayModal, setShowPromptPayModal] = useState(false);
   const [setupInput, setSetupInput] = useState("");
   const [setupInputType, setSetupInputType] = useState<"phone" | "id">("phone");

@@ -61,9 +61,9 @@ export default function QRPaymentScreen({
   const [qrGenerated, setQrGenerated] = useState(false);
 
   const router = useRouter();
-  const { promptpayPhone, getPromptpayPhone } = useSettings();
-  const { markTransactionAsSaved } = useTransactions();
   const { isAuthenticated, selectedFarm } = useAuth();
+  const { promptpayPhone, getPromptpayPhone } = useSettings(isAuthenticated);
+  const { markTransactionAsSaved } = useTransactions();
 
   const generateQRCode = useCallback(async () => {
     try {

@@ -190,9 +190,9 @@ export function useDailySales(date?: string) {
 }
 
 // Hook for WeighPay Settings
-export function useSettings() {
+export function useSettings(enabled: boolean = true) {
   const [settings, setSettings] = useState<WeighPaySettings | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -221,8 +221,12 @@ export function useSettings() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
     loadSettings();
-  }, [loadSettings, refreshTrigger]);
+  }, [loadSettings, refreshTrigger, enabled]);
 
   const updateSettings = useCallback(async (
     updates: UpdateSettingsRequest
