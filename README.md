@@ -218,3 +218,12 @@ API endpoints are managed through `src/lib/api.ts` with custom hooks in `src/hoo
 - [Expo Router](https://docs.expo.dev/router/introduction/)
 - [EAS Build](https://docs.expo.dev/build/introduction/)
 - [NativeWind v4](https://www.nativewind.dev/)
+
+## Contact & Support
+
+For questions, support, or privacy concerns:
+- **Email**: durico888@gmail.com
+- **Company**: DURICO
+- **Team**: Asst.Prof. Dr.Warodom Werapun, Dr. Thitinan Kriangsuwan, Mr. Sakon Buthong, Mr. Siriphong Chotirat
+- **Address**: Prince of Songkla University, Phuket Campus, Thailand
+- **Privacy Policy**: https://durico-web.vercel.app/privacy?app=weighpay

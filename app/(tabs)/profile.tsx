@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Linking,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -102,7 +103,9 @@ export default function ProfileScreen() {
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.push("/privacy-policy" as "/auth/login")}
+              onPress={() => Linking.openURL(
+                "https://durico-web.vercel.app/privacy?app=weighpay"
+              )}
               accessibilityRole="button"
               accessibilityLabel="นโยบายความเป็นส่วนตัว"
             >
