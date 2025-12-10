@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/contexts/AuthContext';
+import ConsentCheckbox from '../../src/components/ConsentCheckbox';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -28,6 +29,9 @@ export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Consent state
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   const validateForm = (): boolean => {
     if (!name.trim()) {
@@ -69,11 +73,23 @@ export default function SignupScreen() {
   };
 
   const handleSignup = async () => {
+    // Validate privacy consent FIRST
+    if (!privacyAccepted) {
+      Alert.alert(
+        'ข้อผิดพลาด',
+        'กรุณายอมรับนโยบายความเป็นส่วนตัวเพื่อดำเนินการต่อ',
+        [{ text: 'ตกลง' }]
+      );
+      return;
+    }
+
     if (!validateForm()) return;
 
     try {
       setIsSubmitting(true);
-      const success = await signup(email.trim(), password, name.trim());
+      const success = await signup(email.trim(), password, name.trim(), {
+        privacyPolicyAccepted: privacyAccepted,
+      });
 
       if (success) {
         // Navigate to main app - this will be handled by the navigation logic
@@ -211,11 +227,23 @@ export default function SignupScreen() {
                   </View>
                 </View>
 
+                {/* Consent Section */}
+                <View style={styles.consentSection}>
+                  <ConsentCheckbox
+                    label="ฉันยอมรับ"
+                    linkText="นโยบายความเป็นส่วนตัว"
+                    link="/privacy-policy"
+                    required
+                    value={privacyAccepted}
+                    onChange={setPrivacyAccepted}
+                  />
+                </View>
+
                 {/* Signup Button */}
                 <TouchableOpacity
-                  style={[styles.signupButton, (isSubmitting || isLoading) && styles.signupButtonDisabled]}
+                  style={[styles.signupButton, (!privacyAccepted || isSubmitting || isLoading) && styles.signupButtonDisabled]}
                   onPress={handleSignup}
-                  disabled={isSubmitting || isLoading}
+                  disabled={!privacyAccepted || isSubmitting || isLoading}
                 >
                   {isSubmitting || isLoading ? (
                     <ActivityIndicator color="white" size="small" />
@@ -378,5 +406,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Kanit-SemiBold',
     color: '#B46A07',
+  },
+  consentSection: {
+    marginTop: 24,
+    marginBottom: 24,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
   },
 });

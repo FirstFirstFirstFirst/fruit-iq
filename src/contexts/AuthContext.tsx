@@ -22,7 +22,14 @@ interface AuthContextType {
 
   // Auth methods
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  signup: (
+    email: string,
+    password: string,
+    name: string,
+    consents?: {
+      privacyPolicyAccepted: boolean;
+    }
+  ) => Promise<boolean>;
   logout: () => Promise<void>;
 
   // Farm methods
@@ -161,11 +168,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signup = async (
     email: string,
     password: string,
-    name: string
+    name: string,
+    consents?: {
+      privacyPolicyAccepted: boolean;
+    }
   ): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const userData = await AuthAPI.signup({ email, password, name });
+      const userData = await AuthAPI.signup({
+        email,
+        password,
+        name,
+        privacyPolicyAccepted: consents?.privacyPolicyAccepted ?? false,
+      });
       setUser(userData);
       setIsAuthenticated(true);
       return true;

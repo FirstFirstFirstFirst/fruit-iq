@@ -12,8 +12,9 @@ import "../global.css"; // Import NativeWind styles
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React, { useEffect } from "react";
-import { AuthProvider } from "../src/contexts/AuthContext";
+
 import { OfflineBanner } from "../src/components/OfflineBanner";
+import { AuthProvider } from "../src/contexts/AuthContext";
 import { useDepaTracking } from "../src/hooks/useDepaTracking";
 
 // Component to handle DEPA tracking (must be inside AuthProvider)
