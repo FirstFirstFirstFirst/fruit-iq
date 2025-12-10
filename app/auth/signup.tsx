@@ -88,7 +88,7 @@ export default function SignupScreen() {
     try {
       setIsSubmitting(true);
       const success = await signup(email.trim(), password, name.trim(), {
-        privacyPolicyAccepted: privacyAccepted,
+        privacyAccepted: privacyAccepted,
       });
 
       if (success) {

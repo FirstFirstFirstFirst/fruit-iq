@@ -27,7 +27,7 @@ interface AuthContextType {
     password: string,
     name: string,
     consents?: {
-      privacyPolicyAccepted: boolean;
+      privacyAccepted: boolean;
     }
   ) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -170,7 +170,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
     name: string,
     consents?: {
-      privacyPolicyAccepted: boolean;
+      privacyAccepted: boolean;
     }
   ): Promise<boolean> => {
     try {
@@ -179,7 +179,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email,
         password,
         name,
-        privacyPolicyAccepted: consents?.privacyPolicyAccepted ?? false,
+        privacyAccepted: consents?.privacyAccepted ?? false,
       });
       setUser(userData);
       setIsAuthenticated(true);

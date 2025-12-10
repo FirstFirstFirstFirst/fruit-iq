@@ -35,7 +35,7 @@ export interface SignupRequest {
   email: string;
   password: string;
   name: string;
-  privacyPolicyAccepted: boolean;
+  privacyAccepted: boolean;
 }
 
 export interface Farm {
